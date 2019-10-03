@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">CryptoBot</string>
+
+    <string name="crypto_icons_url">https://cryptoicons.org/api/icon/%s/200</string>
+
+    <string name="coin_name_dialog">Enter new coin name</string>
+
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+
+    <string name="coin_names_pref">coinNames</string>
+    <string name="cripto_icon">cripto Icon</string>
+    <string name="currency">Currency</string>
+    <string name="livecoin">Livecoin</string>
+    <string name="bittrex">Bittrex</string>
+</resources>

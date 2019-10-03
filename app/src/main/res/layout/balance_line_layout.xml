@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/balance_line_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.4"
+        android:orientation="vertical"
+        android:showDividers="end">
+
+        <ImageView
+            android:id="@+id/CryptoImageView"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:contentDescription="@string/cripto_icon"
+            app:srcCompat="@drawable/generic_crypto" />
+
+        <TextView
+            android:id="@+id/CryptoNameView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:textAlignment="center"
+            android:textColor="@color/textColorSecondary"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            tools:text="text" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/LIvecoinBalanceView"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginTop="30dp"
+        android:layout_weight="0.3"
+        android:textAlignment="viewStart"
+        android:textColor="@color/textColorSecondary"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        tools:text="text" />
+
+    <TextView
+        android:id="@+id/BittrexBalanceView"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginTop="30dp"
+        android:layout_weight="0.3"
+        android:textAlignment="viewStart"
+        android:textColor="@color/textColorSecondary"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        tools:text="text" />
+
+</LinearLayout>
