@@ -1,19 +1,19 @@
 package com.chess.cryptobot.content;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.chess.cryptobot.R;
+import com.chess.cryptobot.activity.BalanceActivity;
 
 import java.util.HashSet;
 import java.util.Set;
 
 public class Preferences {
-    private Activity activity;
+    private BalanceActivity activity;
     private SharedPreferences sharedPref;
 
-    public Preferences(Activity activity) {
+    public Preferences(BalanceActivity activity) {
         this.activity = activity;
         sharedPref = activity.getPreferences(Context.MODE_PRIVATE);
     }

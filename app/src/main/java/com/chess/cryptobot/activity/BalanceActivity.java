@@ -1,13 +1,17 @@
 package com.chess.cryptobot.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.DialogFragment;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.helper.ItemTouchHelper;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.EditText;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.DialogFragment;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.chess.cryptobot.R;
 import com.chess.cryptobot.adapter.BalanceAdapter;
@@ -16,11 +20,14 @@ import com.chess.cryptobot.content.Preferences;
 import com.chess.cryptobot.dialog.CryptoNameDialog;
 import com.chess.cryptobot.model.Balance;
 import com.chess.cryptobot.task.CoinImageTask;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Set;
 
-public class BalanceActivity extends AppCompatActivity implements CryptoNameDialog.CoinNameDialogListener {
+public class BalanceActivity extends AppCompatActivity
+        implements CryptoNameDialog.CoinNameDialogListener {
 
     private RecyclerView balanceRecyclerView;
     private BalanceAdapter balanceAdapter;
@@ -67,10 +74,10 @@ public class BalanceActivity extends AppCompatActivity implements CryptoNameDial
         coinNames.forEach(coinName -> balances.add(new Balance(coinName)));
     }
 
-
     @Override
     public void onDialogPositiveClick(DialogFragment dialog) {
-        EditText nameDialogView = dialog.getDialog().findViewById(R.id.name_dialog_edit_text);
+        EditText nameDialogView = Objects.requireNonNull(dialog.getDialog())
+                .findViewById(R.id.name_dialog_edit_text);
         addBalance(nameDialogView.getText().toString());
     }
 
@@ -89,5 +96,23 @@ public class BalanceActivity extends AppCompatActivity implements CryptoNameDial
 
         CoinImageTask task = new CoinImageTask(balanceAdapter, getApplicationContext());
         task.execute(balance);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.activity_settings) {
+            Intent intent = new Intent(BalanceActivity.this, SettingsActivity.class);
+            startActivity(intent);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

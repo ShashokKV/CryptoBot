@@ -4,10 +4,11 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.DialogFragment;
 import android.widget.EditText;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.DialogFragment;
 
 import com.chess.cryptobot.R;
 
@@ -19,10 +20,10 @@ public class CryptoNameDialog extends DialogFragment {
         void onDialogNegativeClick(DialogFragment dialog);
     }
 
-    CoinNameDialogListener coinNameDialogListener;
+    private CoinNameDialogListener coinNameDialogListener;
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         try{
             coinNameDialogListener = (CoinNameDialogListener) context;

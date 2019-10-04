@@ -1,8 +1,8 @@
 package com.chess.cryptobot.callback;
 
-import android.support.annotation.NonNull;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.helper.ItemTouchHelper;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.chess.cryptobot.adapter.BalanceAdapter;
 import com.chess.cryptobot.content.Preferences;

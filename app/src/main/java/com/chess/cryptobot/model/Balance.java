@@ -1,7 +1,8 @@
 package com.chess.cryptobot.model;
 
 import android.graphics.Bitmap;
-import android.support.annotation.Nullable;
+
+import androidx.annotation.Nullable;
 
 public class Balance {
     private Double bittrexAmmount;
