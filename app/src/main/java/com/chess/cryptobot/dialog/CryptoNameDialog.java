@@ -45,7 +45,5 @@ public class CryptoNameDialog extends DialogFragment {
                 .setPositiveButton(R.string.ok, (dialog, which) -> coinNameDialogListener.onDialogPositiveClick(CryptoNameDialog.this))
                 .setNegativeButton(R.string.cancel, (dialog, which) -> coinNameDialogListener.onDialogNegativeClick(CryptoNameDialog.this))
                 .create();
-
-
     }
 }
