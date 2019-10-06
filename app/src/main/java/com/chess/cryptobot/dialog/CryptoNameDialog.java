@@ -39,7 +39,7 @@ public class CryptoNameDialog extends DialogFragment {
         final EditText editText = new EditText(this.getContext());
         editText.setId(R.id.name_dialog_edit_text);
         editText.setTextColor(getResources().getColor(R.color.colorAccent, null));
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());//, R.style.WhiteAlertDialog);
 
         return builder.setTitle(R.string.coin_name_dialog)
                 .setView(editText)

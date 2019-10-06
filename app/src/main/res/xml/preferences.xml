@@ -1,23 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <PreferenceCategory
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <androidx.preference.PreferenceCategory
         android:title="@string/bittrex_api_keys"
         android:key="bittrex_keys">
-        <EditTextPreference
-            android:key="bittrex_api_key"
-            android:title="@string/api_key" />
-        <EditTextPreference
-            android:key="bittrex_secret_key"
-            android:title="@string/secret_key"/>
-    </PreferenceCategory>
-    <PreferenceCategory
+        <androidx.preference.EditTextPreference
+            android:key="@string/bittrex_api_key"
+            android:title="@string/api_key"
+            android:dialogLayout="@layout/edit_text_layout"/>
+        <androidx.preference.EditTextPreference
+            android:key="@string/bittrex_secret_key"
+            android:title="@string/secret_key"
+            android:dialogLayout="@layout/edit_text_layout"/>
+    </androidx.preference.PreferenceCategory>
+    <androidx.preference.PreferenceCategory
         android:title="@string/livecoin_api_keys"
         android:key="livecoin_keys">
-        <EditTextPreference
+        <androidx.preference.EditTextPreference
             android:key="@string/livecoin_api_key"
-            android:title="@string/api_key" />
-        <EditTextPreference
-            android:key="livecoin_secret_key"
-            android:title="@string/secret_key"/>
-    </PreferenceCategory>
-</PreferenceScreen>
+            android:title="@string/api_key"
+            android:dialogLayout="@layout/edit_text_layout"/>
+        <androidx.preference.EditTextPreference
+            android:key="@string/livecoin_secret_key"
+            android:title="@string/secret_key"
+            android:dialogLayout="@layout/edit_text_layout"/>
+    </androidx.preference.PreferenceCategory>
+</androidx.preference.PreferenceScreen>

@@ -1,7 +1,7 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.MaterialComponents.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.DayNight.DarkActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
@@ -9,7 +9,29 @@
         <item name="android:windowBackground">@color/windowBackground</item>
         <item name="android:textColorPrimary">@color/textColorPrimary</item>
         <item name="android:textColorSecondary">@color/textColorSecondary</item>
-        <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
+        <!--item name="android:editTextStyle">@style/WhiteEditText</item>
+        <item name="android:alertDialogTheme">@style/WhiteAlertDialog</item-->
+
     </style>
+
+    <!--style name="WhiteAlertDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:textColorPrimary">@color/colorAccent</item>
+    </style>
+
+    <style name="WhiteEditText" parent="android:style/Widget.EditText">
+        <item name="android:background">@color/colorAccent</item>
+        <item name="android:editTextBackground">@color/colorAccent</item>
+        <item name="android:textColor">@color/colorAccent</item>
+        <item name="colorPrimary">@color/colorAccent</item>
+        <item name="colorPrimaryDark">@color/colorAccent</item>
+        <item name="android:textColorPrimary">@color/colorAccent</item>
+        <item name="android:textColorSecondary">@color/colorAccent</item>
+        <item name="android:colorAccent">@color/colorAccent</item>
+        <item name="android:colorPrimary">@color/colorAccent</item>
+        <item name="android:colorSecondary">@color/colorAccent</item>
+    </style-->
+
+
 
 </resources>

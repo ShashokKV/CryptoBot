@@ -14,9 +14,13 @@
     <string name="livecoin">Livecoin</string>
     <string name="bittrex">Bittrex</string>
     <string name="livecoin_api_keys">Livecoin Api Keys</string>
-    <string name="livecoin_api_key">livecoin_api_key</string>
     <string name="secret_key">Secret key</string>
     <string name="api_key">Api key</string>
     <string name="bittrex_api_keys">Bittrex Api Keys</string>
     <string name="settings">Settings</string>
+    <string name="paste_key_here">paste key here</string>
+    <string name="bittrex_api_key">bittrex_api_key</string>
+    <string name="bittrex_secret_key">bittrex_secret_key</string>
+    <string name="livecoin_api_key">livecoin_api_key</string>
+    <string name="livecoin_secret_key">livecoin_secret_key</string>
 </resources>
