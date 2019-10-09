@@ -18,6 +18,10 @@ public class Preferences {
         sharedPref = activity.getPreferences(Context.MODE_PRIVATE);
     }
 
+    public String getStringByKey(String key) {
+        return sharedPref.getString(key, "");
+    }
+
     public Set<String> getCoinNames() {
         return new HashSet<>(sharedPref.getStringSet(activity.getString(R.string.coin_names_pref), new HashSet<>()));
     }

@@ -10,7 +10,7 @@ public class Balance {
     private String coinName;
     private Bitmap coinIcon;
 
-    public Balance(String coinName) {
+    Balance(String coinName) {
         this.coinName = coinName;
         this.bittrexAmmount = 0.0d;
         this.livecoinAmmount = 0.0d;

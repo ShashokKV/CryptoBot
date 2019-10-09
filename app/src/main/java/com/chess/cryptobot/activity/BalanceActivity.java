@@ -1,7 +1,10 @@
 package com.chess.cryptobot.activity;
 
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -16,23 +19,20 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.chess.cryptobot.R;
 import com.chess.cryptobot.adapter.BalanceAdapter;
 import com.chess.cryptobot.callback.SwipeBalanceCallback;
-import com.chess.cryptobot.content.Preferences;
 import com.chess.cryptobot.dialog.CryptoNameDialog;
-import com.chess.cryptobot.model.Balance;
-import com.chess.cryptobot.task.CoinImageTask;
+import com.chess.cryptobot.model.BalanceHolder;
+import com.chess.cryptobot.service.BalanceUpdateService;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.util.ArrayList;
 import java.util.Objects;
-import java.util.Set;
 
 public class BalanceActivity extends AppCompatActivity
         implements CryptoNameDialog.CoinNameDialogListener {
 
     private RecyclerView balanceRecyclerView;
-    private BalanceAdapter balanceAdapter;
-    private Preferences preferences;
-    ArrayList<Balance> balances;
+    private BalanceUpdateService mService;
+    private BalanceHolder balanceHolder;
+    private boolean mBound;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +40,6 @@ public class BalanceActivity extends AppCompatActivity
         setContentView(R.layout.balance);
 
         balanceRecyclerView = findViewById(R.id.balanceRecyclerView);
-
         init();
 
         FloatingActionButton floatingActionButton = findViewById(R.id.fab);
@@ -51,51 +50,43 @@ public class BalanceActivity extends AppCompatActivity
     }
 
     private void init() {
-        preferences = new Preferences(this);
-        initBalances();
+        balanceHolder = new BalanceHolder(this);
         initRecyclerView();
+        //initBalanceService();
     }
 
     private void initRecyclerView() {
-        balanceAdapter = new BalanceAdapter(balances);
+        BalanceAdapter balanceAdapter = balanceHolder.getBalanceAdapter();
         balanceRecyclerView.setAdapter(balanceAdapter);
         balanceRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         ItemTouchHelper itemTouchHelper = new
-                ItemTouchHelper(new SwipeBalanceCallback(balanceAdapter, preferences));
+                ItemTouchHelper(new SwipeBalanceCallback(balanceHolder));
         itemTouchHelper.attachToRecyclerView(balanceRecyclerView);
-
-        CoinImageTask task = new CoinImageTask(balanceAdapter, getApplicationContext());
-        task.execute(balances.toArray(new Balance[0]));
     }
 
-    private void initBalances() {
-        balances = new ArrayList<>();
-        Set<String> coinNames = preferences.getCoinNames();
-        coinNames.forEach(coinName -> balances.add(new Balance(coinName)));
+
+    private void initBalanceService() {
+        Intent intent = new Intent(this, BalanceUpdateService.class);
+        bindService(intent, mConnection, BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unbindService(mConnection);
     }
 
     @Override
     public void onDialogPositiveClick(DialogFragment dialog) {
         EditText nameDialogView = Objects.requireNonNull(dialog.getDialog())
                 .findViewById(R.id.name_dialog_edit_text);
-        addBalance(nameDialogView.getText().toString());
+        String coinName = nameDialogView.getText().toString();
+        if (!coinName.isEmpty()) balanceHolder.add(coinName);
     }
 
     @Override
     public void onDialogNegativeClick(DialogFragment dialog) {
         dialog.dismiss();
-    }
-
-    private void addBalance(String coinName) {
-        Balance balance = new Balance(coinName);
-        if (balances.contains(balance)) {
-            return;
-        }
-        balances.add(balance);
-        preferences.addCoinToBalance(coinName);
-
-        CoinImageTask task = new CoinImageTask(balanceAdapter, getApplicationContext());
-        task.execute(balance);
     }
 
     @Override
@@ -115,4 +106,21 @@ public class BalanceActivity extends AppCompatActivity
         }
         return super.onOptionsItemSelected(item);
     }
+
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            BalanceUpdateService.BalanceBinder binder = (BalanceUpdateService.BalanceBinder) service;
+            mService = binder.getService();
+            mBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBound = false;
+        }
+    };
 }

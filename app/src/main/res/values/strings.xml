@@ -23,4 +23,7 @@
     <string name="bittrex_secret_key">bittrex_secret_key</string>
     <string name="livecoin_api_key">livecoin_api_key</string>
     <string name="livecoin_secret_key">livecoin_secret_key</string>
+
+    <string name="bittrex_url"></string>
+    <string name="livecoin_url"></string>
 </resources>

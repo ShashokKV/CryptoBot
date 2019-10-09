@@ -31,6 +31,8 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activity.BalanceActivity"/>
         </activity>
+
+        <service android:name=".service.BalanceUpdateService" />
     </application>
 
 </manifest>

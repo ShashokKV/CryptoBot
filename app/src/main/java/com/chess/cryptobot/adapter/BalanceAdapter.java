@@ -13,14 +13,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.chess.cryptobot.R;
 import com.chess.cryptobot.model.Balance;
+import com.chess.cryptobot.model.BalanceHolder;
 
 import java.util.List;
 
 public class BalanceAdapter extends RecyclerView.Adapter<BalanceAdapter.BalanceViewHolder> {
     private List<Balance> balances;
 
-    public BalanceAdapter(List<Balance> balances) {
-        this.balances = balances;
+    public BalanceAdapter(BalanceHolder balanceHolder) {
+        this.balances = balanceHolder.getBalances();
     }
 
     @NonNull
@@ -47,7 +48,7 @@ public class BalanceAdapter extends RecyclerView.Adapter<BalanceAdapter.BalanceV
         lvcnView.setText(String.valueOf(balance.getLivecoinAmmount()));
         cryptoNameView.setText(balance.getCoinName());
         Bitmap bitmap = balance.getCoinIcon();
-        if (bitmap!=null) cryptoImageView.setImageBitmap(bitmap);
+        if (bitmap != null) cryptoImageView.setImageBitmap(bitmap);
     }
 
     @Override
@@ -79,16 +80,14 @@ public class BalanceAdapter extends RecyclerView.Adapter<BalanceAdapter.BalanceV
         }
     }
 
-    public synchronized void updateAdapter(Balance[] balances) {
-        for (Balance balance : balances) {
-            int index = this.balances.indexOf(balance);
-            if (index >= 0) {
-                this.balances.set(index, balance);
-                this.notifyItemChanged(index);
-            } else {
-                this.balances.add(balance);
-                this.notifyItemInserted(this.balances.size()-1);
-            }
+    public void updateAdapter(Balance balance) {
+        int index = this.balances.indexOf(balance);
+        if (index >= 0) {
+            this.balances.set(index, balance);
+            this.notifyItemChanged(index);
+        } else {
+            this.balances.add(balance);
+            this.notifyItemInserted(this.balances.size() - 1);
         }
     }
 }

@@ -4,17 +4,14 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.chess.cryptobot.adapter.BalanceAdapter;
-import com.chess.cryptobot.content.Preferences;
+import com.chess.cryptobot.model.BalanceHolder;
 
 public class SwipeBalanceCallback extends ItemTouchHelper.SimpleCallback {
-    private BalanceAdapter balanceAdapter;
-    private Preferences preferences;
+    private BalanceHolder balanceHolder;
 
-    public SwipeBalanceCallback(BalanceAdapter adapter, Preferences preferences) {
+    public SwipeBalanceCallback(BalanceHolder balanceHolder) {
         super(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);
-        balanceAdapter = adapter;
-        this.preferences = preferences;
+        this.balanceHolder = balanceHolder;
     }
 
     @Override
@@ -24,8 +21,6 @@ public class SwipeBalanceCallback extends ItemTouchHelper.SimpleCallback {
 
     @Override
     public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
-        int position = viewHolder.getAdapterPosition();
-        preferences.removeCoinFromBalance(balanceAdapter.coinNameByPosition(position));
-        balanceAdapter.deleteItem(position);
+        balanceHolder.remove(viewHolder.getAdapterPosition());
     }
 }
