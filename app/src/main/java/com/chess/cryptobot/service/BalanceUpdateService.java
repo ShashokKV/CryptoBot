@@ -8,10 +8,10 @@ import android.os.IBinder;
 import com.chess.cryptobot.model.Balance;
 
 
-public class BalanceUpdateService extends Service {
+public class BalanceUpdateService {//extends Service {
     private final IBinder balanceBinder = new BalanceBinder();
 
-    @Override
+   // @Override
     public IBinder onBind(Intent intent) {
         return balanceBinder;
     }

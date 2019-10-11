@@ -1,10 +1,7 @@
 package com.chess.cryptobot.activity;
 
-import android.content.ComponentName;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -20,7 +17,7 @@ import com.chess.cryptobot.R;
 import com.chess.cryptobot.adapter.BalanceAdapter;
 import com.chess.cryptobot.callback.SwipeBalanceCallback;
 import com.chess.cryptobot.dialog.CryptoNameDialog;
-import com.chess.cryptobot.model.BalanceHolder;
+import com.chess.cryptobot.content.ContextHolder;
 import com.chess.cryptobot.service.BalanceUpdateService;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -31,7 +28,8 @@ public class BalanceActivity extends AppCompatActivity
 
     private RecyclerView balanceRecyclerView;
     private BalanceUpdateService mService;
-    private BalanceHolder balanceHolder;
+    private ContextHolder contextHolder;
+    private BalanceAdapter balanceAdapter;
     private boolean mBound;
 
     @Override
@@ -50,21 +48,21 @@ public class BalanceActivity extends AppCompatActivity
     }
 
     private void init() {
-        balanceHolder = new BalanceHolder(this);
+        contextHolder = new ContextHolder(this);
         initRecyclerView();
         //initBalanceService();
     }
 
     private void initRecyclerView() {
-        BalanceAdapter balanceAdapter = balanceHolder.getBalanceAdapter();
+        balanceAdapter = new BalanceAdapter(contextHolder);
         balanceRecyclerView.setAdapter(balanceAdapter);
         balanceRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         ItemTouchHelper itemTouchHelper = new
-                ItemTouchHelper(new SwipeBalanceCallback(balanceHolder));
+                ItemTouchHelper(new SwipeBalanceCallback(contextHolder));
         itemTouchHelper.attachToRecyclerView(balanceRecyclerView);
     }
 
-
+/*
     private void initBalanceService() {
         Intent intent = new Intent(this, BalanceUpdateService.class);
         bindService(intent, mConnection, BIND_AUTO_CREATE);
@@ -75,13 +73,13 @@ public class BalanceActivity extends AppCompatActivity
         super.onDestroy();
         unbindService(mConnection);
     }
-
+*/
     @Override
     public void onDialogPositiveClick(DialogFragment dialog) {
         EditText nameDialogView = Objects.requireNonNull(dialog.getDialog())
                 .findViewById(R.id.name_dialog_edit_text);
         String coinName = nameDialogView.getText().toString();
-        if (!coinName.isEmpty()) balanceHolder.add(coinName);
+        if (!coinName.isEmpty()) contextHolder.add(coinName);
     }
 
     @Override
@@ -106,7 +104,7 @@ public class BalanceActivity extends AppCompatActivity
         }
         return super.onOptionsItemSelected(item);
     }
-
+/*
     private ServiceConnection mConnection = new ServiceConnection() {
 
         @Override
@@ -122,5 +120,9 @@ public class BalanceActivity extends AppCompatActivity
         public void onServiceDisconnected(ComponentName arg0) {
             mBound = false;
         }
-    };
+    };*/
+
+    public BalanceAdapter getBalanceAdapter() {
+        return balanceAdapter;
+    }
 }

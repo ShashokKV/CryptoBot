@@ -43,6 +43,7 @@
         android:textColor="@color/colorWhite"
         android:textSize="18sp"
         android:textStyle="bold"
+        android:text="@string/_0_0d"
         tools:text="text" />
 
     <androidx.appcompat.widget.AppCompatTextView
@@ -55,5 +56,6 @@
         android:textColor="@color/colorWhite"
         android:textSize="18sp"
         android:textStyle="bold"
+        android:text="@string/_0_0d"
         tools:text="text" />
 </androidx.appcompat.widget.LinearLayoutCompat>

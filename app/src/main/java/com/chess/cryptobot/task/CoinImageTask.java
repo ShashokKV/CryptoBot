@@ -10,7 +10,7 @@ import androidx.annotation.Nullable;
 
 import com.chess.cryptobot.R;
 import com.chess.cryptobot.model.Balance;
-import com.chess.cryptobot.model.BalanceHolder;
+import com.chess.cryptobot.content.ContextHolder;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -20,11 +20,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 public class CoinImageTask extends AsyncTask<Balance, Integer, Balance> {
-    private BalanceHolder balanceHolder;
+    private ContextHolder contextHolder;
     private final static String TAG = "CoinImageTask";
 
-    public CoinImageTask(BalanceHolder balanceHolder) {
-        this.balanceHolder = balanceHolder;
+    public CoinImageTask(ContextHolder contextHolder) {
+        this.contextHolder = contextHolder;
     }
 
     @Override
@@ -47,7 +47,7 @@ public class CoinImageTask extends AsyncTask<Balance, Integer, Balance> {
     @Override
     protected void onPostExecute(@Nullable Balance balance) {
         if (balance==null) return;
-        balanceHolder.updateView(balance);
+        contextHolder.updateView(balance);
     }
 
     private Bitmap getImage(String coinName) throws IOException {
@@ -63,7 +63,7 @@ public class CoinImageTask extends AsyncTask<Balance, Integer, Balance> {
     }
 
     private Bitmap loadImage(String coinName) throws IOException {
-        try(FileInputStream fileInputStream = balanceHolder.getContext().get().openFileInput(fileName(coinName))) {
+        try(FileInputStream fileInputStream = contextHolder.getContext().get().openFileInput(fileName(coinName))) {
             return BitmapFactory.decodeStream(fileInputStream);
         }
     }
@@ -73,7 +73,7 @@ public class CoinImageTask extends AsyncTask<Balance, Integer, Balance> {
     }
 
     private void saveImage(Bitmap bitmap, String fileName) {
-        try(FileOutputStream out = balanceHolder.getContext().get().openFileOutput(fileName, Context.MODE_PRIVATE)) {
+        try(FileOutputStream out = contextHolder.getContext().get().openFileOutput(fileName, Context.MODE_PRIVATE)) {
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
         } catch (IOException e) {
             Log.d(TAG, e.getLocalizedMessage());
@@ -87,6 +87,6 @@ public class CoinImageTask extends AsyncTask<Balance, Integer, Balance> {
     }
 
     private URL imageUrl(String coinName) throws MalformedURLException {
-        return new URL(String.format(balanceHolder.getContext().get().getResources().getString(R.string.crypto_icons_url), coinName.toLowerCase()));
+        return new URL(String.format(contextHolder.getContext().get().getResources().getString(R.string.crypto_icons_url), coinName.toLowerCase()));
     }
 }

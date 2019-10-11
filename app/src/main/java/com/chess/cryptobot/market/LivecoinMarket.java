@@ -1,26 +1,40 @@
 package com.chess.cryptobot.market;
 
 import com.chess.cryptobot.api.LivecoinMarketService;
-import com.chess.cryptobot.api.MarketService;
-import com.chess.cryptobot.model.response.BalanceResponse;
+import com.chess.cryptobot.exceptions.LivecoinException;
+import com.chess.cryptobot.exceptions.MarketException;
+import com.chess.cryptobot.model.response.livecoin.LivecoinBalanceResponse;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
-import java.util.Map;
 import java.util.TreeMap;
 
-public class LivecoinMarket extends MarketAuthenticator implements Market {
+import retrofit2.Call;
+import retrofit2.Retrofit;
+
+public class LivecoinMarket extends MarketRequest implements Market {
+    private LivecoinMarketService service;
 
     LivecoinMarket(String url, String apiKey, String secretKey) {
         super(url, apiKey, secretKey);
         this.algorithm = "HmacSHA256";
+        this.path = "";
+        this.service = (LivecoinMarketService) initService(initRetrofit(initGson()));
     }
 
     @Override
-    MarketService getService() {
+    Gson initGson() {
+        return new GsonBuilder().create();
+    }
+
+    @Override
+    Object initService(Retrofit retrofit) {
         return retrofit.create(LivecoinMarketService.class);
     }
 
     @Override
-    public Double getAmount(String coinName) {
+    public Double getAmount(String coinName) throws LivecoinException {
+        if (keysIsEmpty()) return 0.0d;
         TreeMap<String, String> params = new TreeMap<>();
         params.put("currency", coinName);
 
@@ -30,21 +44,13 @@ public class LivecoinMarket extends MarketAuthenticator implements Market {
         headers.put("API-key", this.apiKey);
         headers.put("Sign", hash);
 
-        BalanceResponse response = service.getBalance(params, headers);
-        return response.getAmount();
-    }
-
-    @Override
-    String makeHash(Map<String, String> queryParams) {
-        return encode(buildQueryString(queryParams));
-    }
-
-    @Override
-    String asString(byte[] bytes) {
-        StringBuilder sb = new StringBuilder();
-        for (byte b : bytes) {
-            sb.append(String.format("%02x", b));
+        LivecoinBalanceResponse response;
+        try {
+            Call<LivecoinBalanceResponse> call = service.getBalance(params, headers);
+            response = (LivecoinBalanceResponse) execute(call);
+        } catch (MarketException e) {
+            throw new LivecoinException(e.getMessage());
         }
-        return sb.toString().toUpperCase();
+        return response.getAmount();
     }
 }

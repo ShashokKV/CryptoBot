@@ -8,7 +8,14 @@
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
 
-    <string name="coin_names_pref">coinNames</string>
+    <string name="coin_names">coinNames</string>
+    <string name="coin_names_pref">com.chess.cryptobot.coinNames</string>
+    <string name="settings_file_name">com.chess.cryptobot.settings</string>
+    <string name="bittrex_api_key">bittrex_api_key</string>
+    <string name="bittrex_secret_key">bittrex_secret_key</string>
+    <string name="livecoin_api_key">livecoin_api_key</string>
+    <string name="livecoin_secret_key">livecoin_secret_key</string>
+
     <string name="cripto_icon">cripto Icon</string>
     <string name="currency">Currency</string>
     <string name="livecoin">Livecoin</string>
@@ -19,11 +26,8 @@
     <string name="bittrex_api_keys">Bittrex Api Keys</string>
     <string name="settings">Settings</string>
     <string name="paste_key_here">paste key here</string>
-    <string name="bittrex_api_key">bittrex_api_key</string>
-    <string name="bittrex_secret_key">bittrex_secret_key</string>
-    <string name="livecoin_api_key">livecoin_api_key</string>
-    <string name="livecoin_secret_key">livecoin_secret_key</string>
 
-    <string name="bittrex_url"></string>
-    <string name="livecoin_url"></string>
+    <string name="bittrex_url">http://10.0.2.2:8888/crypt/bittrex/</string>
+    <string name="livecoin_url">http://10.0.2.2:8888/crypt/livecoin/</string>
+    <string name="_0_0d">0.0d</string>
 </resources>
