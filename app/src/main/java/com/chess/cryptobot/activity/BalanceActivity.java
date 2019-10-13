@@ -14,17 +14,20 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.chess.cryptobot.R;
+import com.chess.cryptobot.activity.dialog.CryptoDialog;
+import com.chess.cryptobot.activity.dialog.DialogListener;
+import com.chess.cryptobot.activity.dialog.MinBalanceDialog;
 import com.chess.cryptobot.adapter.BalanceAdapter;
-import com.chess.cryptobot.callback.SwipeBalanceCallback;
-import com.chess.cryptobot.dialog.CryptoNameDialog;
+import com.chess.cryptobot.adapter.BalanceViewOnClickListener;
+import com.chess.cryptobot.adapter.SwipeBalanceCallback;
+import com.chess.cryptobot.activity.dialog.CryptoNameDialog;
 import com.chess.cryptobot.content.ContextHolder;
 import com.chess.cryptobot.service.BalanceUpdateService;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.Objects;
 
-public class BalanceActivity extends AppCompatActivity
-        implements CryptoNameDialog.CoinNameDialogListener {
+public class BalanceActivity extends AppCompatActivity implements DialogListener {
 
     private RecyclerView balanceRecyclerView;
     private BalanceUpdateService mService;
@@ -74,8 +77,15 @@ public class BalanceActivity extends AppCompatActivity
         unbindService(mConnection);
     }
 */
-    @Override
-    public void onDialogPositiveClick(DialogFragment dialog) {
+    private void onMinBalancePositiveClick(MinBalanceDialog dialog) {
+        String coinName = dialog.getCoinName();
+        EditText minBalanceView = Objects.requireNonNull(dialog.getDialog())
+                .findViewById(R.id.min_balance_edit_text);
+        Double minBalance = Double.valueOf(minBalanceView.getText().toString());
+        contextHolder.getPrefs().setMinBalance(coinName, minBalance);
+    }
+
+    private void onCryptoNamePositiveClick(CryptoNameDialog dialog) {
         EditText nameDialogView = Objects.requireNonNull(dialog.getDialog())
                 .findViewById(R.id.name_dialog_edit_text);
         String coinName = nameDialogView.getText().toString();
@@ -83,7 +93,18 @@ public class BalanceActivity extends AppCompatActivity
     }
 
     @Override
-    public void onDialogNegativeClick(DialogFragment dialog) {
+    public void onDialogPositiveClick(CryptoDialog dialog) {
+        if (dialog instanceof CryptoNameDialog) {
+            onCryptoNamePositiveClick((CryptoNameDialog) dialog);
+        }else if (dialog instanceof MinBalanceDialog) {
+            onMinBalancePositiveClick((MinBalanceDialog) dialog);
+        }else {
+            throw new IllegalArgumentException("Unknown type of "+dialog.getClass().getName());
+        }
+    }
+
+    @Override
+    public void onDialogNegativeClick(CryptoDialog dialog) {
         dialog.dismiss();
     }
 

@@ -6,6 +6,7 @@ import android.preference.PreferenceManager;
 
 import com.chess.cryptobot.R;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -24,6 +25,16 @@ public class Preferences {
 
     Set<String> getCoinNames() {
         return new TreeSet<>(sharedPreferences.getStringSet(context.getString(R.string.coin_names), new TreeSet<>()));
+    }
+
+    public Double getMinBalance(String coinName) {
+        return Double.parseDouble(Objects.requireNonNull(sharedPreferences.getString("min_".concat(coinName),"0.0")));
+    }
+
+    public void setMinBalance(String coinName, Double minBalance) {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("min_".concat(coinName), minBalance.toString());
+        editor.apply();
     }
 
     void addCoinToBalance(String coinName) {

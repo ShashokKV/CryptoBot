@@ -12,19 +12,23 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.chess.cryptobot.R;
-import com.chess.cryptobot.model.Balance;
 import com.chess.cryptobot.content.ContextHolder;
+import com.chess.cryptobot.model.Balance;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class BalanceAdapter extends RecyclerView.Adapter<BalanceAdapter.BalanceViewHolder> {
     private List<Balance> balances;
+    private RecyclerViewOnClickListener mListener;
+    private ContextHolder contextHolder;
 
     public BalanceAdapter(ContextHolder contextHolder) {
+        this.contextHolder = contextHolder;
         List<Balance> contextBalances = contextHolder.getBalances();
         this.balances = new ArrayList<>(contextBalances.size());
         contextBalances.forEach(balance -> this.balances.add(new Balance(balance)));
+        this.mListener = new BalanceViewOnClickListener();
     }
 
     @NonNull
@@ -34,8 +38,7 @@ public class BalanceAdapter extends RecyclerView.Adapter<BalanceAdapter.BalanceV
         LayoutInflater layoutInflater = LayoutInflater.from(context);
 
         View balanceView = layoutInflater.inflate(R.layout.balance_line_layout, viewGroup, false);
-
-        return new BalanceViewHolder(balanceView);
+        return new BalanceViewHolder(balanceView, mListener);
     }
 
     @Override
@@ -83,11 +86,23 @@ public class BalanceAdapter extends RecyclerView.Adapter<BalanceAdapter.BalanceV
         }
     }
 
-    class BalanceViewHolder extends RecyclerView.ViewHolder {
+    private ContextHolder getContextHolder() {
+        return contextHolder;
+    }
+
+    class BalanceViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+        private RecyclerViewOnClickListener mOnClickListener;
+
         TextView livecoinBalanceView;
         TextView bittrexBalanceView;
         TextView cryptoNameView;
         ImageView cryptoImageView;
+
+        BalanceViewHolder(View view, RecyclerViewOnClickListener onClickListener) {
+            this(view);
+            this.mOnClickListener = onClickListener;
+            view.setOnClickListener(this);
+        }
 
         BalanceViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -95,6 +110,11 @@ public class BalanceAdapter extends RecyclerView.Adapter<BalanceAdapter.BalanceV
             bittrexBalanceView = itemView.findViewById(R.id.BittrexBalanceView);
             cryptoNameView = itemView.findViewById(R.id.CryptoNameView);
             cryptoImageView = itemView.findViewById(R.id.CryptoImageView);
+        }
+
+        @Override
+        public void onClick(View v) {
+            mOnClickListener.onClick(v, getContextHolder(), coinNameByPosition(getAdapterPosition()));
         }
     }
 }

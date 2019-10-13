@@ -1,4 +1,4 @@
-package com.chess.cryptobot.callback;
+package com.chess.cryptobot.adapter;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.ItemTouchHelper;
