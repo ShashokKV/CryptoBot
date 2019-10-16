@@ -2,17 +2,17 @@ package com.chess.cryptobot.task;
 
 import android.os.AsyncTask;
 
-import com.chess.cryptobot.content.ContextHolder;
+import com.chess.cryptobot.content.balance.BalanceHolder;
 import com.chess.cryptobot.exceptions.MarketException;
 import com.chess.cryptobot.market.Market;
 import com.chess.cryptobot.market.MarketFactory;
 import com.chess.cryptobot.model.Balance;
 
 public class BalanceUpdateTask extends AsyncTask<Balance, Integer, Balance> {
-    private ContextHolder contextHolder;
+    private BalanceHolder balanceHolder;
 
-    public BalanceUpdateTask(ContextHolder contextHolder) {
-        this.contextHolder = contextHolder;
+    public BalanceUpdateTask(BalanceHolder balanceHolder) {
+        this.balanceHolder = balanceHolder;
     }
 
     @Override
@@ -22,7 +22,7 @@ public class BalanceUpdateTask extends AsyncTask<Balance, Integer, Balance> {
         String[] markets = {"bittrex", "livecoin"};
         MarketFactory factory = new MarketFactory();
         for (String marketName : markets) {
-            Market market = factory.getMarket(marketName, contextHolder.getPrefs(), contextHolder.getContext().get());
+            Market market = factory.getMarket(marketName, balanceHolder.getPrefs(), balanceHolder.getContext().get());
             try {
                 balance.setAmount(marketName, market.getAmount(balance.getCoinName()));
             } catch (MarketException e) {
@@ -39,11 +39,11 @@ public class BalanceUpdateTask extends AsyncTask<Balance, Integer, Balance> {
     @Override
     protected void onPostExecute(Balance balance) {
         if (balance==null) return;
-        contextHolder.updateView(balance);
+        balanceHolder.updateBalanceInView(balance);
     }
 
     @Override
     protected void onCancelled(Balance balance) {
-        contextHolder.makeToast(balance.getMessage());
+        balanceHolder.makeToast(balance.getMessage());
     }
 }

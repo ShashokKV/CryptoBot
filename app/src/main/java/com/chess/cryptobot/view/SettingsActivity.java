@@ -1,4 +1,4 @@
-package com.chess.cryptobot.activity;
+package com.chess.cryptobot.view;
 
 import android.app.ActionBar;
 import android.os.Bundle;

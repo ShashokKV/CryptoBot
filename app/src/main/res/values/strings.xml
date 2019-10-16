@@ -32,4 +32,8 @@
 
     <string name="_0_0d">0.0d</string>
     <string name="set_min_balance">Set min balance to&#160;</string>
+    <string name="percent">%</string>
+    <string name="pair">Pair</string>
+    <string name="bid">Bid:</string>
+    <string name="ask">Ask:</string>
 </resources>

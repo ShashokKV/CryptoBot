@@ -1,4 +1,4 @@
-package com.chess.cryptobot.activity;
+package com.chess.cryptobot.view;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -8,41 +8,34 @@ import android.view.MenuItem;
 import android.widget.EditText;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.chess.cryptobot.R;
-import com.chess.cryptobot.activity.dialog.CryptoDialog;
-import com.chess.cryptobot.activity.dialog.DialogListener;
-import com.chess.cryptobot.activity.dialog.MinBalanceDialog;
-import com.chess.cryptobot.adapter.BalanceAdapter;
-import com.chess.cryptobot.adapter.BalanceViewOnClickListener;
-import com.chess.cryptobot.adapter.SwipeBalanceCallback;
-import com.chess.cryptobot.activity.dialog.CryptoNameDialog;
-import com.chess.cryptobot.content.ContextHolder;
-import com.chess.cryptobot.service.BalanceUpdateService;
+import com.chess.cryptobot.content.balance.BalanceHolder;
+import com.chess.cryptobot.content.balance.BalancePreferences;
+import com.chess.cryptobot.view.adapter.BalanceAdapter;
+import com.chess.cryptobot.view.adapter.SwipeBalanceCallback;
+import com.chess.cryptobot.view.dialog.CryptoDialog;
+import com.chess.cryptobot.view.dialog.CryptoNameDialog;
+import com.chess.cryptobot.view.dialog.DialogListener;
+import com.chess.cryptobot.view.dialog.MinBalanceDialog;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.Objects;
 
 public class BalanceActivity extends AppCompatActivity implements DialogListener {
 
-    private RecyclerView balanceRecyclerView;
-    private BalanceUpdateService mService;
-    private ContextHolder contextHolder;
+    private BalanceHolder balanceHolder;
     private BalanceAdapter balanceAdapter;
-    private boolean mBound;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.balance);
 
-        balanceRecyclerView = findViewById(R.id.balanceRecyclerView);
         init();
-
         FloatingActionButton floatingActionButton = findViewById(R.id.fab);
         floatingActionButton.setOnClickListener(v -> {
             CryptoNameDialog nameDialog = new CryptoNameDialog();
@@ -51,45 +44,35 @@ public class BalanceActivity extends AppCompatActivity implements DialogListener
     }
 
     private void init() {
-        contextHolder = new ContextHolder(this);
+        balanceHolder = new BalanceHolder(this);
         initRecyclerView();
-        //initBalanceService();
+        balanceHolder.updateAllInView();
     }
 
     private void initRecyclerView() {
-        balanceAdapter = new BalanceAdapter(contextHolder);
+        RecyclerView balanceRecyclerView = findViewById(R.id.balanceRecyclerView);
+        balanceAdapter = new BalanceAdapter(balanceHolder);
         balanceRecyclerView.setAdapter(balanceAdapter);
         balanceRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         ItemTouchHelper itemTouchHelper = new
-                ItemTouchHelper(new SwipeBalanceCallback(contextHolder));
+                ItemTouchHelper(new SwipeBalanceCallback(balanceHolder));
         itemTouchHelper.attachToRecyclerView(balanceRecyclerView);
     }
 
-/*
-    private void initBalanceService() {
-        Intent intent = new Intent(this, BalanceUpdateService.class);
-        bindService(intent, mConnection, BIND_AUTO_CREATE);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        unbindService(mConnection);
-    }
-*/
     private void onMinBalancePositiveClick(MinBalanceDialog dialog) {
         String coinName = dialog.getCoinName();
         EditText minBalanceView = Objects.requireNonNull(dialog.getDialog())
                 .findViewById(R.id.min_balance_edit_text);
         Double minBalance = Double.valueOf(minBalanceView.getText().toString());
-        contextHolder.getPrefs().setMinBalance(coinName, minBalance);
+        BalancePreferences balancePreferences = (BalancePreferences) balanceHolder.getPrefs();
+        balancePreferences.setMinBalance(coinName, minBalance);
     }
 
     private void onCryptoNamePositiveClick(CryptoNameDialog dialog) {
         EditText nameDialogView = Objects.requireNonNull(dialog.getDialog())
                 .findViewById(R.id.name_dialog_edit_text);
         String coinName = nameDialogView.getText().toString();
-        if (!coinName.isEmpty()) contextHolder.add(coinName);
+        if (!coinName.isEmpty()) balanceHolder.add(coinName);
     }
 
     @Override
@@ -125,23 +108,6 @@ public class BalanceActivity extends AppCompatActivity implements DialogListener
         }
         return super.onOptionsItemSelected(item);
     }
-/*
-    private ServiceConnection mConnection = new ServiceConnection() {
-
-        @Override
-        public void onServiceConnected(ComponentName className,
-                                       IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
-            BalanceUpdateService.BalanceBinder binder = (BalanceUpdateService.BalanceBinder) service;
-            mService = binder.getService();
-            mBound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            mBound = false;
-        }
-    };*/
 
     public BalanceAdapter getBalanceAdapter() {
         return balanceAdapter;

@@ -1,17 +1,17 @@
-package com.chess.cryptobot.adapter;
+package com.chess.cryptobot.view.adapter;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.chess.cryptobot.content.ContextHolder;
+import com.chess.cryptobot.content.balance.BalanceHolder;
 
 public class SwipeBalanceCallback extends ItemTouchHelper.SimpleCallback {
-    private ContextHolder contextHolder;
+    private BalanceHolder balanceHolder;
 
-    public SwipeBalanceCallback(ContextHolder contextHolder) {
+    public SwipeBalanceCallback(BalanceHolder balanceHolder) {
         super(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);
-        this.contextHolder = contextHolder;
+        this.balanceHolder = balanceHolder;
     }
 
     @Override
@@ -21,6 +21,6 @@ public class SwipeBalanceCallback extends ItemTouchHelper.SimpleCallback {
 
     @Override
     public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
-        contextHolder.remove(viewHolder.getAdapterPosition());
+        balanceHolder.remove(viewHolder.getAdapterPosition());
     }
 }

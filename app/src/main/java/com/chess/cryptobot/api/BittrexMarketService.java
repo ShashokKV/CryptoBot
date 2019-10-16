@@ -13,4 +13,7 @@ public interface BittrexMarketService {
 
     @GET("account/getbalance")
     Call<BittrexResponse> getBalance(@QueryMap Map<String, String> options, @HeaderMap Map<String, String> headers);
+
+    @GET("public/getmarkets")
+    Call<BittrexResponse> getPairs();
 }

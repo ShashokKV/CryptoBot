@@ -8,9 +8,9 @@
     android:layout_height="wrap_content">
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="0.4"
+        android:layout_weight="0.2"
         android:orientation="vertical"
         android:showDividers="end"
         tools:ignore="UseCompoundDrawables">
@@ -31,32 +31,30 @@
             android:textColor="@color/colorWhite"
             android:textSize="18sp"
             android:textStyle="bold"
-            tools:text="text" />
-    </LinearLayout >
+            tools:text="BTC" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/LIvecoinBalanceView"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_marginTop="30dp"
-        android:layout_weight="0.3"
-        android:textAlignment="viewStart"
+        android:layout_weight="0.4"
+        android:gravity="start|center_horizontal"
+        android:text="@string/_0_0d"
         android:textColor="@color/colorWhite"
         android:textSize="18sp"
         android:textStyle="bold"
-        android:text="@string/_0_0d"
-        tools:text="text" />
+        tools:text="0.000005" />
 
     <TextView
         android:id="@+id/BittrexBalanceView"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_marginTop="30dp"
-        android:layout_weight="0.3"
-        android:textAlignment="viewStart"
+        android:layout_weight="0.4"
+        android:gravity="start|center_horizontal"
+        android:text="@string/_0_0d"
         android:textColor="@color/colorWhite"
         android:textSize="18sp"
         android:textStyle="bold"
-        android:text="@string/_0_0d"
-        tools:text="text" />
+        tools:text="0.0000004" />
 </LinearLayout>

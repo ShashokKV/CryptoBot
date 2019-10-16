@@ -1,4 +1,4 @@
-package com.chess.cryptobot.activity.dialog;
+package com.chess.cryptobot.view.dialog;
 
 import android.widget.EditText;
 import android.widget.TextView;

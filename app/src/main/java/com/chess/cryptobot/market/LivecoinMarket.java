@@ -1,12 +1,15 @@
 package com.chess.cryptobot.market;
 
 import com.chess.cryptobot.api.LivecoinMarketService;
+import com.chess.cryptobot.exceptions.BittrexException;
 import com.chess.cryptobot.exceptions.LivecoinException;
 import com.chess.cryptobot.exceptions.MarketException;
 import com.chess.cryptobot.model.response.livecoin.LivecoinBalanceResponse;
+import com.chess.cryptobot.model.response.livecoin.LivecoinPairsResponse;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.util.List;
 import java.util.TreeMap;
 
 import retrofit2.Call;
@@ -47,6 +50,18 @@ public class LivecoinMarket extends MarketRequest implements Market {
         LivecoinBalanceResponse response;
         try {
             Call<LivecoinBalanceResponse> call = service.getBalance(params, headers);
+            response = (LivecoinBalanceResponse) execute(call);
+        } catch (MarketException e) {
+            throw new LivecoinException(e.getMessage());
+        }
+        return response.getAmount();
+    }
+
+    @Override
+    public List<String> getAvailablePairs() throws BittrexException {
+        LivecoinBalanceResponse response;
+        try {
+            Call<List<LivecoinPairsResponse>> call = service.getPairs();
             response = (LivecoinBalanceResponse) execute(call);
         } catch (MarketException e) {
             throw new LivecoinException(e.getMessage());

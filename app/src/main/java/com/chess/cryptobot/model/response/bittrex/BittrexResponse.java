@@ -1,9 +1,14 @@
 package com.chess.cryptobot.model.response.bittrex;
 
+import com.chess.cryptobot.model.Price;
 import com.chess.cryptobot.model.response.BalanceResponse;
 import com.chess.cryptobot.model.response.MarketResponse;
+import com.chess.cryptobot.model.response.PairsResponse;
 
-public class BittrexResponse implements MarketResponse, BalanceResponse {
+import java.util.ArrayList;
+import java.util.List;
+
+public class BittrexResponse implements MarketResponse, BalanceResponse, PairsResponse {
 
     private Boolean success;
     public String message;
@@ -27,17 +32,34 @@ public class BittrexResponse implements MarketResponse, BalanceResponse {
     }
 
     @Override
-    public Double getAmount() {
-        return results[0].getAvailable();
-    }
-
-    @Override
     public boolean success() {
         return success;
     }
 
     @Override
+    public Double getAmount() {
+        return results[0].getAvailable();
+    }
+
+    @Override
     public String message() {
         return message;
+    }
+
+
+    @Override
+    public List<Price> bids() {
+        return parsePrices(results[0].getBuy());
+    }
+
+    @Override
+    public List<Price> asks() {
+        return parsePrices(results[0].getSell());
+    }
+
+    private List<Price> parsePrices(List<BittrexPrice> prices) {
+        ArrayList<Price> parsedPrices = new ArrayList<>();
+        prices.forEach(price -> parsedPrices.add(new Price(price.getRate(), price.getQuantity())));
+        return parsedPrices;
     }
 }

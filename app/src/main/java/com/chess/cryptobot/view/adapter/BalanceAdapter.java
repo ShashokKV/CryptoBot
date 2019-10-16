@@ -1,4 +1,4 @@
-package com.chess.cryptobot.adapter;
+package com.chess.cryptobot.view.adapter;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -12,7 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.chess.cryptobot.R;
-import com.chess.cryptobot.content.ContextHolder;
+import com.chess.cryptobot.content.balance.BalanceHolder;
 import com.chess.cryptobot.model.Balance;
 
 import java.util.ArrayList;
@@ -21,11 +21,11 @@ import java.util.List;
 public class BalanceAdapter extends RecyclerView.Adapter<BalanceAdapter.BalanceViewHolder> {
     private List<Balance> balances;
     private RecyclerViewOnClickListener mListener;
-    private ContextHolder contextHolder;
+    private BalanceHolder balanceHolder;
 
-    public BalanceAdapter(ContextHolder contextHolder) {
-        this.contextHolder = contextHolder;
-        List<Balance> contextBalances = contextHolder.getBalances();
+    public BalanceAdapter(BalanceHolder balanceHolder) {
+        this.balanceHolder = balanceHolder;
+        List<Balance> contextBalances = balanceHolder.getBalances();
         this.balances = new ArrayList<>(contextBalances.size());
         contextBalances.forEach(balance -> this.balances.add(new Balance(balance)));
         this.mListener = new BalanceViewOnClickListener();
@@ -45,18 +45,11 @@ public class BalanceAdapter extends RecyclerView.Adapter<BalanceAdapter.BalanceV
     public void onBindViewHolder(@NonNull BalanceViewHolder balanceViewHolder, int i) {
         Balance balance = balances.get(i);
 
-        TextView btrxView = balanceViewHolder.bittrexBalanceView;
-        TextView lvcnView = balanceViewHolder.livecoinBalanceView;
-        TextView cryptoNameView = balanceViewHolder.cryptoNameView;
-        ImageView cryptoImageView = balanceViewHolder.cryptoImageView;
-
-        Double bittrexAmount = balance.getAmount("bittrex");
-        Double livecoinAmount = balance.getAmount("livecoin");
-        btrxView.setText(bittrexAmount==null ? "0.0" : String.valueOf(balance.getAmount("bittrex")));
-        lvcnView.setText(livecoinAmount==null ? "0.0" : String.valueOf(balance.getAmount("livecoin")));
-        cryptoNameView.setText(balance.getCoinName());
+        balanceViewHolder.bittrexBalanceView.setText(String.valueOf(balance.getAmount("bittrex")));
+        balanceViewHolder.livecoinBalanceView.setText(String.valueOf(balance.getAmount("livecoin")));
+        balanceViewHolder.cryptoNameView.setText(balance.getCoinName());
         Bitmap bitmap = balance.getCoinIcon();
-        if (bitmap != null) cryptoImageView.setImageBitmap(bitmap);
+        if (bitmap != null) balanceViewHolder.cryptoImageView.setImageBitmap(bitmap);
     }
 
     @Override
@@ -86,8 +79,8 @@ public class BalanceAdapter extends RecyclerView.Adapter<BalanceAdapter.BalanceV
         }
     }
 
-    private ContextHolder getContextHolder() {
-        return contextHolder;
+    private BalanceHolder getBalanceHolder() {
+        return balanceHolder;
     }
 
     class BalanceViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
@@ -114,7 +107,7 @@ public class BalanceAdapter extends RecyclerView.Adapter<BalanceAdapter.BalanceV
 
         @Override
         public void onClick(View v) {
-            mOnClickListener.onClick(v, getContextHolder(), coinNameByPosition(getAdapterPosition()));
+            mOnClickListener.onClick(v, getBalanceHolder(), coinNameByPosition(getAdapterPosition()));
         }
     }
 }

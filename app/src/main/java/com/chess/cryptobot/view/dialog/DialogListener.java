@@ -1,4 +1,4 @@
-package com.chess.cryptobot.activity.dialog;
+package com.chess.cryptobot.view.dialog;
 
 public interface DialogListener {
     void onDialogPositiveClick(CryptoDialog dialog);
