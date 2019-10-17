@@ -1,13 +1,11 @@
 package com.chess.cryptobot.market;
 
-import com.chess.cryptobot.exceptions.BittrexException;
-import com.chess.cryptobot.exceptions.LivecoinException;
-
-import java.util.List;
+import com.chess.cryptobot.exceptions.MarketException;
+import com.chess.cryptobot.model.response.OrderBookResponse;
 
 public interface Market {
 
-    Double getAmount(String coinName) throws BittrexException, LivecoinException;
+    Double getAmount(String coinName) throws MarketException;
 
-    List<String> getAvailablePairs() throws BittrexException;
+    OrderBookResponse getOrderBook(String pairName) throws MarketException;
 }

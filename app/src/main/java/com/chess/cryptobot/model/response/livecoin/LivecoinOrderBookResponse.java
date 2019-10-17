@@ -1,14 +1,14 @@
 package com.chess.cryptobot.model.response.livecoin;
 
 import com.chess.cryptobot.model.Price;
-import com.chess.cryptobot.model.response.PairsResponse;
+import com.chess.cryptobot.model.response.OrderBookResponse;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class LivecoinPairsResponse implements PairsResponse {
+public class LivecoinOrderBookResponse extends LivecoinResponse implements OrderBookResponse {
     @SerializedName("asks")
     @Expose
     public List<List<String>> asks;

@@ -6,6 +6,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -14,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.chess.cryptobot.R;
 import com.chess.cryptobot.content.balance.BalanceHolder;
-import com.chess.cryptobot.content.balance.BalancePreferences;
+import com.chess.cryptobot.model.Balance;
 import com.chess.cryptobot.view.adapter.BalanceAdapter;
 import com.chess.cryptobot.view.adapter.SwipeBalanceCallback;
 import com.chess.cryptobot.view.dialog.CryptoDialog;
@@ -26,7 +27,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.Objects;
 
 public class BalanceActivity extends AppCompatActivity implements DialogListener {
-
     private BalanceHolder balanceHolder;
     private BalanceAdapter balanceAdapter;
 
@@ -46,7 +46,7 @@ public class BalanceActivity extends AppCompatActivity implements DialogListener
     private void init() {
         balanceHolder = new BalanceHolder(this);
         initRecyclerView();
-        balanceHolder.updateAllInView();
+        balanceHolder.updateAll();
     }
 
     private void initRecyclerView() {
@@ -59,13 +59,34 @@ public class BalanceActivity extends AppCompatActivity implements DialogListener
         itemTouchHelper.attachToRecyclerView(balanceRecyclerView);
     }
 
+    public synchronized void updateBalance(Balance balance) {
+        balanceAdapter.updateItem(balance);
+    }
+
+    public void addBalance(Balance balance) {
+        balanceAdapter.addItem(balance);
+    }
+
+    public String coinNameByPosition(int position) {
+        return  balanceAdapter.coinNameByPosition(position);
+    }
+
+    public void deleteBalanceByPosition(int position) {
+        balanceAdapter.deleteItem(position);
+    }
+
+    public void makeToast(String message) {
+        if (message!=null && !message.isEmpty()) {
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+        }
+    }
+
     private void onMinBalancePositiveClick(MinBalanceDialog dialog) {
         String coinName = dialog.getCoinName();
         EditText minBalanceView = Objects.requireNonNull(dialog.getDialog())
                 .findViewById(R.id.min_balance_edit_text);
         Double minBalance = Double.valueOf(minBalanceView.getText().toString());
-        BalancePreferences balancePreferences = (BalancePreferences) balanceHolder.getPrefs();
-        balancePreferences.setMinBalance(coinName, minBalance);
+        balanceHolder.setMinBalance(coinName, minBalance);
     }
 
     private void onCryptoNamePositiveClick(CryptoNameDialog dialog) {
@@ -107,9 +128,5 @@ public class BalanceActivity extends AppCompatActivity implements DialogListener
             return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    public BalanceAdapter getBalanceAdapter() {
-        return balanceAdapter;
     }
 }

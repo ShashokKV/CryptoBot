@@ -2,18 +2,16 @@ package com.chess.cryptobot.content;
 
 import android.content.Context;
 
-import com.chess.cryptobot.view.BalanceActivity;
-
 import java.lang.ref.WeakReference;
 
 public abstract class ContextHolder {
-    private WeakReference<BalanceActivity> context;
+    private WeakReference<Context> context;
 
     public ContextHolder(Context context) {
-        this.context = new WeakReference<>((BalanceActivity)context);
+        this.context = new WeakReference<>(context);
     }
 
-    public WeakReference<BalanceActivity> getContext() {
+    public WeakReference<Context> getContext() {
         return this.context;
     }
 

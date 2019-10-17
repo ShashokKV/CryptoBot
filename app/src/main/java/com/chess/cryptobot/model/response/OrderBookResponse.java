@@ -4,7 +4,7 @@ import com.chess.cryptobot.model.Price;
 
 import java.util.List;
 
-public interface PairsResponse {
+public interface OrderBookResponse {
 
     List<Price> bids();
     List<Price> asks();

@@ -1,7 +1,7 @@
 package com.chess.cryptobot.api;
 
 import com.chess.cryptobot.model.response.livecoin.LivecoinBalanceResponse;
-import com.chess.cryptobot.model.response.livecoin.LivecoinPairsResponse;
+import com.chess.cryptobot.model.response.livecoin.LivecoinOrderBookResponse;
 
 import java.util.List;
 import java.util.Map;
@@ -17,5 +17,5 @@ public interface LivecoinMarketService {
     Call<LivecoinBalanceResponse> getBalance(@QueryMap Map<String, String> options, @HeaderMap Map<String, String> headers);
 
     @GET("exchange/order_book")
-    Call<List<LivecoinPairsResponse>> getPairs(@QueryMap Map<String, String> options);
+    Call<LivecoinOrderBookResponse> getOrderBook(@QueryMap Map<String, String> options);
 }

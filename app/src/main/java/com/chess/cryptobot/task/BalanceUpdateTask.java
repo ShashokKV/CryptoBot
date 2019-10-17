@@ -7,12 +7,15 @@ import com.chess.cryptobot.exceptions.MarketException;
 import com.chess.cryptobot.market.Market;
 import com.chess.cryptobot.market.MarketFactory;
 import com.chess.cryptobot.model.Balance;
+import com.chess.cryptobot.view.BalanceActivity;
+
+import java.lang.ref.WeakReference;
 
 public class BalanceUpdateTask extends AsyncTask<Balance, Integer, Balance> {
-    private BalanceHolder balanceHolder;
+    private WeakReference<BalanceHolder> balanceHolderWeakReference;
 
     public BalanceUpdateTask(BalanceHolder balanceHolder) {
-        this.balanceHolder = balanceHolder;
+        this.balanceHolderWeakReference = new WeakReference<>(balanceHolder);
     }
 
     @Override
@@ -21,6 +24,7 @@ public class BalanceUpdateTask extends AsyncTask<Balance, Integer, Balance> {
         int hashCode = balance.getAmounts().hashCode();
         String[] markets = {"bittrex", "livecoin"};
         MarketFactory factory = new MarketFactory();
+        BalanceHolder balanceHolder = this.balanceHolderWeakReference.get();
         for (String marketName : markets) {
             Market market = factory.getMarket(marketName, balanceHolder.getPrefs(), balanceHolder.getContext().get());
             try {
@@ -39,11 +43,12 @@ public class BalanceUpdateTask extends AsyncTask<Balance, Integer, Balance> {
     @Override
     protected void onPostExecute(Balance balance) {
         if (balance==null) return;
-        balanceHolder.updateBalanceInView(balance);
+        balanceHolderWeakReference.get().updateBalance(balance);
     }
 
     @Override
     protected void onCancelled(Balance balance) {
-        balanceHolder.makeToast(balance.getMessage());
+        BalanceActivity activity =  balanceHolderWeakReference.get().getBalanceActivityOrNull();
+        if (activity!=null) activity.makeToast(balance.getMessage());
     }
 }

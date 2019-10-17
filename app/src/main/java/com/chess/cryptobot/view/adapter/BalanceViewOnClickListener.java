@@ -4,6 +4,7 @@ import android.view.View;
 
 import com.chess.cryptobot.content.balance.BalanceHolder;
 import com.chess.cryptobot.content.balance.BalancePreferences;
+import com.chess.cryptobot.view.BalanceActivity;
 import com.chess.cryptobot.view.dialog.MinBalanceDialog;
 
 public class BalanceViewOnClickListener implements RecyclerViewOnClickListener {
@@ -12,6 +13,8 @@ public class BalanceViewOnClickListener implements RecyclerViewOnClickListener {
         BalancePreferences balancePreferences = (BalancePreferences) balanceHolder.getPrefs();
         Double minBalance = balancePreferences.getMinBalance(coinName);
         MinBalanceDialog dialog = new MinBalanceDialog(coinName, minBalance);
-        dialog.show(balanceHolder.getContext().get().getSupportFragmentManager(), "coinName");
+        BalanceActivity balanceActivity = balanceHolder.getBalanceActivityOrNull();
+        if (balanceActivity!=null)
+        dialog.show(balanceActivity.getSupportFragmentManager(), "coinName");
     }
 }

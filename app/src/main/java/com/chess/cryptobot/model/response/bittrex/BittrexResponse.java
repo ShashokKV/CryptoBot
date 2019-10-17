@@ -3,12 +3,12 @@ package com.chess.cryptobot.model.response.bittrex;
 import com.chess.cryptobot.model.Price;
 import com.chess.cryptobot.model.response.BalanceResponse;
 import com.chess.cryptobot.model.response.MarketResponse;
-import com.chess.cryptobot.model.response.PairsResponse;
+import com.chess.cryptobot.model.response.OrderBookResponse;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class BittrexResponse implements MarketResponse, BalanceResponse, PairsResponse {
+public class BittrexResponse implements MarketResponse, BalanceResponse, OrderBookResponse {
 
     private Boolean success;
     public String message;

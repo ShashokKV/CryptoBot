@@ -3,12 +3,12 @@ package com.chess.cryptobot.market;
 import com.chess.cryptobot.api.BittrexMarketService;
 import com.chess.cryptobot.exceptions.BittrexException;
 import com.chess.cryptobot.exceptions.MarketException;
+import com.chess.cryptobot.model.response.OrderBookResponse;
 import com.chess.cryptobot.model.response.bittrex.BittrexResponse;
 import com.chess.cryptobot.model.response.bittrex.BittrexTypeAdapter;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -61,14 +61,17 @@ public class BittrexMarket extends MarketRequest implements Market {
     }
 
     @Override
-    public List<String> getAvailablePairs() throws BittrexException {
+    public OrderBookResponse getOrderBook(String pairName) throws BittrexException {
         BittrexResponse response;
+        Map<String, String> params = new TreeMap<>();
+        params.put("market", pairName);
+        params.put("type", "both");
         try {
-            Call<BittrexResponse> call = service.getPairs();
+            Call<BittrexResponse> call = service.getOrderBook(params);
             response = (BittrexResponse) execute(call);
         } catch (MarketException e) {
             throw new BittrexException(e.getMessage());
         }
-        return response.getPairs();
+        return response;
     }
 }
