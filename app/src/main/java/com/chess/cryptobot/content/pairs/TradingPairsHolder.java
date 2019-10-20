@@ -5,37 +5,37 @@ import android.content.Context;
 import com.chess.cryptobot.content.ContextHolder;
 import com.chess.cryptobot.content.Preferences;
 import com.chess.cryptobot.model.TradingPair;
+import com.chess.cryptobot.model.ViewItem;
+import com.chess.cryptobot.task.TradingPairsUpdateTask;
 
-import java.util.ArrayList;
+import java.util.Set;
 
 public class TradingPairsHolder extends ContextHolder {
-private TradingPairsPreferences prefs;
-private ArrayList<TradingPair> tradingPairs;
 
     public TradingPairsHolder(Context context) {
         super(context);
-        prefs = new TradingPairsPreferences(context);
-        initPairs();
     }
 
     @Override
-    public Preferences getPrefs() {
-        return this.prefs;
+    public Preferences initPrefs(Context context) {
+        return new TradingPairsPreferences(context);
     }
 
-    private void initPairs() {
-        tradingPairs = new ArrayList<>();
-        String[] coinNames = prefs.getCoinNames().toArray(new String[0]);
-        for (String name : coinNames) {
-            for (String coinName : coinNames) {
-                if (!name.equals(coinName)) {
-                    tradingPairs.add(new TradingPair(name, coinName));
+    public void initViewItems(Set<String> coinNames) {
+        TradingPair tradingPair;
+        for (String baseName : coinNames) {
+            for (String marketName : coinNames) {
+                if (!baseName.equals(marketName)) {
+                    tradingPair = new TradingPair(baseName, marketName);
+                    add(tradingPair);
                 }
             }
         }
     }
 
-    public ArrayList<TradingPair> getTradingPairs() {
-        return this.tradingPairs;
+    public void updateItem(ViewItem item) {
+        TradingPair tradingPair = (TradingPair) item;
+        TradingPairsUpdateTask task = new TradingPairsUpdateTask(this);
+        task.execute(tradingPair);
     }
 }

@@ -14,21 +14,19 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.chess.cryptobot.R;
 import com.chess.cryptobot.content.balance.BalanceHolder;
 import com.chess.cryptobot.model.Balance;
+import com.chess.cryptobot.model.ViewItem;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class BalanceAdapter extends RecyclerView.Adapter<BalanceAdapter.BalanceViewHolder> {
-    private List<Balance> balances;
+public class BalanceAdapter extends RecyclerViewAdapter<BalanceAdapter.BalanceViewHolder, Balance> {
     private RecyclerViewOnClickListener mListener;
-    private BalanceHolder balanceHolder;
 
     public BalanceAdapter(BalanceHolder balanceHolder) {
-        this.balanceHolder = balanceHolder;
-        List<Balance> contextBalances = balanceHolder.getBalances();
-        this.balances = new ArrayList<>(contextBalances.size());
-        contextBalances.forEach(balance -> this.balances.add(new Balance(balance)));
-        this.mListener = new BalanceViewOnClickListener();
+        super(balanceHolder);
+        this.mListener = new BalanceViewOnClickListener(balanceHolder);
+    }
+
+    @Override
+    public Balance copyItem(ViewItem item) {
+        return (Balance) item.copy();
     }
 
     @NonNull
@@ -43,44 +41,17 @@ public class BalanceAdapter extends RecyclerView.Adapter<BalanceAdapter.BalanceV
 
     @Override
     public void onBindViewHolder(@NonNull BalanceViewHolder balanceViewHolder, int i) {
-        Balance balance = balances.get(i);
+        Balance balance = getItemByPosition(i);
 
         balanceViewHolder.bittrexBalanceView.setText(String.valueOf(balance.getAmount("bittrex")));
         balanceViewHolder.livecoinBalanceView.setText(String.valueOf(balance.getAmount("livecoin")));
-        balanceViewHolder.cryptoNameView.setText(balance.getCoinName());
+        balanceViewHolder.cryptoNameView.setText(balance.getName());
         Bitmap bitmap = balance.getCoinIcon();
         if (bitmap != null) balanceViewHolder.cryptoImageView.setImageBitmap(bitmap);
     }
 
-    @Override
-    public int getItemCount() {
-        return balances.size();
-    }
-
     public String coinNameByPosition(int position) {
-        return balances.get(position).getCoinName();
-    }
-
-    public void addItem(Balance balance) {
-        this.balances.add(new Balance(balance));
-        this.notifyItemInserted(getItemCount());
-    }
-
-    public void deleteItem(int position) {
-        balances.remove(position);
-        this.notifyItemRemoved(position);
-    }
-
-    public void updateItem(Balance balance) {
-        int index = this.balances.indexOf(balance);
-        if (index >= 0) {
-            this.balances.set(index, new Balance(balance));
-            this.notifyItemChanged(index);
-        }
-    }
-
-    private BalanceHolder getBalanceHolder() {
-        return balanceHolder;
+        return getItemByPosition(position).getName();
     }
 
     class BalanceViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
@@ -107,7 +78,7 @@ public class BalanceAdapter extends RecyclerView.Adapter<BalanceAdapter.BalanceV
 
         @Override
         public void onClick(View v) {
-            mOnClickListener.onClick(v, getBalanceHolder(), coinNameByPosition(getAdapterPosition()));
+            mOnClickListener.onClick(v, coinNameByPosition(getAdapterPosition()));
         }
     }
 }

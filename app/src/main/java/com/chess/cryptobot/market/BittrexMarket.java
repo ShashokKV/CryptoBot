@@ -25,6 +25,11 @@ public class BittrexMarket extends MarketRequest implements Market {
     }
 
     @Override
+    public String getMarketName() {
+        return "bittrex";
+    }
+
+    @Override
     Gson initGson() {
         return new GsonBuilder()
                 .registerTypeAdapter(BittrexResponse.class, new BittrexTypeAdapter())

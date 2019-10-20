@@ -5,6 +5,8 @@ import com.chess.cryptobot.model.response.OrderBookResponse;
 
 public interface Market {
 
+    String getMarketName();
+
     Double getAmount(String coinName) throws MarketException;
 
     OrderBookResponse getOrderBook(String pairName) throws MarketException;

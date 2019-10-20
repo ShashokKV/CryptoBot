@@ -4,79 +4,68 @@ import android.content.Context;
 
 import com.chess.cryptobot.content.ContextHolder;
 import com.chess.cryptobot.content.Preferences;
+import com.chess.cryptobot.exceptions.ItemNotFoundException;
 import com.chess.cryptobot.model.Balance;
+import com.chess.cryptobot.model.ViewItem;
 import com.chess.cryptobot.task.BalanceUpdateTask;
 import com.chess.cryptobot.task.CoinImageTask;
-import com.chess.cryptobot.view.BalanceActivity;
+import com.chess.cryptobot.view.AdapterActivity;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 public class BalanceHolder extends ContextHolder {
-    private ArrayList<Balance> balances;
-    private BalancePreferences prefs;
 
     public BalanceHolder(Context context) {
         super(context);
-
-        this.prefs = new BalancePreferences(context);
-        balances = new ArrayList<>();
-        Set<String> coinNames = prefs.getCoinNames();
-        coinNames.forEach(coinName -> balances.add(new Balance(coinName)));
     }
 
     @Override
-    public Preferences getPrefs() {
-        return this.prefs;
+    public Preferences initPrefs(Context context) {
+        return new BalancePreferences(context);
+    }
+
+    public void initViewItems(Set<String> coinNames) {
+        coinNames.forEach(coinName -> add(new Balance(coinName)));
     }
 
     public void add(String coinName) {
         add(new Balance(coinName));
     }
 
-    private void add(Balance balance) {
-        if (balances.contains(balance)) return;
-        balances.add(balance);
-        prefs.addCoinToBalance(balance.getCoinName());
-        BalanceActivity balanceActivity = getBalanceActivityOrNull();
-        if (balanceActivity!=null) {
-            balanceActivity.addBalance(balance);
-            updateImage(balance);
-            updateAmount(balance);
-        }
+    @Override
+    public void add(ViewItem viewItem) {
+        super.add(viewItem);
+        BalancePreferences preferences = (BalancePreferences) getPrefs();
+        Balance balance = (Balance) viewItem;
+        preferences.addCoinToBalance(balance.getName());
+        updateImage(balance);
+        updateAmount(balance);
     }
 
-    public void remove(int position) {
-        if (position >= balances.size()) return;
-        BalanceActivity balanceActivity = getBalanceActivityOrNull();
-        if (balanceActivity!=null) {
-            String coinName = balanceActivity.coinNameByPosition(position);
-            prefs.removeCoinFromBalance(coinName);
-            balanceActivity.deleteBalanceByPosition(position);
-            balances.remove(position);
-        }
+    @Override
+    public void remove(ViewItem item) {
+        super.remove(item);
+        removeCoinFromPrefs(item);
     }
 
-    public void updateAll() {
-        updateImage(balances);
-        updateAmount(balances);
+    private void removeCoinFromPrefs(ViewItem item) {
+        BalancePreferences preferences = (BalancePreferences) getPrefs();
+        preferences.removeCoin(item.getName());
     }
 
-    private void updateImage(ArrayList<Balance> balances) {
-        balances.forEach(this::updateImage);
+    @Override
+    public void updateItem(ViewItem item) {
+        Balance balance = (Balance) item;
+        updateImage(balance);
+        updateAmount(balance);
     }
 
     private void updateImage(Balance balance) {
-        BalanceActivity  balanceActivity = getBalanceActivityOrNull();
-        if (balanceActivity != null) {
+        AdapterActivity activity = getAdapterActivityOrNull();
+        if (activity != null) {
             CoinImageTask task = new CoinImageTask(this);
             task.execute(balance);
         }
-    }
-
-    private void updateAmount(ArrayList<Balance> balances) {
-        balances.forEach(this::updateAmount);
     }
 
     private void updateAmount(Balance balance) {
@@ -84,31 +73,22 @@ public class BalanceHolder extends ContextHolder {
         task.execute(balance);
     }
 
-    public void updateBalance(Balance updatedBalance) {
-        for(Balance balance: balances) {
-            if (balance.equals(updatedBalance)) {
-                balances.set(balances.indexOf(balance), updatedBalance);
-                break;
-            }
-        }
-
-        BalanceActivity activity =  getBalanceActivityOrNull();
-        if (activity!=null) activity.updateBalance(updatedBalance);
-    }
-
-    public void setMinBalance(String coinName, Double minBalance) {
-        prefs.setMinBalance(coinName,minBalance);
-    }
-
-    public BalanceActivity getBalanceActivityOrNull() {
-        Context context = this.getContext().get();
-        if (context instanceof BalanceActivity) {
-            return (BalanceActivity) context;
+    public Balance getBalanceByPosition(int position) throws ItemNotFoundException {
+        AdapterActivity balanceActivity = getAdapterActivityOrNull();
+        if (balanceActivity != null) {
+            String coinName = balanceActivity.itemNameByPosition(position);
+            return (Balance) this.getItemByName(coinName);
         }
         return null;
     }
 
-    public List<Balance> getBalances() {
-        return balances;
+    public void makeToast(String message) {
+        AdapterActivity adapterActivity = this.getAdapterActivityOrNull();
+        if (adapterActivity!=null) adapterActivity.makeToast(message);
+    }
+
+    public void setMinBalance(String coinName, Double minBalance) {
+        BalancePreferences preferences = (BalancePreferences) getPrefs();
+        preferences.setMinBalance(coinName,minBalance);
     }
 }

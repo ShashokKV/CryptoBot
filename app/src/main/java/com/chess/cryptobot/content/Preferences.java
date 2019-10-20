@@ -18,7 +18,7 @@ public class Preferences {
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
-    public Set<String> getCoinNames() {
+    protected Set<String> getCoinNames() {
         return new TreeSet<>(sharedPreferences.getStringSet(getContext().getString(R.string.coin_names), new TreeSet<>()));
     }
 

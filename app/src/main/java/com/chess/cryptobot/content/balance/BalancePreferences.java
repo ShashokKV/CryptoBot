@@ -18,7 +18,7 @@ public class BalancePreferences extends Preferences {
         return Double.parseDouble(Objects.requireNonNull(getSharedPreferences().getString("min_".concat(coinName),"0.0")));
     }
 
-    public void setMinBalance(String coinName, Double minBalance) {
+    void setMinBalance(String coinName, Double minBalance) {
         SharedPreferences.Editor editor = getSharedPreferences().edit();
         editor.putString("min_".concat(coinName), minBalance.toString());
         editor.apply();
@@ -31,7 +31,7 @@ public class BalancePreferences extends Preferences {
         updateBalancePrefs(coinNames);
     }
 
-    void removeCoinFromBalance(String coinName) {
+    void removeCoin(String coinName) {
         Set<String> coinNames = getCoinNames();
         coinNames.remove(coinName);
         updateBalancePrefs(coinNames);

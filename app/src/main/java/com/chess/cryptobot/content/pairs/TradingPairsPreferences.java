@@ -4,8 +4,8 @@ import android.content.Context;
 
 import com.chess.cryptobot.content.Preferences;
 
-public class TradingPairsPreferences extends Preferences {
-    public TradingPairsPreferences(Context context) {
+class TradingPairsPreferences extends Preferences {
+    TradingPairsPreferences(Context context) {
         super(context);
     }
 }

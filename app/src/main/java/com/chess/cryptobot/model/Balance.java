@@ -7,7 +7,7 @@ import androidx.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Balance {
+public class Balance implements ViewItem{
     private String coinName;
     private Bitmap coinIcon;
     private Map<String, Double> amounts;
@@ -20,8 +20,8 @@ public class Balance {
         this.amounts.put("livecoin", 0.0d);
     }
 
-    public Balance(Balance balance) {
-        this.coinName = balance.getCoinName();
+    private Balance(Balance balance) {
+        this.coinName = balance.getName();
         Bitmap coinIcon = balance.getCoinIcon();
         if (coinIcon!=null) this.coinIcon = coinIcon.copy(coinIcon.getConfig(), coinIcon.isMutable());
         this.amounts = new HashMap<>();
@@ -35,14 +35,18 @@ public class Balance {
         if (balanceObj == this) return true;
         if (balanceObj instanceof Balance) {
             Balance balance = (Balance) balanceObj;
-            return (balance.getCoinName().equals(this.coinName));
+            return (balance.getName().equals(this.coinName));
         }else {
             return false;
         }
     }
 
-    public String getCoinName() {
+    public String getName() {
         return coinName;
+    }
+
+    public Balance copy() {
+        return new Balance(this);
     }
 
     public Bitmap getCoinIcon() {

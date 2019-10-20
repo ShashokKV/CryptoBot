@@ -11,7 +11,6 @@ import androidx.annotation.Nullable;
 import com.chess.cryptobot.R;
 import com.chess.cryptobot.content.balance.BalanceHolder;
 import com.chess.cryptobot.model.Balance;
-import com.chess.cryptobot.view.BalanceActivity;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -34,7 +33,7 @@ public class CoinImageTask extends AsyncTask<Balance, Integer, Balance> {
         boolean updated = false;
         Balance balance = balances[0];
             try{
-                Bitmap bitmap = getImage(balance.getCoinName());
+                Bitmap bitmap = getImage(balance.getName());
                 balance.setCoinIcon(bitmap);
                 updated = true;
             }catch (IOException ignored){}
@@ -49,7 +48,7 @@ public class CoinImageTask extends AsyncTask<Balance, Integer, Balance> {
     @Override
     protected void onPostExecute(@Nullable Balance balance) {
         if (balance==null) return;
-        balanceHolderWeakReference.get().updateBalance(balance);
+        balanceHolderWeakReference.get().setItem(balance);
     }
 
     private Bitmap getImage(String coinName) throws IOException {

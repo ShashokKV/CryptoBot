@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.chess.cryptobot.R;
 import com.chess.cryptobot.content.balance.BalanceHolder;
 import com.chess.cryptobot.model.Balance;
+import com.chess.cryptobot.model.ViewItem;
 import com.chess.cryptobot.view.adapter.BalanceAdapter;
 import com.chess.cryptobot.view.adapter.SwipeBalanceCallback;
 import com.chess.cryptobot.view.dialog.CryptoDialog;
@@ -26,7 +27,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.Objects;
 
-public class BalanceActivity extends AppCompatActivity implements DialogListener {
+public class BalanceActivity extends AppCompatActivity implements DialogListener, AdapterActivity {
     private BalanceHolder balanceHolder;
     private BalanceAdapter balanceAdapter;
 
@@ -46,7 +47,6 @@ public class BalanceActivity extends AppCompatActivity implements DialogListener
     private void init() {
         balanceHolder = new BalanceHolder(this);
         initRecyclerView();
-        balanceHolder.updateAll();
     }
 
     private void initRecyclerView() {
@@ -59,19 +59,25 @@ public class BalanceActivity extends AppCompatActivity implements DialogListener
         itemTouchHelper.attachToRecyclerView(balanceRecyclerView);
     }
 
-    public synchronized void updateBalance(Balance balance) {
-        balanceAdapter.updateItem(balance);
+    @Override
+    protected void onStart() {
+        super.onStart();
+        balanceHolder.updateAllItems();
     }
 
-    public void addBalance(Balance balance) {
-        balanceAdapter.addItem(balance);
+    public void updateItem(ViewItem balance) {
+        balanceAdapter.updateItem((Balance) balance);
     }
 
-    public String coinNameByPosition(int position) {
+    public void addItem(ViewItem balance) {
+        balanceAdapter.addItem((Balance)balance);
+    }
+
+    public String itemNameByPosition(int position) {
         return  balanceAdapter.coinNameByPosition(position);
     }
 
-    public void deleteBalanceByPosition(int position) {
+    public void deleteItemByPosition(int position) {
         balanceAdapter.deleteItem(position);
     }
 

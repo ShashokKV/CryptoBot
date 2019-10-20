@@ -25,6 +25,11 @@ public class LivecoinMarket extends MarketRequest implements Market {
     }
 
     @Override
+    public String getMarketName() {
+        return "livecoin";
+    }
+
+    @Override
     Gson initGson() {
         return new GsonBuilder().create();
     }

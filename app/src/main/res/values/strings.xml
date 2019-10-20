@@ -36,4 +36,6 @@
     <string name="pair">Pair</string>
     <string name="bid">Bid:</string>
     <string name="ask">Ask:</string>
+    <string name="balance">Balance</string>
+    <string name="trading_pairs">Trading Pairs</string>
 </resources>

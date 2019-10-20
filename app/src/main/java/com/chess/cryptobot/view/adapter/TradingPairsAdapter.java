@@ -12,16 +12,17 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.chess.cryptobot.R;
 import com.chess.cryptobot.content.pairs.TradingPairsHolder;
 import com.chess.cryptobot.model.TradingPair;
+import com.chess.cryptobot.model.ViewItem;
 
-import java.util.ArrayList;
-
-public class TradingPairsAdapter extends RecyclerView.Adapter<TradingPairsAdapter.TradingPairsViewHolder> {
-private ArrayList<TradingPair> tradingPairs;
+public class TradingPairsAdapter extends RecyclerViewAdapter<TradingPairsAdapter.TradingPairsViewHolder, TradingPair> {
 
     public TradingPairsAdapter(TradingPairsHolder tradingPairsHolder) {
-        this.tradingPairs = new ArrayList<>();
-        tradingPairsHolder.getTradingPairs()
-                .forEach(tradingPair -> tradingPairs.add(new TradingPair(tradingPair)));
+        super(tradingPairsHolder);
+    }
+
+    @Override
+    public TradingPair copyItem(ViewItem item) {
+        return (TradingPair) item.copy();
     }
 
     @NonNull
@@ -35,19 +36,14 @@ private ArrayList<TradingPair> tradingPairs;
 
     @Override
     public void onBindViewHolder(@NonNull TradingPairsViewHolder holder, int position) {
-        TradingPair tradingPair = tradingPairs.get(position);
+        TradingPair tradingPair = getItemByPosition(position);
 
-        holder.pairNameView.setText(tradingPair.getLIvecoinPairName());
+        holder.pairNameView.setText(tradingPair.getName());
         holder.livecoinBidView.setText(String.valueOf(tradingPair.getLivecoinBid()));
         holder.livecoinAskVeiw.setText(String.valueOf(tradingPair.getLivecoinAsk()));
         holder.bittrextBidView.setText(String.valueOf(tradingPair.getBittrexBid()));
         holder.bittrexAskView.setText(String.valueOf(tradingPair.getBittrexAsk()));
         holder.percent.setText(String.valueOf(tradingPair.getPercent()));
-    }
-
-    @Override
-    public int getItemCount() {
-        return tradingPairs.size();
     }
 
     class TradingPairsViewHolder extends RecyclerView.ViewHolder {
