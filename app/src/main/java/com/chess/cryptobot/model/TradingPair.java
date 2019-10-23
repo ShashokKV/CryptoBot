@@ -33,6 +33,11 @@ public class TradingPair implements ViewItem {
         this.message = tradingPair.message;
     }
 
+    public static TradingPair fromPairName(String pairName) {
+        String[] coinNames = pairName.split("/");
+        return new TradingPair(coinNames[0], coinNames[1]);
+    }
+
     public TradingPair copy() {
         return new TradingPair(this);
     }

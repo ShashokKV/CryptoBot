@@ -16,12 +16,13 @@ public class MarketFactory {
         List<Market> markets = new ArrayList<>();
 
         for (String marketName : marketNames) {
-            markets.add(getMarket(marketName, contextHolder.getPrefs(), contextHolder.getContext().get()));
+            markets.add(getMarket(marketName, contextHolder.getPrefs(), contextHolder.getContext()));
         }
         return markets;
     }
 
     private Market getMarket(String marketName, Preferences preferences, Context context) {
+        if (context==null) return null;
         if (marketName.equals("bittrex")) {
             return new BittrexMarket(context.getString(R.string.bittrex_url),
                     preferences.getValue(context.getString(R.string.bittrex_api_key)),

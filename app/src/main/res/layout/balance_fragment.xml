@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout  xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/balance_fragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".view.BalanceActivity">
+    tools:context=".view.BalanceFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -20,9 +21,10 @@
             android:layout_marginEnd="16dp"
             android:backgroundTint="@color/colorAccent"
             android:backgroundTintMode="src_over"
-            android:src="@drawable/baseline_add_black_24dp"
+            android:src="@drawable/round_add_24"
             app:layout_constraintBottom_toBottomOf="@+id/linearLayout"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:rippleColor="@color/colorSecondaryDark" />
 
         <LinearLayout
             android:id="@+id/linearLayout"
@@ -32,7 +34,7 @@
             android:layout_marginEnd="8dp"
             android:orientation="vertical"
             android:weightSum="1"
-            app:layout_constraintBottom_toTopOf="@+id/bottom_navigation"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
@@ -40,7 +42,7 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
                 <TextView
@@ -49,8 +51,8 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="0.2"
                     android:text="@string/currency"
-                    android:textColor="?android:attr/textColorSecondary"
                     android:textSize="18sp"
+                    android:textColor="@color/colorSecondary"
                     android:textStyle="bold" />
 
                 <TextView
@@ -60,8 +62,8 @@
                     android:layout_weight="0.4"
                     android:text="@string/bittrex"
                     android:textAlignment="center"
-                    android:textColor="?android:attr/textColorSecondary"
                     android:textSize="18sp"
+                    android:textColor="@color/colorSecondary"
                     android:textStyle="bold" />
 
                 <TextView
@@ -71,29 +73,17 @@
                     android:layout_weight="0.4"
                     android:text="@string/livecoin"
                     android:textAlignment="center"
-                    android:textColor="?android:attr/textColorSecondary"
                     android:textSize="18sp"
+                    android:textColor="@color/colorSecondary"
                     android:textStyle="bold" />
             </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/balanceRecyclerView"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="wrap_content" />
         </LinearLayout>
 
-        <com.google.android.material.bottomnavigation.BottomNavigationView
-            android:id="@+id/bottom_navigation"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:background="@color/colorPrimary"
-            app:itemIconTint="@color/colorWhite"
-            app:itemTextColor="@color/colorWhite"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:menu="@menu/bottom_menu" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-</FrameLayout>
+</FrameLayout >

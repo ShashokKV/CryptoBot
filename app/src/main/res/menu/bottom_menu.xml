@@ -3,12 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="activity_balance"
+        android:id="@+id/activity_balance"
         android:icon="@drawable/round_account_balance_wallet_24"
         android:title="@string/balance"
         app:showAsAction="ifRoom"/>
     <item
-        android:id="activity_pairs"
+        android:id="@+id/activity_pairs"
         android:icon="@drawable/round_timeline_24"
         android:title="@string/trading_pairs"
         app:showAsAction="ifRoom"/>

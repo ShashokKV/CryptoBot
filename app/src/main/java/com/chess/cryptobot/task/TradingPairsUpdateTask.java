@@ -24,10 +24,20 @@ public class TradingPairsUpdateTask extends AsyncTask<TradingPair, Integer, Trad
     protected TradingPair doInBackground(TradingPair... tradingPairs) {
         TradingPair tradingPair = tradingPairs[0];
         PairResponseEnricher enricher = new PairResponseEnricher(tradingPair);
+        TradingPairsHolder tradingPairsHolder = tradingPairsHolderWeakReference.get();
+        if (tradingPairsHolder==null) {
+            cancel(true);
+            return null;
+        }
+        publishProgress();
         MarketFactory factory = new MarketFactory();
         List<Market> markets = factory.getMarkets(tradingPairsHolderWeakReference.get());
         for (Market market: markets) {
             try {
+                if (market==null) {
+                    cancel(true);
+                    return null;
+                }
                 OrderBookResponse response = market.getOrderBook(tradingPair.getPairNameForMarket(market.getMarketName()));
                 enricher.enrichWithResponse(response);
             } catch (MarketException e) {
@@ -42,12 +52,34 @@ public class TradingPairsUpdateTask extends AsyncTask<TradingPair, Integer, Trad
 
     @Override
     protected void onPostExecute(TradingPair tradingPair) {
+        TradingPairsHolder tradingPairsHolder = tradingPairsHolderWeakReference.get();
+        if (tradingPairsHolder==null) return;
+        tradingPairsHolder.hideSpinner();
         if (tradingPair==null) return;
-        tradingPairsHolderWeakReference.get().setItem(tradingPair);
+        tradingPairsHolder.setItem(tradingPair);
     }
 
     @Override
     protected void onCancelled(TradingPair tradingPair) {
-        tradingPairsHolderWeakReference.get().remove(tradingPair);
+        TradingPairsHolder tradingPairsHolder = tradingPairsHolderWeakReference.get();
+        if (tradingPairsHolder!=null && tradingPair!=null) {
+            String message = tradingPair.getMessage();
+            if (message==null) return;
+            if (message.contains("Unknown currency pair") || message.contains("INVALID_MARKET")) {
+                tradingPairsHolder.remove(tradingPair);
+                tradingPairsHolder.addToInvalidPairs(tradingPair);
+            } else {
+                tradingPairsHolder.makeToast(message);
+            }
+            tradingPairsHolder.hideSpinner();
+        }
+    }
+
+    @Override
+    protected void onProgressUpdate(Integer... values) {
+        TradingPairsHolder tradingPairsHolder = tradingPairsHolderWeakReference.get();
+        if (tradingPairsHolder!=null) {
+            tradingPairsHolder.showSpinner();
+        }
     }
 }

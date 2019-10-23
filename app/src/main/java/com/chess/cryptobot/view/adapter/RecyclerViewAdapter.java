@@ -8,8 +8,8 @@ import com.chess.cryptobot.model.ViewItem;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class RecyclerViewAdapter<T extends RecyclerView.ViewHolder, S extends ViewItem> extends RecyclerView.Adapter<T> {
-    private List<S> items;
+public abstract class RecyclerViewAdapter<T extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<T> {
+    private List<ViewItem> items;
     private ContextHolder holder;
 
     RecyclerViewAdapter(ContextHolder holder) {
@@ -22,13 +22,17 @@ public abstract class RecyclerViewAdapter<T extends RecyclerView.ViewHolder, S e
         holder.getViewItems().forEach(item -> this.items.add(copyItem(item)));
     }
 
-    public abstract S copyItem(ViewItem item);
+    public abstract ViewItem copyItem(ViewItem item);
 
-    S getItemByPosition(int position) {
+    public String itemNameByPosition(int position) {
+        return getItemByPosition(position).getName();
+    }
+
+    ViewItem getItemByPosition(int position) {
         return this.items.get(position);
     }
 
-    public void addItem(S item) {
+    public void addItem(ViewItem item) {
         this.items.add(copyItem(item));
         this.notifyItemInserted(getItemCount());
     }
@@ -38,7 +42,7 @@ public abstract class RecyclerViewAdapter<T extends RecyclerView.ViewHolder, S e
         this.notifyItemRemoved(position);
     }
 
-    public void updateItem(S item) {
+    public void updateItem(ViewItem item) {
         int index = this.items.indexOf(item);
         if (index >= 0) {
             this.items.set(index, copyItem(item));

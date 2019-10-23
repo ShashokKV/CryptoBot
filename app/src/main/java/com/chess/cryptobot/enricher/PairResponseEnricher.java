@@ -22,10 +22,10 @@ public class PairResponseEnricher {
    }
 
    public PairResponseEnricher countPercent() {
-        Float bittrexPercent = (Double.valueOf((tradingPair.getBittrexBid() - tradingPair.getLivecoinAsk())
-                /tradingPair.getLivecoinAsk()*100)).floatValue();
-        Float livecoinPercent = (Double.valueOf((tradingPair.getLivecoinBid() - tradingPair.getBittrexAsk())
-                /tradingPair.getBittrexAsk()*100)).floatValue();
+        Float bittrexPercent = (Double.valueOf((tradingPair.getLivecoinAsk() - tradingPair.getBittrexBid())
+                /tradingPair.getBittrexBid()*100)).floatValue();
+        Float livecoinPercent = (Double.valueOf((tradingPair.getBittrexAsk() - tradingPair.getLivecoinBid())
+                /tradingPair.getLivecoinBid()*100)).floatValue();
         if (bittrexPercent>livecoinPercent) {
             tradingPair.setPercent(bittrexPercent);
         }else {

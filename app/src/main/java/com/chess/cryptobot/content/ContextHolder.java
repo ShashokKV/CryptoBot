@@ -2,50 +2,57 @@ package com.chess.cryptobot.content;
 
 import android.content.Context;
 
+import androidx.fragment.app.Fragment;
+
 import com.chess.cryptobot.exceptions.ItemNotFoundException;
 import com.chess.cryptobot.model.ViewItem;
-import com.chess.cryptobot.view.AdapterActivity;
-import com.chess.cryptobot.view.BalanceActivity;
+import com.chess.cryptobot.view.MainFragment;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 public abstract class ContextHolder {
-    private WeakReference<Context> context;
+    private Fragment fr;
     private List<ViewItem> viewItems;
     private Preferences prefs;
 
-    public ContextHolder(Context context) {
-        this.context = new WeakReference<>(context);
+    public ContextHolder(Fragment fr) {
+        this.fr = fr;
         viewItems = new ArrayList<>();
-        prefs = initPrefs(context);
-        Set<String> coinNames = prefs.getCoinNames();
-        initViewItems(coinNames);
+        prefs = initPrefs(fr.getContext());
+        Set<String> itemsSet = prefs.getItemsSet();
+        initViewItems(itemsSet);
     }
 
     public abstract Preferences initPrefs(Context context);
 
-    public abstract void initViewItems(Set<String> coinNames);
+    public abstract void initViewItems(Set<String> itemsSet);
 
-    public void add(ViewItem viewItem) {
-        if (viewItems.contains(viewItem)) return;
-        viewItems.add(viewItem);
-        AdapterActivity activity = getAdapterActivityOrNull();
-        if (activity != null) activity.addItem(viewItem);
+    public synchronized void add(ViewItem viewItem) {
+        addItemToList(viewItem);
+        MainFragment fragment = getAdapterFragmentOrNull();
+        if (fragment != null) fragment.addItem(viewItem);
+        Preferences preferences = getPrefs();
+        preferences.addItem(viewItem.getName());
     }
 
-    public void remove(ViewItem item) {
+    protected synchronized void addItemToList(ViewItem viewItem) {
+        if (viewItems.contains(viewItem)) return;
+        viewItems.add(viewItem);
+    }
+
+    public synchronized void remove(ViewItem item) {
         if (item==null) return;
-        AdapterActivity activity = getAdapterActivityOrNull();
+        MainFragment activity = getAdapterFragmentOrNull();
         if (activity!=null) {
             activity.deleteItemByPosition(viewItems.indexOf(item));
         }
         this.viewItems.remove(item);
+        getPrefs().removeItem(item.getName());
     }
 
-    public void setItem(ViewItem updatedItem) {
+    public synchronized void setItem(ViewItem updatedItem) {
         for(ViewItem item: viewItems) {
             if (item.equals(updatedItem)) {
                 viewItems.set(viewItems.indexOf(item), updatedItem);
@@ -53,7 +60,7 @@ public abstract class ContextHolder {
             }
         }
 
-        AdapterActivity activity =  getAdapterActivityOrNull();
+        MainFragment activity =  getAdapterFragmentOrNull();
         if (activity!=null) activity.updateItem(updatedItem);
     }
 
@@ -63,24 +70,39 @@ public abstract class ContextHolder {
 
     public abstract void updateItem(ViewItem item);
 
+    public void makeToast(String message) {
+        MainFragment mainFragment = this.getAdapterFragmentOrNull();
+        if (mainFragment !=null) mainFragment.makeToast(message);
+    }
+
     public List<ViewItem> getViewItems() {
         return this.viewItems;
     }
 
-    public WeakReference<Context> getContext() {
-        return this.context;
+    public Context getContext() {
+        return this.fr.getContext();
     }
 
     public Preferences getPrefs() {
         return this.prefs;
     }
 
-    protected AdapterActivity getAdapterActivityOrNull() {
-        Context context = this.getContext().get();
-        if (context instanceof BalanceActivity) {
-            return (AdapterActivity) context;
+    protected MainFragment getAdapterFragmentOrNull() {
+        Fragment fragment = this.fr;
+        if (fragment instanceof MainFragment) {
+            return (MainFragment) fragment;
         }
         return null;
+    }
+
+    public void showSpinner(){
+        MainFragment mainFragment = this.getAdapterFragmentOrNull();
+        if (mainFragment !=null) mainFragment.showSpinner();
+    }
+
+    public void hideSpinner() {
+        MainFragment mainFragment = this.getAdapterFragmentOrNull();
+        if (mainFragment !=null) mainFragment.hideSpinner();
     }
 
     protected ViewItem getItemByName(String itemName) throws ItemNotFoundException {

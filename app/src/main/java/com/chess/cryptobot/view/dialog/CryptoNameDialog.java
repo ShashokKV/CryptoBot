@@ -4,8 +4,14 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.chess.cryptobot.R;
+import com.chess.cryptobot.content.balance.BalanceHolder;
 
 public class CryptoNameDialog extends CryptoDialog {
+private BalanceHolder balanceHolder;
+
+    public CryptoNameDialog(BalanceHolder balanceHolder) {
+        this.balanceHolder = balanceHolder;
+    }
 
     @Override
     EditText enrichEditText(EditText editText) {
@@ -24,5 +30,9 @@ public class CryptoNameDialog extends CryptoDialog {
     @Override
     CryptoDialog getInstance() {
         return CryptoNameDialog.this;
+    }
+
+    public BalanceHolder getBalanceHolder() {
+        return balanceHolder;
     }
 }

@@ -48,7 +48,8 @@ public class CoinImageTask extends AsyncTask<Balance, Integer, Balance> {
     @Override
     protected void onPostExecute(@Nullable Balance balance) {
         if (balance==null) return;
-        balanceHolderWeakReference.get().setItem(balance);
+        BalanceHolder balanceHolder = balanceHolderWeakReference.get();
+        if (balanceHolder!=null) balanceHolder.setItem(balance);
     }
 
     private Bitmap getImage(String coinName) throws IOException {
@@ -64,7 +65,9 @@ public class CoinImageTask extends AsyncTask<Balance, Integer, Balance> {
     }
 
     private Bitmap loadImage(String coinName) throws IOException {
-        try(FileInputStream fileInputStream = getContext().openFileInput(fileName(coinName))) {
+        Context context = getContext();
+        if (context == null) return null;
+        try(FileInputStream fileInputStream = context.openFileInput(fileName(coinName))) {
             return BitmapFactory.decodeStream(fileInputStream);
         }
     }
@@ -74,7 +77,9 @@ public class CoinImageTask extends AsyncTask<Balance, Integer, Balance> {
     }
 
     private void saveImage(Bitmap bitmap, String fileName) {
-        try(FileOutputStream out = getContext().openFileOutput(fileName, Context.MODE_PRIVATE)) {
+        Context context = getContext();
+        if (context == null || bitmap == null) return;
+        try(FileOutputStream out = context.openFileOutput(fileName, Context.MODE_PRIVATE)) {
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
         } catch (IOException e) {
             Log.d(TAG, e.getLocalizedMessage());
@@ -82,16 +87,26 @@ public class CoinImageTask extends AsyncTask<Balance, Integer, Balance> {
     }
 
     private Bitmap downloadImage(String coinName) throws IOException {
-        try(InputStream inputStream = imageUrl(coinName).openStream()) {
+        URL imageUrl = imageUrl(coinName);
+        if (imageUrl==null) return null;
+        try(InputStream inputStream = imageUrl.openStream()) {
             return BitmapFactory.decodeStream(inputStream);
         }
     }
 
     private URL imageUrl(String coinName) throws MalformedURLException {
-        return new URL(String.format(getContext().getResources().getString(R.string.crypto_icons_url), coinName.toLowerCase()));
+        Context context = getContext();
+        if (context == null) return null;
+        return new URL(String.format(context.getResources().getString(R.string.crypto_icons_url), coinName.toLowerCase()));
     }
 
     private Context getContext() {
-        return balanceHolderWeakReference.get().getContext().get();
+        BalanceHolder balanceHolder = balanceHolderWeakReference.get();
+        if (balanceHolder!=null) {
+            return balanceHolder.getContext();
+        }else {
+            cancel(true);
+            return null;
+        }
     }
 }

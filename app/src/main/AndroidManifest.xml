@@ -15,7 +15,7 @@
         tools:ignore="GoogleAppIndexingWarning"
         android:fullBackupContent="false"
         android:launchMode="singleTop">
-        <activity android:name=".view.BalanceActivity">
+        <activity android:name=".view.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -25,14 +25,12 @@
         <activity
             android:name=".view.SettingsActivity"
             android:label="@string/settings"
-            android:parentActivityName=".view.BalanceActivity">
+            android:parentActivityName=".view.MainActivity">
 
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".view.BalanceActivity"/>
+                android:value=".view.MainActivity"/>
         </activity>
-        <activity android:name=".view.TradingPairsActivity" />
-
         <service android:name=".service.BalanceUpdateService" />
     </application>
 

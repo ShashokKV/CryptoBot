@@ -6,10 +6,28 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:windowBackground">@color/windowBackground</item>
+        <item name="colorControlHighlight">@color/colorPrimaryLight</item>
+        <item name="android:windowBackground">@color/colorBackground</item>
         <item name="android:textColorPrimary">@color/textColorPrimary</item>
         <item name="android:textColorSecondary">@color/textColorSecondary</item>
-        <item name="android:fontFamily">@font/enriqueta</item>
+        <item name="android:fontFamily">@font/roboto_medium</item>
         <item name="android:textColor">@color/colorWhite</item>
+        <item name="android:divider">@color/dividerColor</item>
+        <item name="alertDialogTheme">@style/AlertDialogTheme</item>
+    </style>
+    <style name="AlertDialogTheme" parent="ThemeOverlay.AppCompat.Dialog.Alert">
+        <item name="buttonBarNegativeButtonStyle">@style/NegativeButtonStyle</item>
+        <item name="buttonBarPositiveButtonStyle">@style/PositiveButtonStyle</item>
+        <item name="android:titleTextColor">@color/colorSecondaryDark</item>
+        <item name="android:editTextColor">@color/colorAccent</item>
+    </style>
+
+    <style name="NegativeButtonStyle" parent="Widget.AppCompat.Button.ButtonBar.AlertDialog">
+        <item name="android:textColor">@color/colorSecondaryDark</item>
+
+    </style>
+
+    <style name="PositiveButtonStyle" parent="Widget.AppCompat.Button.ButtonBar.AlertDialog">
+        <item name="android:textColor">@color/colorSecondaryDark</item>
     </style>
 </resources>

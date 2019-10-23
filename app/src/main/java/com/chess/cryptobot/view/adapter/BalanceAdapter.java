@@ -16,7 +16,7 @@ import com.chess.cryptobot.content.balance.BalanceHolder;
 import com.chess.cryptobot.model.Balance;
 import com.chess.cryptobot.model.ViewItem;
 
-public class BalanceAdapter extends RecyclerViewAdapter<BalanceAdapter.BalanceViewHolder, Balance> {
+public class BalanceAdapter extends RecyclerViewAdapter<BalanceAdapter.BalanceViewHolder> {
     private RecyclerViewOnClickListener mListener;
 
     public BalanceAdapter(BalanceHolder balanceHolder) {
@@ -41,17 +41,13 @@ public class BalanceAdapter extends RecyclerViewAdapter<BalanceAdapter.BalanceVi
 
     @Override
     public void onBindViewHolder(@NonNull BalanceViewHolder balanceViewHolder, int i) {
-        Balance balance = getItemByPosition(i);
+        Balance balance = (Balance) getItemByPosition(i);
 
         balanceViewHolder.bittrexBalanceView.setText(String.valueOf(balance.getAmount("bittrex")));
         balanceViewHolder.livecoinBalanceView.setText(String.valueOf(balance.getAmount("livecoin")));
         balanceViewHolder.cryptoNameView.setText(balance.getName());
         Bitmap bitmap = balance.getCoinIcon();
         if (bitmap != null) balanceViewHolder.cryptoImageView.setImageBitmap(bitmap);
-    }
-
-    public String coinNameByPosition(int position) {
-        return getItemByPosition(position).getName();
     }
 
     class BalanceViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
@@ -78,7 +74,7 @@ public class BalanceAdapter extends RecyclerViewAdapter<BalanceAdapter.BalanceVi
 
         @Override
         public void onClick(View v) {
-            mOnClickListener.onClick(v, coinNameByPosition(getAdapterPosition()));
+            mOnClickListener.onClick(v, itemNameByPosition(getAdapterPosition()));
         }
     }
 }

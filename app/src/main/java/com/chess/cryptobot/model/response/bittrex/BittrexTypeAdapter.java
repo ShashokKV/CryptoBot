@@ -33,6 +33,9 @@ public class BittrexTypeAdapter extends TypeAdapter<BittrexResponse> {
             response = new BittrexResponse((BittrexGenericResponse[]) gson.fromJson(jsonReader, BittrexGenericResponse[].class));
         } else if(jsonReader.peek() == JsonToken.BEGIN_OBJECT) {
             response = new BittrexResponse((BittrexGenericResponse) gson.fromJson(jsonReader, BittrexGenericResponse.class));
+        }else if(jsonReader.peek() == JsonToken.NULL) {
+            response = new BittrexResponse(new BittrexGenericResponse());
+            jsonReader.nextNull();
         } else {
             throw new JsonParseException("Unexpected token " + jsonReader.peek());
         }

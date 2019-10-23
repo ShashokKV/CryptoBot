@@ -37,16 +37,23 @@ public abstract class CryptoDialog extends DialogFragment {
         editText = enrichEditText(editText);
 
         TextView titleView = new TextView(this.getContext());
-        titleView.setTextColor(getResources().getColor(R.color.colorPrimaryDark, null));
+        titleView.setTextColor(getResources().getColor(R.color.colorSecondaryDark, null));
         titleView.setAutoSizeTextTypeWithDefaults(TextView.AUTO_SIZE_TEXT_TYPE_NONE);
         titleView.setTextSize(20);
         titleView = enrichTitle(titleView);
 
-        return builder.setCustomTitle(titleView)
+        AlertDialog alertDialog = builder.setCustomTitle(titleView)
                 .setView(editText)
                 .setPositiveButton(R.string.ok, (dialog, which) -> dialogListener.onDialogPositiveClick(getInstance()))
                 .setNegativeButton(R.string.cancel, (dialog, which) -> dialogListener.onDialogNegativeClick(getInstance()))
                 .create();
+
+        alertDialog.setOnShowListener(dialog -> {
+            alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getResources().getColor(R.color.colorSecondaryDark, null));
+            alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getResources().getColor(R.color.colorSecondaryDark, null));
+        });
+
+        return alertDialog;
     }
 
     abstract EditText enrichEditText(EditText editText);

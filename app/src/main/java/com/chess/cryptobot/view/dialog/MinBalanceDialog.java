@@ -5,14 +5,17 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.chess.cryptobot.R;
+import com.chess.cryptobot.content.balance.BalanceHolder;
 
 public class MinBalanceDialog extends CryptoDialog {
 private String coinName;
 private Double minBalance;
+private BalanceHolder balanceHolder;
 
-    public MinBalanceDialog(String coinName, Double minBalance) {
+    public MinBalanceDialog(BalanceHolder balanceHolder, String coinName, Double minBalance) {
         this.coinName = coinName;
         this.minBalance = minBalance;
+        this.balanceHolder = balanceHolder;
     }
 
     @Override
@@ -37,5 +40,9 @@ private Double minBalance;
 
     public String getCoinName() {
         return coinName;
+    }
+
+    public BalanceHolder getBalanceHolder() {
+        return balanceHolder;
     }
 }

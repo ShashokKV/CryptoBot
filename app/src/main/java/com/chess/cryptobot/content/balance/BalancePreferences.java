@@ -7,11 +7,15 @@ import com.chess.cryptobot.R;
 import com.chess.cryptobot.content.Preferences;
 
 import java.util.Objects;
-import java.util.Set;
 
 public class BalancePreferences extends Preferences {
-    BalancePreferences(Context context) {
+    public BalancePreferences(Context context) {
         super(context);
+    }
+
+    @Override
+    public String initPrefKey(Context context) {
+        return context.getResources().getString(R.string.coin_names_pref_key);
     }
 
     public Double getMinBalance(String coinName) {
@@ -21,25 +25,6 @@ public class BalancePreferences extends Preferences {
     void setMinBalance(String coinName, Double minBalance) {
         SharedPreferences.Editor editor = getSharedPreferences().edit();
         editor.putString("min_".concat(coinName), minBalance.toString());
-        editor.apply();
-    }
-
-    void addCoinToBalance(String coinName) {
-        Set<String> coinNames = getCoinNames();
-        if (coinNames.contains(coinName)) return;
-        coinNames.add(coinName);
-        updateBalancePrefs(coinNames);
-    }
-
-    void removeCoin(String coinName) {
-        Set<String> coinNames = getCoinNames();
-        coinNames.remove(coinName);
-        updateBalancePrefs(coinNames);
-    }
-
-    private void updateBalancePrefs(Set<String> coinNames) {
-        SharedPreferences.Editor editor = getSharedPreferences().edit();
-        editor.putStringSet(getContext().getString(R.string.coin_names), coinNames);
         editor.apply();
     }
 }

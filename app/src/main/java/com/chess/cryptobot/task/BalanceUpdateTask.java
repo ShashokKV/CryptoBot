@@ -22,10 +22,20 @@ public class BalanceUpdateTask extends AsyncTask<Balance, Integer, Balance> {
     protected Balance doInBackground(Balance[] balances) {
         Balance balance = balances[0];
         int hashCode = balance.getAmounts().hashCode();
+        BalanceHolder balanceHolder = balanceHolderWeakReference.get();
+        if (balanceHolder==null) {
+            cancel(true);
+            return null;
+        }
+        publishProgress();
         MarketFactory factory = new MarketFactory();
-        List<Market> markets = factory.getMarkets(balanceHolderWeakReference.get());
+        List<Market> markets = factory.getMarkets(balanceHolder);
         for (Market market: markets) {
             try {
+                if (market==null) {
+                    cancel(true);
+                    return null;
+                }
                 balance.setAmount(market.getMarketName(), market.getAmount(balance.getName()));
             } catch (MarketException e) {
                 balance.setMessage(e.getMessage());
@@ -41,12 +51,27 @@ public class BalanceUpdateTask extends AsyncTask<Balance, Integer, Balance> {
 
     @Override
     protected void onPostExecute(Balance balance) {
+        BalanceHolder balanceHolder = balanceHolderWeakReference.get();
+        if (balanceHolder==null) return;
+        balanceHolder.hideSpinner();
         if (balance==null) return;
-        balanceHolderWeakReference.get().setItem(balance);
+        balanceHolder.setItem(balance);
     }
 
     @Override
     protected void onCancelled(Balance balance) {
-        balanceHolderWeakReference.get().makeToast(balance.getMessage());
+        BalanceHolder balanceHolder = balanceHolderWeakReference.get();
+        if (balanceHolder!=null && balance!=null) {
+            balanceHolder.hideSpinner();
+            balanceHolder.makeToast(balance.getMessage());
+        }
+    }
+
+    @Override
+    protected void onProgressUpdate(Integer... values) {
+        BalanceHolder balanceHolder = balanceHolderWeakReference.get();
+        if (balanceHolder!=null) {
+            balanceHolder.showSpinner();
+        }
     }
 }

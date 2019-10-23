@@ -25,7 +25,7 @@ public class SwipeBalanceCallback extends ItemTouchHelper.SimpleCallback {
     public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
         Balance balance;
         try {
-            balance = balanceHolder.getBalanceByPosition(i);
+            balance = balanceHolder.getBalanceByPosition(viewHolder.getAdapterPosition());
         }catch (ItemNotFoundException e) {
             return;
         }
