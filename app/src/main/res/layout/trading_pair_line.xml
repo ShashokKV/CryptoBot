@@ -35,7 +35,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@color/colorWhite"
-                android:maxLength="20"
+                android:maxLength="18"
                 tools:text="0.000000000000" />
 
             <TextView
@@ -50,7 +50,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@color/colorWhite"
-                android:maxLength="20"
+                android:maxLength="18"
                 tools:text="0.000000000000" />
 
         </LinearLayout>
@@ -73,7 +73,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@color/colorWhite"
-                android:maxLength="20"
+                android:maxLength="18"
                 tools:text="0.00000000000" />
 
             <TextView
@@ -88,7 +88,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@color/colorWhite"
-                android:maxLength="20"
+                android:maxLength="18"
                 tools:text="0.00000000000" />
 
         </LinearLayout>

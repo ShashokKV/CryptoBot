@@ -19,14 +19,14 @@
             android:id="@+id/CryptoImageView"
             android:layout_width="64dp"
             android:layout_height="64dp"
+            android:layout_marginStart="10dp"
             android:contentDescription="@string/cripto_icon"
             app:srcCompat="@drawable/generic_crypto" />
 
         <TextView
             android:id="@+id/CryptoNameView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:textAlignment="center"
             android:textColor="@color/colorWhite"
             android:textSize="18sp"

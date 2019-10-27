@@ -14,7 +14,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.chess.cryptobot.R;
 import com.chess.cryptobot.content.balance.BalanceHolder;
 import com.chess.cryptobot.model.Balance;
-import com.chess.cryptobot.model.ViewItem;
 
 public class BalanceAdapter extends RecyclerViewAdapter<BalanceAdapter.BalanceViewHolder> {
     private RecyclerViewOnClickListener mListener;
@@ -22,11 +21,6 @@ public class BalanceAdapter extends RecyclerViewAdapter<BalanceAdapter.BalanceVi
     public BalanceAdapter(BalanceHolder balanceHolder) {
         super(balanceHolder);
         this.mListener = new BalanceViewOnClickListener(balanceHolder);
-    }
-
-    @Override
-    public Balance copyItem(ViewItem item) {
-        return (Balance) item.copy();
     }
 
     @NonNull

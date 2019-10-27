@@ -44,7 +44,7 @@ abstract class MarketRequest {
 
     abstract Object initService(Retrofit retrofit);
 
-    boolean keysIsEmpty() {
+    public boolean keysIsEmpty() {
         return this.apiKey.isEmpty() || this.secretKey.isEmpty();
     }
 

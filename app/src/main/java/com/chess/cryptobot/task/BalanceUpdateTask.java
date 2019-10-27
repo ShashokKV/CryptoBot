@@ -1,77 +1,48 @@
 package com.chess.cryptobot.task;
 
-import android.os.AsyncTask;
-
+import com.chess.cryptobot.content.ContextHolder;
 import com.chess.cryptobot.content.balance.BalanceHolder;
 import com.chess.cryptobot.exceptions.MarketException;
 import com.chess.cryptobot.market.Market;
-import com.chess.cryptobot.market.MarketFactory;
 import com.chess.cryptobot.model.Balance;
 
-import java.lang.ref.WeakReference;
-import java.util.List;
-
-public class BalanceUpdateTask extends AsyncTask<Balance, Integer, Balance> {
-    private WeakReference<BalanceHolder> balanceHolderWeakReference;
+public class BalanceUpdateTask extends MarketTask<Balance, Balance> {
+    private int hashCode;
 
     public BalanceUpdateTask(BalanceHolder balanceHolder) {
-        this.balanceHolderWeakReference = new WeakReference<>(balanceHolder);
+        super(balanceHolder);
     }
 
     @Override
-    protected Balance doInBackground(Balance[] balances) {
-        Balance balance = balances[0];
-        int hashCode = balance.getAmounts().hashCode();
-        BalanceHolder balanceHolder = balanceHolderWeakReference.get();
-        if (balanceHolder==null) {
-            cancel(true);
-            return null;
-        }
-        publishProgress();
-        MarketFactory factory = new MarketFactory();
-        List<Market> markets = factory.getMarkets(balanceHolder);
-        for (Market market: markets) {
-            try {
-                if (market==null) {
-                    cancel(true);
-                    return null;
-                }
-                balance.setAmount(market.getMarketName(), market.getAmount(balance.getName()));
-            } catch (MarketException e) {
-                balance.setMessage(e.getMessage());
-                cancel(true);
-                return balance;
-            }
-        }
+    public void preMarketProcess(Balance balance) {
+        hashCode = balance.getAmounts().hashCode();
+    }
 
-        try {Thread.sleep(1000);} catch (InterruptedException ignored) {}
+    @Override
+    public Balance marketProcess(Market market, Balance balance) throws MarketException {
+        balance.setAmount(market.getMarketName(), market.getAmount(balance.getName()));
+        return balance;
+    }
+
+    @Override
+    public Balance postMarketProcess(Balance balance) {
         if (hashCode==balance.getAmounts().hashCode()) return null;
         return balance;
     }
 
     @Override
-    protected void onPostExecute(Balance balance) {
-        BalanceHolder balanceHolder = balanceHolderWeakReference.get();
-        if (balanceHolder==null) return;
-        balanceHolder.hideSpinner();
-        if (balance==null) return;
-        balanceHolder.setItem(balance);
+    public Balance exceptionProcess(Balance balance, String exceptionMessage) {
+        balance.setMessage(exceptionMessage);
+        return balance;
     }
 
     @Override
-    protected void onCancelled(Balance balance) {
-        BalanceHolder balanceHolder = balanceHolderWeakReference.get();
-        if (balanceHolder!=null && balance!=null) {
-            balanceHolder.hideSpinner();
-            balanceHolder.makeToast(balance.getMessage());
-        }
+    public void doInPostExecute(Balance balance, ContextHolder holder) {
+        holder.setItem(balance);
     }
 
     @Override
-    protected void onProgressUpdate(Integer... values) {
-        BalanceHolder balanceHolder = balanceHolderWeakReference.get();
-        if (balanceHolder!=null) {
-            balanceHolder.showSpinner();
-        }
+    public void doInOnCanceled(Balance balance, ContextHolder holder) {
+        holder.makeToast(balance.getMessage());
     }
 }

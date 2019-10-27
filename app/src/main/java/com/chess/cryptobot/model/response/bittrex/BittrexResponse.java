@@ -1,6 +1,7 @@
 package com.chess.cryptobot.model.response.bittrex;
 
 import com.chess.cryptobot.model.Price;
+import com.chess.cryptobot.model.response.AllMarketsResponse;
 import com.chess.cryptobot.model.response.BalanceResponse;
 import com.chess.cryptobot.model.response.MarketResponse;
 import com.chess.cryptobot.model.response.OrderBookResponse;
@@ -8,7 +9,11 @@ import com.chess.cryptobot.model.response.OrderBookResponse;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BittrexResponse implements MarketResponse, BalanceResponse, OrderBookResponse {
+public class BittrexResponse implements MarketResponse,
+        BalanceResponse,
+        OrderBookResponse,
+        AllMarketsResponse
+{
 
     private Boolean success;
     public String message;
@@ -27,18 +32,13 @@ public class BittrexResponse implements MarketResponse, BalanceResponse, OrderBo
         this.success = success;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
     @Override
     public boolean success() {
         return success;
     }
 
-    @Override
-    public Double getAmount() {
-        return results[0].getAvailable();
+    public void setMessage(String message) {
+        this.message = message;
     }
 
     @Override
@@ -46,6 +46,10 @@ public class BittrexResponse implements MarketResponse, BalanceResponse, OrderBo
         return message;
     }
 
+    @Override
+    public Double getAmount() {
+        return results[0].getAvailable();
+    }
 
     @Override
     public List<Price> bids() {
@@ -55,6 +59,15 @@ public class BittrexResponse implements MarketResponse, BalanceResponse, OrderBo
     @Override
     public List<Price> asks() {
         return parsePrices(results[0].getSell());
+    }
+
+    @Override
+    public List<String> getMarketNames() {
+        List<String> marketNames = new ArrayList<>();
+        for (BittrexGenericResponse result: results) {
+            marketNames.add(result.getMarketName());
+        }
+        return marketNames;
     }
 
     private List<Price> parsePrices(List<BittrexPrice> prices) {

@@ -7,6 +7,8 @@ import androidx.fragment.app.Fragment;
 import com.chess.cryptobot.content.ContextHolder;
 import com.chess.cryptobot.content.Preferences;
 import com.chess.cryptobot.exceptions.ItemNotFoundException;
+import com.chess.cryptobot.market.Market;
+import com.chess.cryptobot.market.MarketFactory;
 import com.chess.cryptobot.model.Balance;
 import com.chess.cryptobot.model.ViewItem;
 import com.chess.cryptobot.task.BalanceUpdateTask;
@@ -16,9 +18,23 @@ import com.chess.cryptobot.view.MainFragment;
 import java.util.Set;
 
 public class BalanceHolder extends ContextHolder {
+    private boolean hasKeys;
 
     public BalanceHolder(Fragment fragment) {
         super(fragment);
+        checkIfHasKeys();
+        updateAllItems();
+    }
+
+    private void checkIfHasKeys() {
+        hasKeys = true;
+        MarketFactory factory = new MarketFactory();
+        for (Market market: factory.getMarkets(this)) {
+            if (market.keysIsEmpty()) {
+                hasKeys = false;
+                break;
+            }
+        }
     }
 
     @Override
@@ -39,14 +55,14 @@ public class BalanceHolder extends ContextHolder {
         super.add(viewItem);
         Balance balance = (Balance) viewItem;
         updateImage(balance);
-        updateAmount(balance);
+        if (hasKeys) updateAmount(balance);
     }
 
     @Override
     public void updateItem(ViewItem item) {
         Balance balance = (Balance) item;
         updateImage(balance);
-        updateAmount(balance);
+        if (hasKeys) updateAmount(balance);
     }
 
     private void updateImage(Balance balance) {

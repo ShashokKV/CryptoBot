@@ -4,7 +4,7 @@
     <color name="colorPrimaryDark">#38006b</color>
     <color name="colorPrimaryLight">#9c4dcc</color>
     <color name="colorSecondary">#c2185b</color>
-    <color name="colorSecondaryLight">#fa5788</color>
+    <color name="colorSecondaryLight">#FA5788</color>
     <color name="colorSecondaryDark">#8C0032</color>
     <color name="textColorPrimary">#ffffff</color>
     <color name="textColorSecondary">#ffffff</color>
@@ -12,6 +12,6 @@
     <color name="colorBackground">#53278F</color>
 
     <color name="colorWhite">#FFFFFF</color>
-    <color name="colorAccent">#c2185b</color>
+    <color name="colorAccent">#C2185B</color>
 
 </resources>

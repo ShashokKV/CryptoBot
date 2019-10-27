@@ -19,10 +19,14 @@ public abstract class ContextHolder {
 
     public ContextHolder(Fragment fr) {
         this.fr = fr;
-        viewItems = new ArrayList<>();
+        initFields();
         prefs = initPrefs(fr.getContext());
         Set<String> itemsSet = prefs.getItemsSet();
         initViewItems(itemsSet);
+    }
+
+    public void initFields() {
+        viewItems = new ArrayList<>();
     }
 
     public abstract Preferences initPrefs(Context context);
@@ -32,7 +36,7 @@ public abstract class ContextHolder {
     public synchronized void add(ViewItem viewItem) {
         addItemToList(viewItem);
         MainFragment fragment = getAdapterFragmentOrNull();
-        if (fragment != null) fragment.addItem(viewItem);
+        if (fragment != null) fragment.addItem();
         Preferences preferences = getPrefs();
         preferences.addItem(viewItem.getName());
     }
@@ -70,9 +74,11 @@ public abstract class ContextHolder {
 
     public abstract void updateItem(ViewItem item);
 
-    public void makeToast(String message) {
-        MainFragment mainFragment = this.getAdapterFragmentOrNull();
-        if (mainFragment !=null) mainFragment.makeToast(message);
+    protected ViewItem getItemByName(String itemName) throws ItemNotFoundException {
+        for(ViewItem item: viewItems) {
+            if (item.getName().equals(itemName)) return item;
+        }
+        throw new ItemNotFoundException(itemName);
     }
 
     public List<ViewItem> getViewItems() {
@@ -95,6 +101,11 @@ public abstract class ContextHolder {
         return null;
     }
 
+    public void makeToast(String message) {
+        MainFragment mainFragment = this.getAdapterFragmentOrNull();
+        if (mainFragment !=null) mainFragment.makeToast(message);
+    }
+
     public void showSpinner(){
         MainFragment mainFragment = this.getAdapterFragmentOrNull();
         if (mainFragment !=null) mainFragment.showSpinner();
@@ -103,12 +114,5 @@ public abstract class ContextHolder {
     public void hideSpinner() {
         MainFragment mainFragment = this.getAdapterFragmentOrNull();
         if (mainFragment !=null) mainFragment.hideSpinner();
-    }
-
-    protected ViewItem getItemByName(String itemName) throws ItemNotFoundException {
-        for(ViewItem item: viewItems) {
-            if (item.getName().equals(itemName)) return item;
-        }
-        throw new ItemNotFoundException(itemName);
     }
 }

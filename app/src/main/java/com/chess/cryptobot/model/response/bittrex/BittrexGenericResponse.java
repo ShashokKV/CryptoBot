@@ -15,6 +15,13 @@ class BittrexGenericResponse {
     @SerializedName("sell")
     @Expose
     private List<BittrexPrice> sell;
+    @SerializedName("MarketCurrency")
+    @Expose
+    private String marketCurrency;
+    @SerializedName("BaseCurrency")
+    @Expose
+    private String baseCurrency;
+
 
     Double getAvailable() {
         return available;
@@ -27,4 +34,6 @@ class BittrexGenericResponse {
     List<BittrexPrice> getSell() {
         return sell;
     }
+
+    String getMarketName() {return String.format("%s/%s", baseCurrency, marketCurrency);}
 }

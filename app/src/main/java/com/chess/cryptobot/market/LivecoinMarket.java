@@ -5,10 +5,12 @@ import com.chess.cryptobot.exceptions.LivecoinException;
 import com.chess.cryptobot.exceptions.MarketException;
 import com.chess.cryptobot.model.response.OrderBookResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinBalanceResponse;
+import com.chess.cryptobot.model.response.livecoin.LivecoinMarketsResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinOrderBookResponse;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.util.List;
 import java.util.TreeMap;
 
 import retrofit2.Call;
@@ -76,5 +78,17 @@ public class LivecoinMarket extends MarketRequest implements Market {
             throw new LivecoinException(e.getMessage());
         }
         return response;
+    }
+
+    @Override
+    public List<String> getAllMarkets() throws LivecoinException {
+        LivecoinMarketsResponse response;
+        Call<LivecoinMarketsResponse> call = service.getAllMarkets();
+        try {
+            response = (LivecoinMarketsResponse) execute(call);
+        } catch (MarketException e) {
+            throw new LivecoinException(e.getMessage());
+        }
+        return response.getMarketNames();
     }
 }

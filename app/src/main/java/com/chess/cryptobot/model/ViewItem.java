@@ -1,7 +1,5 @@
 package com.chess.cryptobot.model;
 
-public interface ViewItem {
+public interface ViewItem extends Comparable<ViewItem>{
     String getName();
-
-    ViewItem copy();
 }

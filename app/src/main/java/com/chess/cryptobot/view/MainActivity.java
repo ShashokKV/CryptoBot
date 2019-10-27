@@ -27,7 +27,7 @@ import java.util.Objects;
 public class MainActivity extends AppCompatActivity implements DialogListener {
 
     final Fragment balanceFragment = new BalanceFragment();
-    final Fragment tradingPairFragment = new TradingPairsFragment();
+    final Fragment tradingPairFragment = new PairsFragment();
     final FragmentManager fragmentManager = getSupportFragmentManager();
     private ProgressBar spinner;
     Fragment active;

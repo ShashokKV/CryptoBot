@@ -10,6 +10,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.chess.cryptobot.R;
 import com.chess.cryptobot.content.ContextHolder;
@@ -63,8 +64,12 @@ public class BalanceFragment extends MainFragment {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        getHolder().updateAllItems();
+    public SwipeRefreshLayout initSwipeRefresh(View view) {
+        return (SwipeRefreshLayout) view.findViewById(R.id.swipeRefreshBalance);
+    }
+
+    @Override
+    public void beforeRefresh() {
+
     }
 }

@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.chess.cryptobot.R;
 import com.chess.cryptobot.content.ContextHolder;
@@ -21,9 +22,10 @@ import com.chess.cryptobot.view.adapter.RecyclerViewAdapter;
 
 import java.util.Objects;
 
-public abstract class MainFragment<T extends RecyclerView.ViewHolder> extends Fragment {
+public abstract class MainFragment<T extends RecyclerView.ViewHolder> extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private RecyclerViewAdapter<T> adapter;
     private ContextHolder holder;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     @Nullable
     @Override
@@ -43,8 +45,21 @@ public abstract class MainFragment<T extends RecyclerView.ViewHolder> extends Fr
         dividerItemDecoration.setDrawable(getResources().getDrawable(R.drawable.divider, null));
         recyclerView.addItemDecoration(dividerItemDecoration);
 
+        swipeRefreshLayout = initSwipeRefresh(view);
+        swipeRefreshLayout.setOnRefreshListener(this);
+        swipeRefreshLayout.setColorSchemeResources(R.color.colorSecondary, R.color.colorSecondaryDark);
+
         return view;
     }
+
+    @Override
+    public void onRefresh() {
+        beforeRefresh();
+        swipeRefreshLayout.setRefreshing(false);
+        holder.updateAllItems();
+    }
+
+    public abstract void beforeRefresh();
 
     public abstract View initFragmentView(LayoutInflater inflater, ViewGroup container);
 
@@ -54,8 +69,9 @@ public abstract class MainFragment<T extends RecyclerView.ViewHolder> extends Fr
 
     public abstract RecyclerViewAdapter<T> initAdapter(ContextHolder holder);
 
-    public void addItem(ViewItem item) { adapter.addItem(item);
-    }
+    public abstract SwipeRefreshLayout initSwipeRefresh(View view);
+
+    public void addItem() { adapter.notifyItemInserted();  }
 
     public void updateItem(ViewItem item) {
         adapter.updateItem(item);

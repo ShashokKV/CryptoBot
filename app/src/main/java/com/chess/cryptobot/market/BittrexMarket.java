@@ -9,6 +9,7 @@ import com.chess.cryptobot.model.response.bittrex.BittrexTypeAdapter;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -79,4 +80,18 @@ public class BittrexMarket extends MarketRequest implements Market {
         }
         return response;
     }
+
+    @Override
+    public List<String> getAllMarkets() throws BittrexException {
+        BittrexResponse response;
+        Call<BittrexResponse> call = service.getAllMarkets();
+        try {
+            response = (BittrexResponse) execute(call);
+        }catch (MarketException e) {
+            throw new BittrexException(e.getMessage());
+        }
+        return response.getMarketNames();
+    }
+
+
 }

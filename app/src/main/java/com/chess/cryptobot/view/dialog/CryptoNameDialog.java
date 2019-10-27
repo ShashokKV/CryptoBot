@@ -1,5 +1,6 @@
 package com.chess.cryptobot.view.dialog;
 
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -17,6 +18,7 @@ private BalanceHolder balanceHolder;
     EditText enrichEditText(EditText editText) {
         editText.setId(R.id.name_dialog_edit_text);
         editText.setTextColor(getResources().getColor(R.color.colorAccent, null));
+        editText.setInputType(EditorInfo.TYPE_TEXT_FLAG_CAP_CHARACTERS);
         return editText;
     }
 

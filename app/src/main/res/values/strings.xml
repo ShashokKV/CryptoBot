@@ -9,12 +9,15 @@
     <string name="cancel">Cancel</string>
 
     <string name="coin_names_pref_key">coinNames</string>
-    <string name="trading_pairs_pref_key">tradingPairs</string>
+    <string name="pairs_pref_key">pairs</string>
 
     <string name="bittrex_api_key">bittrex_api_key</string>
     <string name="bittrex_secret_key">bittrex_secret_key</string>
     <string name="livecoin_api_key">livecoin_api_key</string>
     <string name="livecoin_secret_key">livecoin_secret_key</string>
+
+    <string name="bittrex_fee">0.25</string>
+    <string name="livecoin_fee">0.18</string>
 
     <string name="cripto_icon">cripto Icon</string>
     <string name="currency">Currency</string>

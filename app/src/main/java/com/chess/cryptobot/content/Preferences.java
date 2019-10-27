@@ -4,8 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import java.util.HashSet;
 import java.util.Set;
-import java.util.TreeSet;
 
 public abstract class Preferences {
     private Context context;
@@ -25,7 +25,7 @@ public abstract class Preferences {
     }
 
     public Set<String> getItemsSet() {
-        return new TreeSet<>(sharedPreferences.getStringSet(preferenceKey, new TreeSet<>()));
+        return new HashSet<>(sharedPreferences.getStringSet(preferenceKey, new HashSet<>()));
     }
 
     void addItem(String itemName) {

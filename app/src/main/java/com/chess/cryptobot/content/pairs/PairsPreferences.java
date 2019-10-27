@@ -5,13 +5,13 @@ import android.content.Context;
 import com.chess.cryptobot.R;
 import com.chess.cryptobot.content.Preferences;
 
-class TradingPairsPreferences extends Preferences {
-    TradingPairsPreferences(Context context) {
+class PairsPreferences extends Preferences {
+    PairsPreferences(Context context) {
         super(context);
     }
 
     @Override
     public String initPrefKey(Context context) {
-        return context.getResources().getString(R.string.trading_pairs_pref_key);
+        return context.getResources().getString(R.string.pairs_pref_key);
     }
 }

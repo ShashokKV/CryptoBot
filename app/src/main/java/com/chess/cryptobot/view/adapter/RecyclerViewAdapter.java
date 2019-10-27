@@ -13,16 +13,15 @@ public abstract class RecyclerViewAdapter<T extends RecyclerView.ViewHolder> ext
     private ContextHolder holder;
 
     RecyclerViewAdapter(ContextHolder holder) {
+        this.setHasStableIds(true);
         this.holder = holder;
         this.items = new ArrayList<>();
         initViewItems();
     }
 
     private void initViewItems() {
-        holder.getViewItems().forEach(item -> this.items.add(copyItem(item)));
+        this.items = holder.getViewItems();
     }
-
-    public abstract ViewItem copyItem(ViewItem item);
 
     public String itemNameByPosition(int position) {
         return getItemByPosition(position).getName();
@@ -32,20 +31,17 @@ public abstract class RecyclerViewAdapter<T extends RecyclerView.ViewHolder> ext
         return this.items.get(position);
     }
 
-    public void addItem(ViewItem item) {
-        this.items.add(copyItem(item));
+    public void notifyItemInserted() {
         this.notifyItemInserted(getItemCount());
     }
 
     public void deleteItem(int position) {
-        items.remove(position);
         this.notifyItemRemoved(position);
     }
 
     public void updateItem(ViewItem item) {
         int index = this.items.indexOf(item);
         if (index >= 0) {
-            this.items.set(index, copyItem(item));
             this.notifyItemChanged(index);
         }
     }
@@ -53,5 +49,11 @@ public abstract class RecyclerViewAdapter<T extends RecyclerView.ViewHolder> ext
     @Override
     public int getItemCount() {
         return items.size();
+    }
+
+    @Override
+    public long getItemId(int position) {
+        ViewItem viewItem = items.get(position);
+        return viewItem.getName().hashCode();
     }
 }

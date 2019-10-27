@@ -1,8 +1,7 @@
-package com.chess.cryptobot;
+package com.chess;
 
-
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -12,6 +11,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class ExampleUnitTest {
     @Test
     public void addition_isCorrect() {
-        assertEquals(4, 2 + 2);
+        Assertions.assertEquals(4, 2 + 2);
     }
 }

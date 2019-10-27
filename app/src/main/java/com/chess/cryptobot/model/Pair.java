@@ -2,7 +2,7 @@ package com.chess.cryptobot.model;
 
 import androidx.annotation.Nullable;
 
-public class TradingPair implements ViewItem {
+public class Pair implements ViewItem {
     private String baseName;
     private String marketName;
     private Double bittrexAsk;
@@ -12,7 +12,7 @@ public class TradingPair implements ViewItem {
     private float percent;
     private String message;
 
-    public TradingPair(String baseName, String marketName) {
+    public Pair(String baseName, String marketName) {
         this.baseName = baseName;
         this.marketName = marketName;
         this.bittrexAsk = 0.0d;
@@ -22,37 +22,27 @@ public class TradingPair implements ViewItem {
         this.percent = 0.0f;
     }
 
-    private TradingPair(TradingPair tradingPair) {
-        this.baseName = tradingPair.baseName;
-        this.marketName = tradingPair.marketName;
-        this.livecoinBid = tradingPair.livecoinBid;
-        this.livecoinAsk = tradingPair.livecoinAsk;
-        this.bittrexBid = tradingPair.bittrexBid;
-        this.bittrexAsk = tradingPair.bittrexAsk;
-        this.percent = tradingPair.percent;
-        this.message = tradingPair.message;
-    }
-
-    public static TradingPair fromPairName(String pairName) {
+    public static Pair fromPairName(String pairName) {
         String[] coinNames = pairName.split("/");
-        return new TradingPair(coinNames[0], coinNames[1]);
-    }
-
-    public TradingPair copy() {
-        return new TradingPair(this);
+        return new Pair(coinNames[0], coinNames[1]);
     }
 
     @Override
     public boolean equals(@Nullable Object obj) {
         if (obj==null) return false;
         if (obj==this) return true;
-        if (obj instanceof TradingPair) {
-            TradingPair pair = (TradingPair) obj;
+        if (obj instanceof Pair) {
+            Pair pair = (Pair) obj;
             return pair.marketName.equals(this.marketName) &&
                     pair.baseName.equals(this.baseName);
         }
         return false;
+    }
 
+    @Override
+    public int compareTo(ViewItem item) {
+        Pair pair = (Pair) item;
+        return (int) (this.percent- pair.percent)*100;
     }
 
     public String getName() {
