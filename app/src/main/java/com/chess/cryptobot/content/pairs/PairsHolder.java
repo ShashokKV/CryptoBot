@@ -7,12 +7,14 @@ import androidx.fragment.app.Fragment;
 import com.chess.cryptobot.R;
 import com.chess.cryptobot.content.ContextHolder;
 import com.chess.cryptobot.content.Preferences;
+import com.chess.cryptobot.content.balance.BalancePreferences;
 import com.chess.cryptobot.model.Pair;
 import com.chess.cryptobot.model.ViewItem;
 import com.chess.cryptobot.task.AvailablePairsTask;
 import com.chess.cryptobot.task.PairsUpdateTask;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -20,6 +22,7 @@ public class PairsHolder extends ContextHolder {
     private List<String> invalidPairs;
     private List<String> availablePairs;
     private List<String> negativePercentPairs;
+    private AllPairsPreferences allPairsPrefs;
     private float fee;
 
     public PairsHolder(Fragment fragment) {
@@ -50,6 +53,7 @@ public class PairsHolder extends ContextHolder {
 
     @Override
     public Preferences initPrefs(Context context) {
+        allPairsPrefs = new AllPairsPreferences(context);
         return new PairsPreferences(context);
     }
 
@@ -60,7 +64,9 @@ public class PairsHolder extends ContextHolder {
         });
     }
 
-    public void updateFromBalance(Set<String> coinNames) {
+    public void updateFromBalance() {
+        BalancePreferences balancePreferences = new BalancePreferences(getContext());
+        Set<String> coinNames = balancePreferences.getItems();
         List<Pair> balancePairs = new ArrayList<>();
         for (String baseName : coinNames) {
             for (String marketName : coinNames) {
@@ -118,7 +124,6 @@ public class PairsHolder extends ContextHolder {
         task.execute(pair);
     }
 
-
     public void addToInvalidPairs(Pair pair) {
         String pairName = pair.getName();
         if (!invalidPairs.contains(pairName)) invalidPairs.add(pairName);
@@ -140,6 +145,7 @@ public class PairsHolder extends ContextHolder {
     public void setAvailablePairs(List<String> pairs) {
         if (pairs != null) {
             availablePairs = pairs;
+            allPairsPrefs.setItems(new HashSet<>(pairs));
         }
     }
 }

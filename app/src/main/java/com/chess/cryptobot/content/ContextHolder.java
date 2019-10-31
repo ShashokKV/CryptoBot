@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment;
 
 import com.chess.cryptobot.exceptions.ItemNotFoundException;
 import com.chess.cryptobot.model.ViewItem;
+import com.chess.cryptobot.view.MainActivity;
 import com.chess.cryptobot.view.MainFragment;
 
 import java.util.ArrayList;
@@ -21,7 +22,7 @@ public abstract class ContextHolder {
         this.fr = fr;
         initFields();
         prefs = initPrefs(fr.getContext());
-        Set<String> itemsSet = prefs.getItemsSet();
+        Set<String> itemsSet = prefs.getItems();
         initViewItems(itemsSet);
     }
 
@@ -35,8 +36,7 @@ public abstract class ContextHolder {
 
     public synchronized void add(ViewItem viewItem) {
         addItemToList(viewItem);
-        MainFragment fragment = getAdapterFragmentOrNull();
-        if (fragment != null) fragment.addItem();
+        getMainFragment().addItem();
         Preferences preferences = getPrefs();
         preferences.addItem(viewItem.getName());
     }
@@ -47,25 +47,21 @@ public abstract class ContextHolder {
     }
 
     public synchronized void remove(ViewItem item) {
-        if (item==null) return;
-        MainFragment activity = getAdapterFragmentOrNull();
-        if (activity!=null) {
-            activity.deleteItemByPosition(viewItems.indexOf(item));
-        }
+        if (item == null) return;
+        getMainFragment().deleteItemByPosition(viewItems.indexOf(item));
         this.viewItems.remove(item);
         getPrefs().removeItem(item.getName());
     }
 
     public synchronized void setItem(ViewItem updatedItem) {
-        for(ViewItem item: viewItems) {
+        for (ViewItem item : viewItems) {
             if (item.equals(updatedItem)) {
                 viewItems.set(viewItems.indexOf(item), updatedItem);
                 break;
             }
         }
 
-        MainFragment activity =  getAdapterFragmentOrNull();
-        if (activity!=null) activity.updateItem(updatedItem);
+       getMainFragment().updateItem(updatedItem);
     }
 
     public void updateAllItems() {
@@ -75,7 +71,7 @@ public abstract class ContextHolder {
     public abstract void updateItem(ViewItem item);
 
     protected ViewItem getItemByName(String itemName) throws ItemNotFoundException {
-        for(ViewItem item: viewItems) {
+        for (ViewItem item : viewItems) {
             if (item.getName().equals(itemName)) return item;
         }
         throw new ItemNotFoundException(itemName);
@@ -93,26 +89,23 @@ public abstract class ContextHolder {
         return this.prefs;
     }
 
-    protected MainFragment getAdapterFragmentOrNull() {
-        Fragment fragment = this.fr;
-        if (fragment instanceof MainFragment) {
-            return (MainFragment) fragment;
-        }
-        return null;
+    protected MainFragment getMainFragment() {
+        return (MainFragment) this.fr;
+    }
+
+    protected MainActivity getMainActivity() {
+        return (MainActivity) this.fr.getActivity();
     }
 
     public void makeToast(String message) {
-        MainFragment mainFragment = this.getAdapterFragmentOrNull();
-        if (mainFragment !=null) mainFragment.makeToast(message);
+        this.getMainFragment().makeToast(message);
     }
 
-    public void showSpinner(){
-        MainFragment mainFragment = this.getAdapterFragmentOrNull();
-        if (mainFragment !=null) mainFragment.showSpinner();
+    public void showSpinner() {
+        this.getMainFragment().showSpinner();
     }
 
     public void hideSpinner() {
-        MainFragment mainFragment = this.getAdapterFragmentOrNull();
-        if (mainFragment !=null) mainFragment.hideSpinner();
+        this.getMainFragment().hideSpinner();
     }
 }

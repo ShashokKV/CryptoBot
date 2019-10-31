@@ -24,19 +24,23 @@ public abstract class Preferences {
         return preferenceKey;
     }
 
-    public Set<String> getItemsSet() {
+    public Set<String> getItems() {
         return new HashSet<>(sharedPreferences.getStringSet(preferenceKey, new HashSet<>()));
     }
 
+    public void setItems(Set<String> items) {
+        updateItemSet(items);
+    }
+
     void addItem(String itemName) {
-        Set<String> itemsSet = getItemsSet();
+        Set<String> itemsSet = getItems();
         if (itemsSet.contains(itemName)) return;
         itemsSet.add(itemName);
         updateItemSet(itemsSet);
     }
 
     void removeItem(String itemName) {
-        Set<String> itemsSet = getItemsSet();
+        Set<String> itemsSet = getItems();
         itemsSet.remove(itemName);
         updateItemSet(itemsSet);
     }
@@ -51,7 +55,7 @@ public abstract class Preferences {
         return sharedPreferences.getString(key, "");
     }
 
-    protected SharedPreferences getSharedPreferences() {
+    public SharedPreferences getSharedPreferences() {
         return sharedPreferences;
     }
 

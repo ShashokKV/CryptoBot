@@ -1,13 +1,14 @@
 package com.chess.cryptobot.view;
 
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,6 +17,7 @@ import androidx.fragment.app.FragmentManager;
 
 import com.chess.cryptobot.R;
 import com.chess.cryptobot.content.balance.BalanceHolder;
+import com.chess.cryptobot.service.BotService;
 import com.chess.cryptobot.view.dialog.CryptoDialog;
 import com.chess.cryptobot.view.dialog.CryptoNameDialog;
 import com.chess.cryptobot.view.dialog.DialogListener;
@@ -26,11 +28,13 @@ import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity implements DialogListener {
 
-    final Fragment balanceFragment = new BalanceFragment();
-    final Fragment tradingPairFragment = new PairsFragment();
-    final FragmentManager fragmentManager = getSupportFragmentManager();
-    private ProgressBar spinner;
-    Fragment active;
+    private final BalanceFragment balanceFragment = new BalanceFragment();
+    private final PairsFragment pairFragment = new PairsFragment();
+    private final FragmentManager fragmentManager = getSupportFragmentManager();
+    private Fragment active;
+    private boolean botIsActive;
+    private BotService botService;
+    private boolean isBound;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -40,12 +44,23 @@ public class MainActivity extends AppCompatActivity implements DialogListener {
         BottomNavigationView navigation = findViewById(R.id.bottom_navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
-        fragmentManager.beginTransaction().add(R.id.include, tradingPairFragment, "2").hide(tradingPairFragment).commit();
-        fragmentManager.beginTransaction().add(R.id.include, balanceFragment, "1").show(balanceFragment).commit();
-        active = balanceFragment;
+        Intent intent = getIntent();
+        boolean openPairs = false;
+        if (intent!=null) {
+            openPairs = intent.getBooleanExtra("openPairs", false);
+        }
+        if (openPairs) {
+            fragmentManager.beginTransaction().add(R.id.include, pairFragment, "2").show(pairFragment).commit();
+            fragmentManager.beginTransaction().add(R.id.include, balanceFragment, "1").hide(balanceFragment).commit();
+            active = pairFragment;
+        }else {
+            fragmentManager.beginTransaction().add(R.id.include, pairFragment, "2").hide(pairFragment).commit();
+            fragmentManager.beginTransaction().add(R.id.include, balanceFragment, "1").show(balanceFragment).commit();
+            active = balanceFragment;
+        }
 
-        ProgressBar spinner = findViewById(R.id.progressBar);
-        spinner.setVisibility(View.GONE);
+        updateBot();
+        botIsActive = BotService.isRunning;
     }
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -57,19 +72,17 @@ public class MainActivity extends AppCompatActivity implements DialogListener {
                 return true;
 
             case R.id.activity_pairs:
-                fragmentManager.beginTransaction().hide(active).show(tradingPairFragment).commit();
-                active = tradingPairFragment;
+                fragmentManager.beginTransaction().hide(active).show(pairFragment).commit();
+                active = pairFragment;
                 return true;
         }
         return false;
     };
 
-    public void showSpinner() {
-        spinner.setVisibility(View.VISIBLE);
-    }
-
-    public void hideSpiiner() {
-        spinner.setVisibility(View.GONE);
+    @Override
+    protected void onStop() {
+        if (boundServiceConnection!=null) unbindService(boundServiceConnection);
+        super.onStop();
     }
 
     @Override
@@ -110,6 +123,8 @@ public class MainActivity extends AppCompatActivity implements DialogListener {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
         menuInflater.inflate(R.menu.menu, menu);
+        MenuItem item = menu.getItem(0);
+        toggleIcon(item);
         return true;
     }
 
@@ -120,7 +135,66 @@ public class MainActivity extends AppCompatActivity implements DialogListener {
             Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
             startActivity(intent);
             return true;
+        }else if(id == R.id.bot_toggle) {
+            toggleBot();
+            toggleIcon(item);
         }
         return super.onOptionsItemSelected(item);
     }
+
+    private void toggleIcon(MenuItem item) {
+        if (botIsActive) {
+            item.setIcon(R.drawable.outline_toggle_on_24);
+        }else {
+            item.setIcon(R.drawable.outline_toggle_off_24);
+        }
+    }
+
+    public void toggleBot() {
+        if (BotService.isRunning) {
+            stopBot();
+        } else {
+            startBot();
+        }
+    }
+
+    public void updateBot() {
+        if (!botIsActive) return;
+        if (!isBound) {
+            Intent intent = new Intent(this, BotService.class);
+            bindService(intent, boundServiceConnection, BIND_AUTO_CREATE);
+        }
+        botService.update();
+    }
+
+    private void startBot() {
+        Intent intent = new Intent(this, BotService.class);
+        startForegroundService(intent);
+        bindService(intent, boundServiceConnection, BIND_AUTO_CREATE);
+        botIsActive = true;
+    }
+
+    private void stopBot() {
+        Intent intent = new Intent(this, BotService.class);
+        if (isBound) unbindService(boundServiceConnection);
+        stopService(intent);
+        botIsActive = false;
+    }
+
+
+    private ServiceConnection boundServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+
+            BotService.BotBinder binderBridge = (BotService.BotBinder) service ;
+            botService = binderBridge.getService();
+            isBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            botService= null;
+            isBound = false;
+        }
+    };
 }

@@ -56,6 +56,13 @@ public class BalanceHolder extends ContextHolder {
         Balance balance = (Balance) viewItem;
         updateImage(balance);
         if (hasKeys) updateAmount(balance);
+        getMainActivity().updateBot();
+    }
+
+    @Override
+    public synchronized void remove(ViewItem item) {
+        super.remove(item);
+        getMainActivity().updateBot();
     }
 
     @Override
@@ -66,8 +73,8 @@ public class BalanceHolder extends ContextHolder {
     }
 
     private void updateImage(Balance balance) {
-        MainFragment activity = getAdapterFragmentOrNull();
-        if (activity != null) {
+        MainFragment fragment = getMainFragment();
+        if (fragment != null) {
             CoinImageTask task = new CoinImageTask(this);
             task.execute(balance);
         }
@@ -79,7 +86,7 @@ public class BalanceHolder extends ContextHolder {
     }
 
     public Balance getBalanceByPosition(int position) throws ItemNotFoundException {
-        MainFragment balanceActivity = getAdapterFragmentOrNull();
+        MainFragment balanceActivity = getMainFragment();
         if (balanceActivity != null) {
             String coinName = balanceActivity.itemNameByPosition(position);
             return (Balance) this.getItemByName(coinName);

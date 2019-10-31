@@ -9,7 +9,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.chess.cryptobot.R;
 import com.chess.cryptobot.content.ContextHolder;
-import com.chess.cryptobot.content.balance.BalancePreferences;
 import com.chess.cryptobot.content.pairs.PairsHolder;
 import com.chess.cryptobot.view.adapter.PairsAdapter;
 import com.chess.cryptobot.view.adapter.RecyclerViewAdapter;
@@ -45,22 +44,16 @@ public class PairsFragment extends MainFragment {
     public void beforeRefresh() {
         PairsHolder holder = (PairsHolder) getHolder();
         holder.resetNegativePercentPairs();
-        updateFromBalance();
+        holder.updateFromBalance();
     }
 
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
         if (!hidden) {
-            updateFromBalance();
             PairsHolder pairsHolder = (PairsHolder) getHolder();
+            pairsHolder.updateFromBalance();
             pairsHolder.updateAllItems();
         }
-    }
-
-    private void updateFromBalance() {
-        PairsHolder pairsHolder = (PairsHolder) getHolder();
-        BalancePreferences balancePreferences = new BalancePreferences(getContext());
-        pairsHolder.updateFromBalance(balancePreferences.getItemsSet());
     }
 }

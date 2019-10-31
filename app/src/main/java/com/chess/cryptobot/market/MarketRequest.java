@@ -29,8 +29,8 @@ abstract class MarketRequest {
 
     MarketRequest(String url, String apiKey, String secretKey) {
         this.url = url;
-        this.apiKey = apiKey;
-        this.secretKey = secretKey;
+        this.apiKey = apiKey == null ? "" : apiKey;
+        this.secretKey = secretKey == null ? "" : secretKey;
     }
 
     abstract Gson initGson();

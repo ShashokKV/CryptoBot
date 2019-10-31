@@ -10,6 +10,7 @@
 
     <string name="coin_names_pref_key">coinNames</string>
     <string name="pairs_pref_key">pairs</string>
+    <string name="available_pairs_pref_key">available_pairs</string>
 
     <string name="bittrex_api_key">bittrex_api_key</string>
     <string name="bittrex_secret_key">bittrex_secret_key</string>
@@ -43,4 +44,14 @@
     <string name="ask">Ask:</string>
     <string name="balance">Balance</string>
     <string name="trading_pairs">Trading Pairs</string>
+    <string name="_0">0</string>
+    
+    <string name="channel_name">Profitable pairs notification</string>
+    <string name="channel_description">Notification about pairs that can make profit</string>
+    <string name="bot_toggle">Bot toggle</string>
+
+    <string name="crypto_bot_tag">crypto_bot_tag</string>
+    <string name="service_run_period">run_period</string>
+    <string name="statistic_run_period">statistic_period</string>
+    <string name="min_profit_percent">min_profit_percent</string>
 </resources>

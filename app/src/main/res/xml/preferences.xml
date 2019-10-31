@@ -6,11 +6,11 @@
         <androidx.preference.EditTextPreference
             android:key="@string/bittrex_api_key"
             android:title="@string/api_key"
-            android:dialogLayout="@layout/edit_text_layout"/>
+            android:dialogLayout="@layout/keys_dialog"/>
         <androidx.preference.EditTextPreference
             android:key="@string/bittrex_secret_key"
             android:title="@string/secret_key"
-            android:dialogLayout="@layout/edit_text_layout"/>
+            android:dialogLayout="@layout/keys_dialog"/>
     </androidx.preference.PreferenceCategory>
     <androidx.preference.PreferenceCategory
         android:title="@string/livecoin_api_keys"
@@ -18,10 +18,28 @@
         <androidx.preference.EditTextPreference
             android:key="@string/livecoin_api_key"
             android:title="@string/api_key"
-            android:dialogLayout="@layout/edit_text_layout"/>
+            android:dialogLayout="@layout/keys_dialog"/>
         <androidx.preference.EditTextPreference
             android:key="@string/livecoin_secret_key"
             android:title="@string/secret_key"
-            android:dialogLayout="@layout/edit_text_layout"/>
+            android:dialogLayout="@layout/keys_dialog"/>
+    </androidx.preference.PreferenceCategory>
+    <androidx.preference.PreferenceCategory
+        android:title="Trading preferences">
+        <androidx.preference.EditTextPreference
+            android:title="Minimum profit percent"
+            android:key="@string/min_profit_percent"
+            android:dialogLayout="@layout/number_dialog"
+            android:defaultValue="3"/>
+        <androidx.preference.EditTextPreference
+            android:title="Run period in minutes"
+            android:key="@string/service_run_period"
+            android:dialogLayout="@layout/number_dialog"
+            android:defaultValue="5"/>
+        <androidx.preference.EditTextPreference
+            android:title="Statistic collection period"
+            android:key="@string/statistic_run_period"
+            android:dialogLayout="@layout/number_dialog"
+            android:defaultValue="30"/>
     </androidx.preference.PreferenceCategory>
 </androidx.preference.PreferenceScreen>

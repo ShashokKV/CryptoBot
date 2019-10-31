@@ -31,7 +31,9 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".view.MainActivity"/>
         </activity>
-        <service android:name=".service.BalanceUpdateService" />
+        <service android:name=".service.BotService" >
+        </service>
+
     </application>
 
 </manifest>
