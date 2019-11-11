@@ -3,7 +3,9 @@ package com.chess.cryptobot.api;
 import com.chess.cryptobot.model.response.livecoin.LivecoinBalanceResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinMarketsResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinOrderBookResponse;
+import com.chess.cryptobot.model.response.livecoin.LivecoinTickerResponse;
 
+import java.util.List;
 import java.util.Map;
 
 import retrofit2.Call;
@@ -21,4 +23,7 @@ public interface LivecoinMarketService {
 
     @GET("exchange/restrictions")
     Call<LivecoinMarketsResponse> getAllMarkets();
+
+    @GET("exchange/ticker")
+    Call<List<LivecoinTickerResponse>> getTicker();
 }

@@ -17,7 +17,7 @@
 
         <ImageView
             android:id="@+id/CryptoImageView"
-            android:layout_width="64dp"
+            android:layout_width="match_parent"
             android:layout_height="64dp"
             android:layout_marginStart="10dp"
             android:contentDescription="@string/cripto_icon"

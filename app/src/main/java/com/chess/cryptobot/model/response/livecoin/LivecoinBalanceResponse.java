@@ -13,14 +13,4 @@ public class LivecoinBalanceResponse extends LivecoinResponse implements Balance
     public Double getAmount() {
         return value;
     }
-
-    @Override
-    public boolean success() {
-        return true;
-    }
-
-    @Override
-    public String message() {
-        return null;
-    }
 }

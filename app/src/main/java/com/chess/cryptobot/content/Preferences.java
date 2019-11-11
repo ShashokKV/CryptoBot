@@ -51,10 +51,6 @@ public abstract class Preferences {
         editor.apply();
     }
 
-    public String getValue(String key) {
-        return sharedPreferences.getString(key, "");
-    }
-
     public SharedPreferences getSharedPreferences() {
         return sharedPreferences;
     }

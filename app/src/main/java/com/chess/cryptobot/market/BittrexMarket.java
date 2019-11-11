@@ -4,6 +4,7 @@ import com.chess.cryptobot.api.BittrexMarketService;
 import com.chess.cryptobot.exceptions.BittrexException;
 import com.chess.cryptobot.exceptions.MarketException;
 import com.chess.cryptobot.model.response.OrderBookResponse;
+import com.chess.cryptobot.model.response.TickerResponse;
 import com.chess.cryptobot.model.response.bittrex.BittrexResponse;
 import com.chess.cryptobot.model.response.bittrex.BittrexTypeAdapter;
 import com.google.gson.Gson;
@@ -16,7 +17,7 @@ import java.util.TreeMap;
 import retrofit2.Call;
 import retrofit2.Retrofit;
 
-public class BittrexMarket extends MarketRequest implements Market {
+public class BittrexMarket extends MarketRequest {
     private BittrexMarketService service;
 
     BittrexMarket(String url, String apiKey, String secretKey) {
@@ -27,7 +28,7 @@ public class BittrexMarket extends MarketRequest implements Market {
 
     @Override
     public String getMarketName() {
-        return "bittrex";
+        return Market.BITTREX_MARKET;
     }
 
     @Override
@@ -93,5 +94,15 @@ public class BittrexMarket extends MarketRequest implements Market {
         return response.getMarketNames();
     }
 
-
+    @Override
+    public List<? extends TickerResponse> getTicker() throws MarketException {
+        BittrexResponse response;
+        Call<BittrexResponse> call = service.getTicker();
+        try {
+            response = (BittrexResponse) execute(call);
+        }catch (MarketException e) {
+            throw new BittrexException(e.getMessage());
+        }
+        return response.getTickers();
+    }
 }

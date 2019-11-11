@@ -1,11 +1,12 @@
 package com.chess.cryptobot.model.response.bittrex;
 
+import com.chess.cryptobot.model.response.TickerResponse;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-class BittrexGenericResponse {
+class BittrexGenericResponse implements TickerResponse {
     @SerializedName("Available")
     @Expose
     private Double available;
@@ -21,7 +22,15 @@ class BittrexGenericResponse {
     @SerializedName("BaseCurrency")
     @Expose
     private String baseCurrency;
-
+    @SerializedName("MarketName")
+    @Expose
+    private String tickerName;
+    @SerializedName("Bid")
+    @Expose
+    private Double tickerBid;
+    @SerializedName("Ask")
+    @Expose
+    private Double tickerAsk;
 
     Double getAvailable() {
         return available;
@@ -36,4 +45,14 @@ class BittrexGenericResponse {
     }
 
     String getMarketName() {return String.format("%s/%s", baseCurrency, marketCurrency);}
+
+    public String getTickerName() {return tickerName.replace("-", "/");}
+
+    public Double getTickerBid() {
+        return tickerBid;
+    }
+
+    public Double getTickerAsk() {
+        return tickerAsk;
+    }
 }

@@ -19,6 +19,7 @@
 
     <string name="bittrex_fee">0.25</string>
     <string name="livecoin_fee">0.18</string>
+    <string name="ignored_pairs">BTC/LUNA#BTC/CPT#BTC/PLA</string>
 
     <string name="cripto_icon">cripto Icon</string>
     <string name="currency">Currency</string>
@@ -48,10 +49,13 @@
     
     <string name="channel_name">Profitable pairs notification</string>
     <string name="channel_description">Notification about pairs that can make profit</string>
+    <string name="foreground_channel_name">CryptoBot notifications</string>
+
     <string name="bot_toggle">Bot toggle</string>
 
     <string name="crypto_bot_tag">crypto_bot_tag</string>
     <string name="service_run_period">run_period</string>
     <string name="statistic_run_period">statistic_period</string>
     <string name="min_profit_percent">min_profit_percent</string>
+    <string name="profit_graph">Profit Graph</string>
 </resources>

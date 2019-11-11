@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
@@ -31,12 +32,34 @@ public class BalanceFragment extends MainFragment {
        View view = super.onCreateView(inflater, container, savedInstanceState);
 
         BalanceHolder balanceHolder = (BalanceHolder) getHolder();
-        FloatingActionButton floatingActionButton = Objects.requireNonNull(view).findViewById(R.id.fab);
-        floatingActionButton.setOnClickListener(v -> {
+        FloatingActionButton addBalanceButton = Objects.requireNonNull(view).findViewById(R.id.add_fab);
+        addBalanceButton.animate()
+                .scaleXBy(10)
+                .scaleYBy(10)
+                .setDuration(300)
+                .start();
+        addBalanceButton.setOnClickListener(v -> {
             CryptoNameDialog nameDialog = new CryptoNameDialog(balanceHolder);
             FragmentManager fragmentManager = getFragmentManager();
             if (fragmentManager!=null) nameDialog.show(getFragmentManager(), "coinName");
         });
+
+        FloatingActionButton syncBalanceButton = (view).findViewById(R.id.sync_fab);
+        syncBalanceButton.animate()
+                .rotation(180f)
+                .setDuration(300)
+                .start();
+        syncBalanceButton.setOnClickListener(click -> {
+            AlertDialog alertDialog = new AlertDialog.Builder(Objects.requireNonNull(getContext()))
+                    .setMessage("Sync all balances?")
+                    .setPositiveButton("Yes", (dialog, which) -> {
+
+                    })
+                    .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
+                    .create();
+            alertDialog.show();
+        });
+
         return view;
     }
 

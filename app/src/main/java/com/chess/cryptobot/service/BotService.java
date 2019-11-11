@@ -15,7 +15,6 @@ import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
-import androidx.core.app.NotificationCompat;
 
 import com.chess.cryptobot.R;
 import com.chess.cryptobot.content.balance.BalancePreferences;
@@ -39,8 +38,11 @@ import java.util.stream.Collectors;
 
 public class BotService extends Service {
     public static final int NOTIFICATION_ID = 100500;
+    public static final int FOREGROUND_NOTIFICATION_ID = 200500;
+
     public static boolean isRunning;
     private final static String CHANNEL_ID = "profit_pairs_channel_id";
+    private final static String FOREGROUND_CHANNEL_ID = "bot_channel_id";
     private Timer botTimer;
     private List<Pair> pairs;
     private Integer runPeriod;
@@ -56,11 +58,11 @@ public class BotService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        super.onStartCommand(intent, startId, startId);
+        super.onStartCommand(intent, flags, startId);
         Toast.makeText(this, "Bot starting", Toast.LENGTH_SHORT).show();
         initFields();
         startTimer();
-        startForeground(200500, buildForegroundNotification());
+        startForeground(FOREGROUND_NOTIFICATION_ID, buildForegroundNotification());
         isRunning = true;
         return START_STICKY;
     }
@@ -112,17 +114,29 @@ public class BotService extends Service {
 
     private Notification buildForegroundNotification() {
         PendingIntent pendingIntent = getPendingIntent();
+        createForegroundNotificationChannelIfNotExists();
 
-        return new NotificationCompat.Builder(BotService.this, CHANNEL_ID)
+        return new Notification.Builder(BotService.this, FOREGROUND_CHANNEL_ID)
                 .setSmallIcon(R.drawable.round_monetization_on_24)
                 .setContentTitle("Bot is running")
                 .setColorized(true)
-                .setPriority(NotificationCompat.PRIORITY_MIN)
                 .setColor(getResources().getColor(R.color.colorPrimary, null))
                 .setContentIntent(pendingIntent)
-                .setSound(null)
+                .setCategory(Notification.CATEGORY_SERVICE)
                 .build();
+    }
 
+    private void createForegroundNotificationChannelIfNotExists() {
+        NotificationManager notificationManager = getSystemService(NotificationManager.class);
+
+        NotificationChannel channel = notificationManager.getNotificationChannel(FOREGROUND_CHANNEL_ID);
+        if (channel==null) {
+            CharSequence name = getApplicationContext().getString(R.string.foreground_channel_name);
+            channel = new NotificationChannel(FOREGROUND_CHANNEL_ID, name, NotificationManager.IMPORTANCE_LOW);
+            channel.enableVibration(false);
+            channel.enableLights(false);
+            notificationManager.createNotificationChannel(channel);
+        }
     }
 
     private PendingIntent getPendingIntent() {
@@ -217,7 +231,8 @@ public class BotService extends Service {
 
         private void makeNotification(List<Pair> profitPairs) {
             String text = getNotificationText(profitPairs);
-            NotificationManager notificationManager = getNotificationManager();
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            createNotificationChannelIfNotExist(notificationManager);
             notificationManager.notify(NOTIFICATION_ID, buildNotification(text));
         }
 
@@ -227,16 +242,15 @@ public class BotService extends Service {
                     .collect(Collectors.joining());
         }
 
-        private NotificationManager getNotificationManager() {
-            CharSequence name = getApplicationContext().getString(R.string.channel_name);
-            String description = getApplicationContext().getString(R.string.channel_description);
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
-            channel.setDescription(description);
-            channel.setImportance(NotificationManager.IMPORTANCE_DEFAULT);
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
-            return notificationManager;
+        private void createNotificationChannelIfNotExist(NotificationManager notificationManager) {
+            NotificationChannel channel = notificationManager.getNotificationChannel(CHANNEL_ID);
+            if (channel==null) {
+                CharSequence name = getApplicationContext().getString(R.string.channel_name);
+                String description = getApplicationContext().getString(R.string.channel_description);
+                channel = new NotificationChannel(CHANNEL_ID, name, NotificationManager.IMPORTANCE_DEFAULT);
+                channel.setDescription(description);
+                notificationManager.createNotificationChannel(channel);
+            }
         }
 
         private Notification buildNotification(String notificationText) {
@@ -248,6 +262,7 @@ public class BotService extends Service {
                     .setStyle(new Notification.BigTextStyle().bigText(notificationText))
                     .setAutoCancel(true)
                     .setContentIntent(pendingIntent)
+                    .setCategory(Notification.CATEGORY_SERVICE)
                     .build();
         }
     }

@@ -4,19 +4,23 @@ import com.chess.cryptobot.api.LivecoinMarketService;
 import com.chess.cryptobot.exceptions.LivecoinException;
 import com.chess.cryptobot.exceptions.MarketException;
 import com.chess.cryptobot.model.response.OrderBookResponse;
+import com.chess.cryptobot.model.response.TickerResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinBalanceResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinMarketsResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinOrderBookResponse;
+import com.chess.cryptobot.model.response.livecoin.LivecoinTickerResponse;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.TreeMap;
 
 import retrofit2.Call;
+import retrofit2.Response;
 import retrofit2.Retrofit;
 
-public class LivecoinMarket extends MarketRequest implements Market {
+public class LivecoinMarket extends MarketRequest {
     private LivecoinMarketService service;
 
     LivecoinMarket(String url, String apiKey, String secretKey) {
@@ -28,7 +32,7 @@ public class LivecoinMarket extends MarketRequest implements Market {
 
     @Override
     public String getMarketName() {
-        return "livecoin";
+        return Market.LIVECOIN_MARKET;
     }
 
     @Override
@@ -90,5 +94,21 @@ public class LivecoinMarket extends MarketRequest implements Market {
             throw new LivecoinException(e.getMessage());
         }
         return response.getMarketNames();
+    }
+
+    @Override
+    public List<? extends TickerResponse> getTicker() throws MarketException {
+        List<LivecoinTickerResponse> responses;
+        Call<List<LivecoinTickerResponse>> call = service.getTicker();
+        try {
+            Response<List<LivecoinTickerResponse>> result = call.execute();
+            responses = result.body();
+            if (responses == null) {
+                throw new LivecoinException("No response");
+            }
+        } catch (IOException e) {
+            throw new LivecoinException(e.getMessage());
+        }
+        return responses;
     }
 }

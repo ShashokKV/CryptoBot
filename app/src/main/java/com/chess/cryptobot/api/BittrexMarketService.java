@@ -19,4 +19,7 @@ public interface BittrexMarketService {
 
     @GET("public/getmarkets")
     Call<BittrexResponse> getAllMarkets();
+
+    @GET("public/getmarketsummaries")
+    Call<BittrexResponse> getTicker();
 }

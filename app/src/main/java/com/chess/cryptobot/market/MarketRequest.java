@@ -19,7 +19,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-abstract class MarketRequest {
+abstract class MarketRequest implements Market {
     String url;
     String path;
     String apiKey;

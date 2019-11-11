@@ -5,14 +5,17 @@ import com.chess.cryptobot.model.response.AllMarketsResponse;
 import com.chess.cryptobot.model.response.BalanceResponse;
 import com.chess.cryptobot.model.response.MarketResponse;
 import com.chess.cryptobot.model.response.OrderBookResponse;
+import com.chess.cryptobot.model.response.TickerResponse;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class BittrexResponse implements MarketResponse,
         BalanceResponse,
         OrderBookResponse,
-        AllMarketsResponse
+        AllMarketsResponse,
+        TickerResponse
 {
 
     private Boolean success;
@@ -61,6 +64,10 @@ public class BittrexResponse implements MarketResponse,
         return parsePrices(results[0].getSell());
     }
 
+    public List<TickerResponse> getTickers() {
+        return Arrays.asList(results);
+    }
+
     @Override
     public List<String> getMarketNames() {
         List<String> marketNames = new ArrayList<>();
@@ -74,5 +81,20 @@ public class BittrexResponse implements MarketResponse,
         ArrayList<Price> parsedPrices = new ArrayList<>();
         prices.forEach(price -> parsedPrices.add(new Price(price.getRate(), price.getQuantity())));
         return parsedPrices;
+    }
+
+    @Override
+    public String getTickerName() {
+        return null;
+    }
+
+    @Override
+    public Double getTickerBid() {
+        return null;
+    }
+
+    @Override
+    public Double getTickerAsk() {
+        return null;
     }
 }

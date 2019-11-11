@@ -3,8 +3,10 @@ package com.chess.cryptobot.view;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -14,6 +16,10 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.work.Constraints;
+import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
 
 import com.chess.cryptobot.R;
 import com.chess.cryptobot.content.balance.BalanceHolder;
@@ -22,14 +28,17 @@ import com.chess.cryptobot.view.dialog.CryptoDialog;
 import com.chess.cryptobot.view.dialog.CryptoNameDialog;
 import com.chess.cryptobot.view.dialog.DialogListener;
 import com.chess.cryptobot.view.dialog.MinBalanceDialog;
+import com.chess.cryptobot.worker.MarketWorker;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity implements DialogListener {
 
     private final BalanceFragment balanceFragment = new BalanceFragment();
     private final PairsFragment pairFragment = new PairsFragment();
+    private final GraphFragment graphFragment = new GraphFragment();
     private final FragmentManager fragmentManager = getSupportFragmentManager();
     private Fragment active;
     private boolean botIsActive;
@@ -58,8 +67,10 @@ public class MainActivity extends AppCompatActivity implements DialogListener {
             fragmentManager.beginTransaction().add(R.id.include, balanceFragment, "1").show(balanceFragment).commit();
             active = balanceFragment;
         }
+        fragmentManager.beginTransaction().add(R.id.include, graphFragment, "3").hide(graphFragment).commit();
 
         updateBot();
+        runWork();
         botIsActive = BotService.isRunning;
     }
 
@@ -75,13 +86,20 @@ public class MainActivity extends AppCompatActivity implements DialogListener {
                 fragmentManager.beginTransaction().hide(active).show(pairFragment).commit();
                 active = pairFragment;
                 return true;
+
+            case  R.id.activity_graph:
+                fragmentManager.beginTransaction().hide(active).show(graphFragment).commit();
+                active = graphFragment;
+                return true;
         }
         return false;
     };
 
     @Override
     protected void onStop() {
-        if (boundServiceConnection!=null) unbindService(boundServiceConnection);
+        if (BotService.isRunning) {
+            if (isBound) unbindService(boundServiceConnection);
+        }
         super.onStop();
     }
 
@@ -179,6 +197,23 @@ public class MainActivity extends AppCompatActivity implements DialogListener {
         if (isBound) unbindService(boundServiceConnection);
         stopService(intent);
         botIsActive = false;
+    }
+
+    private void runWork() {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        long workPeriod = Long.valueOf(Objects.requireNonNull(preferences.getString(getString(R.string.statistic_run_period), "30")));
+
+        Constraints constraints = new Constraints.Builder()
+                .setRequiresBatteryNotLow(true)
+                .build();
+
+        PeriodicWorkRequest workRequest = new PeriodicWorkRequest.Builder(MarketWorker.class, workPeriod, TimeUnit.MINUTES)
+                .setConstraints(constraints)
+                .setInitialDelay(15, TimeUnit.MINUTES)
+                .build();
+
+        WorkManager.getInstance(this)
+                .enqueueUniquePeriodicWork("market_work", ExistingPeriodicWorkPolicy.REPLACE, workRequest);
     }
 
 

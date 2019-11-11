@@ -22,6 +22,10 @@ public class PairResponseEnricher {
    }
 
    public PairResponseEnricher countPercent(Float fee) {
+        if (pair.getLivecoinAsk()==0 || pair.getBittrexAsk()==0) {
+            pair.setPercent(0.0f);
+            return this;
+        }
         Float bittrexPercent = (Double.valueOf((pair.getBittrexBid() - pair.getLivecoinAsk())
                 / pair.getLivecoinAsk()*100)).floatValue()-fee;
         Float livecoinPercent = (Double.valueOf((pair.getLivecoinBid() - pair.getBittrexAsk())
