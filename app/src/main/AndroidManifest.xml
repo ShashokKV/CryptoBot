@@ -38,6 +38,7 @@
         </activity>
         <service android:name=".service.BotService" >
         </service>
+        <service android:name=".service.BalanceSyncService" />
 
     </application>
 

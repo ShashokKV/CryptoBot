@@ -58,4 +58,5 @@
     <string name="statistic_run_period">statistic_period</string>
     <string name="min_profit_percent">min_profit_percent</string>
     <string name="profit_graph">Profit Graph</string>
+    <string name="sync_balances_title">Sync all balances?</string>
 </resources>
