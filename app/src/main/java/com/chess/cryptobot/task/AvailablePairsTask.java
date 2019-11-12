@@ -47,7 +47,7 @@ public class AvailablePairsTask extends MarketTask<Integer, List<String>> {
         PairsHolder pairsHolder = (PairsHolder) holder;
         pairsHolder.setAvailablePairs(excludeMarkets(allMarketNames, holder));
         pairsHolder.removeInvalidPairs();
-        pairsHolder.updateAllItems();
+//        pairsHolder.updateAllItems();
     }
 
     @Override

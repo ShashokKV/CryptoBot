@@ -26,6 +26,7 @@ import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 
 import java.lang.ref.WeakReference;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -88,8 +89,9 @@ public class GraphTask extends AsyncTask<Void, Integer, HorizontalBarChart> {
     }
 
     private List<ProfitPair> getProfitPairsByDayAndMinPercent(ProfitPairDao dao, LocalDateTime date, Float minPercent) {
-        LocalDateTime dateStart = date.minusDays(1);
-        return dao.getPairsByDayAndMinPercent(dateStart, date, minPercent);
+        LocalDateTime dateStart = date.toLocalDate().atStartOfDay();
+        LocalDateTime dateEnd = date.toLocalDate().atTime(LocalTime.MAX);
+        return dao.getPairsByDayAndMinPercent(dateStart, dateEnd, minPercent);
     }
 
     private void countApproximatePercent(List<ProfitPair> pairs) {
