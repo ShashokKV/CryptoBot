@@ -3,6 +3,7 @@ package com.chess.cryptobot.enricher;
 import com.chess.cryptobot.model.Pair;
 import com.chess.cryptobot.model.response.OrderBookResponse;
 import com.chess.cryptobot.model.response.bittrex.BittrexResponse;
+import com.chess.cryptobot.model.response.livecoin.LivecoinOrderBookResponse;
 
 public class PairResponseEnricher {
     private Pair pair;
@@ -15,7 +16,7 @@ public class PairResponseEnricher {
         if (response instanceof BittrexResponse) {
             pair.setBittrexAsk(response.asks().get(0).getValue());
             pair.setBittrexBid(response.bids().get(0).getValue());
-        } else {
+        } else if (response instanceof LivecoinOrderBookResponse){
             pair.setLivecoinAsk(response.asks().get(0).getValue());
             pair.setLivecoinBid(response.bids().get(0).getValue());
         }

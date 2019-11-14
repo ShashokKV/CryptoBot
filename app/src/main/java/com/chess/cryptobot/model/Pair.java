@@ -7,8 +7,10 @@ public class Pair implements ViewItem {
     private String marketName;
     private Double bittrexAsk;
     private Double bittrexBid;
+    private Double bittrexVolume;
     private Double livecoinAsk;
     private Double livecoinBid;
+    private Double livecoinVolume;
     private float percent;
     private String message;
 
@@ -39,12 +41,6 @@ public class Pair implements ViewItem {
         return false;
     }
 
-    @Override
-    public int compareTo(ViewItem item) {
-        Pair pair = (Pair) item;
-        return (int) (this.percent- pair.percent)*100;
-    }
-
     public String getName() {
         return baseName.concat("/").concat(marketName);
     }
@@ -65,6 +61,14 @@ public class Pair implements ViewItem {
         return livecoinBid;
     }
 
+    public Double getBittrexVolume() {
+        return bittrexVolume;
+    }
+
+    public Double getLivecoinVolume() {
+        return livecoinVolume;
+    }
+
     public float getPercent() {
         return percent;
     }
@@ -83,6 +87,14 @@ public class Pair implements ViewItem {
 
     public void setLivecoinBid(Double livecoinBid) {
         this.livecoinBid = livecoinBid;
+    }
+
+    public void setBittrexVolume(Double bittrexVolume) {
+        this.bittrexVolume = bittrexVolume;
+    }
+
+    public void setLivecoinVolume(Double livecoinVolume) {
+        this.livecoinVolume = livecoinVolume;
     }
 
     public void setPercent(float percent) {

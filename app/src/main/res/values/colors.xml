@@ -13,5 +13,6 @@
 
     <color name="colorWhite">#FFFFFF</color>
     <color name="colorAccent">#C2185B</color>
+    <color name="colorError">#FF5252</color>
 
 </resources>

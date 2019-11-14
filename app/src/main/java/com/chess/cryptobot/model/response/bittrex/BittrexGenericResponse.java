@@ -1,12 +1,13 @@
 package com.chess.cryptobot.model.response.bittrex;
 
+import com.chess.cryptobot.model.response.CurrenciesResponse;
 import com.chess.cryptobot.model.response.TickerResponse;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-class BittrexGenericResponse implements TickerResponse {
+class BittrexGenericResponse implements TickerResponse, CurrenciesResponse {
     @SerializedName("Available")
     @Expose
     private Double available;
@@ -16,12 +17,6 @@ class BittrexGenericResponse implements TickerResponse {
     @SerializedName("sell")
     @Expose
     private List<BittrexPrice> sell;
-    @SerializedName("MarketCurrency")
-    @Expose
-    private String marketCurrency;
-    @SerializedName("BaseCurrency")
-    @Expose
-    private String baseCurrency;
     @SerializedName("MarketName")
     @Expose
     private String tickerName;
@@ -31,6 +26,18 @@ class BittrexGenericResponse implements TickerResponse {
     @SerializedName("Ask")
     @Expose
     private Double tickerAsk;
+    @SerializedName("Volume")
+    @Expose
+    private Double volume;
+    @SerializedName("Currency")
+    @Expose
+    private String currency;
+    @SerializedName("TxFee")
+    @Expose
+    private Double txFee;
+    @SerializedName("IsActive")
+    @Expose
+    private Boolean isActive;
 
     Double getAvailable() {
         return available;
@@ -44,8 +51,6 @@ class BittrexGenericResponse implements TickerResponse {
         return sell;
     }
 
-    String getMarketName() {return String.format("%s/%s", baseCurrency, marketCurrency);}
-
     public String getTickerName() {return tickerName.replace("-", "/");}
 
     public Double getTickerBid() {
@@ -54,5 +59,27 @@ class BittrexGenericResponse implements TickerResponse {
 
     public Double getTickerAsk() {
         return tickerAsk;
+    }
+
+    @Override
+    public Double getVolume() {
+        return volume;
+    }
+
+    @Override
+    public String getCurrencyName() {
+        return currency;
+    }
+
+    @Override
+    public Boolean isActive() {
+        if (isActive==null) return false;
+        return isActive;
+    }
+
+    @Override
+    public Double getFee() {
+        if (txFee==null) return 0.0d;
+        return txFee;
     }
 }

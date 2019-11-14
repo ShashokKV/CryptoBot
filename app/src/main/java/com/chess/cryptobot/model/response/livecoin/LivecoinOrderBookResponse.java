@@ -11,10 +11,10 @@ import java.util.List;
 public class LivecoinOrderBookResponse extends LivecoinResponse implements OrderBookResponse {
     @SerializedName("asks")
     @Expose
-    public List<List<String>> asks;
+    private List<List<String>> asks;
     @SerializedName("bids")
     @Expose
-    public List<List<String>> bids;
+    private List<List<String>> bids;
 
     @Override
     public List<Price> bids() {

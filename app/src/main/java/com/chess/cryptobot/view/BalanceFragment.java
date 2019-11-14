@@ -26,6 +26,7 @@ import com.chess.cryptobot.R;
 import com.chess.cryptobot.content.ContextHolder;
 import com.chess.cryptobot.content.balance.BalanceHolder;
 import com.chess.cryptobot.service.BalanceSyncService;
+import com.chess.cryptobot.task.CoinStatusTask;
 import com.chess.cryptobot.view.adapter.BalanceAdapter;
 import com.chess.cryptobot.view.adapter.RecyclerViewAdapter;
 import com.chess.cryptobot.view.adapter.SwipeBalanceCallback;
@@ -40,9 +41,16 @@ public class BalanceFragment extends MainFragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-       View view = super.onCreateView(inflater, container, savedInstanceState);
+        View view = super.onCreateView(inflater, container, savedInstanceState);
 
         BalanceHolder balanceHolder = (BalanceHolder) getHolder();
+        initAddButton(view, balanceHolder);
+        initSyncButton(view, balanceHolder);
+        initBalanceStatus(balanceHolder);
+        return view;
+    }
+
+    private void initAddButton(View view, BalanceHolder balanceHolder) {
         FloatingActionButton addBalanceButton = Objects.requireNonNull(view).findViewById(R.id.add_fab);
         addBalanceButton.setOnClickListener(v -> {
             PropertyValuesHolder scalex = PropertyValuesHolder.ofFloat(View.SCALE_X, 1.2f);
@@ -55,9 +63,11 @@ public class BalanceFragment extends MainFragment {
 
             CryptoNameDialog nameDialog = new CryptoNameDialog(balanceHolder);
             FragmentManager fragmentManager = getFragmentManager();
-            if (fragmentManager!=null) nameDialog.show(getFragmentManager(), "coinName");
+            if (fragmentManager != null) nameDialog.show(getFragmentManager(), "coinName");
         });
+    }
 
+    private void initSyncButton(View view, BalanceHolder balanceHolder) {
         FloatingActionButton syncBalanceButton = (view).findViewById(R.id.sync_fab);
         syncBalanceButton.setOnClickListener(click -> {
             PropertyValuesHolder angle = PropertyValuesHolder.ofFloat(View.ROTATION, 360f);
@@ -84,7 +94,7 @@ public class BalanceFragment extends MainFragment {
                     .setCustomTitle(titleView)
                     .setPositiveButton("Yes", (dialog, which) -> {
                         FragmentActivity activity = this.getActivity();
-                        if (activity!=null) {
+                        if (activity != null) {
                             Intent intent = new Intent(activity, BalanceSyncService.class);
                             intent.putStringArrayListExtra("coinNames",
                                     new ArrayList<>(balanceHolder.getPrefs().getItems()));
@@ -95,8 +105,11 @@ public class BalanceFragment extends MainFragment {
                     .create();
             alertDialog.show();
         });
+    }
 
-        return view;
+    private void initBalanceStatus(BalanceHolder balanceHolder) {
+        CoinStatusTask coinStatusTask = new CoinStatusTask(balanceHolder);
+        coinStatusTask.execute(0);
     }
 
     @Override

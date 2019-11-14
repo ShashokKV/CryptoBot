@@ -1,7 +1,7 @@
 package com.chess.cryptobot.api;
 
 import com.chess.cryptobot.model.response.livecoin.LivecoinBalanceResponse;
-import com.chess.cryptobot.model.response.livecoin.LivecoinMarketsResponse;
+import com.chess.cryptobot.model.response.livecoin.LivecoinCurrenciesListResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinOrderBookResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinTickerResponse;
 
@@ -21,9 +21,9 @@ public interface LivecoinMarketService {
     @GET("exchange/order_book")
     Call<LivecoinOrderBookResponse> getOrderBook(@QueryMap Map<String, String> options);
 
-    @GET("exchange/restrictions")
-    Call<LivecoinMarketsResponse> getAllMarkets();
-
     @GET("exchange/ticker")
     Call<List<LivecoinTickerResponse>> getTicker();
+
+    @GET("info/coinInfo")
+    Call<LivecoinCurrenciesListResponse> getCurrencies();
 }

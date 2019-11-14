@@ -15,15 +15,20 @@ import com.chess.cryptobot.task.BalanceUpdateTask;
 import com.chess.cryptobot.task.CoinImageTask;
 import com.chess.cryptobot.view.MainFragment;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 public class BalanceHolder extends ContextHolder {
     private boolean hasKeys;
+    private Map<String, Boolean> bittrexStatuses;
+    private Map<String, Boolean> livecoinStatuses;
 
     public BalanceHolder(Fragment fragment) {
         super(fragment);
+        bittrexStatuses = new HashMap<>();
+        livecoinStatuses = new HashMap<>();
         checkIfHasKeys();
-        updateAllItems();
     }
 
     private void checkIfHasKeys() {
@@ -47,13 +52,16 @@ public class BalanceHolder extends ContextHolder {
     }
 
     public void add(String coinName) {
-        add(new Balance(coinName));
+        Balance balance = new Balance(coinName);
+        if (!getViewItems().contains(balance))
+            add(new Balance(coinName));
     }
 
     @Override
     public void add(ViewItem viewItem) {
         super.add(viewItem);
         Balance balance = (Balance) viewItem;
+        balance.setStatuses(livecoinStatuses.get(balance.getName()), bittrexStatuses.get(balance.getName()));
         updateImage(balance);
         if (hasKeys) updateAmount(balance);
         getMainActivity().updateBot();
@@ -68,6 +76,7 @@ public class BalanceHolder extends ContextHolder {
     @Override
     public void updateItem(ViewItem item) {
         Balance balance = (Balance) item;
+        balance.setStatuses(livecoinStatuses.get(balance.getName()), bittrexStatuses.get(balance.getName()));
         updateImage(balance);
         if (hasKeys) updateAmount(balance);
     }
@@ -94,10 +103,13 @@ public class BalanceHolder extends ContextHolder {
         return null;
     }
 
-
-
     public void setMinBalance(String coinName, Double minBalance) {
         BalancePreferences preferences = (BalancePreferences) getPrefs();
         preferences.setMinBalance(coinName,minBalance);
+    }
+
+    public void setCurrencyStatus(Map<String, Boolean> bittrexStatuses, Map<String, Boolean> livecoinStatuses) {
+        this.bittrexStatuses = bittrexStatuses;
+        this.livecoinStatuses = livecoinStatuses;
     }
 }

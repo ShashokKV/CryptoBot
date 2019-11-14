@@ -28,7 +28,6 @@ import java.lang.ref.WeakReference;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class GraphTask extends AsyncTask<Void, Integer, HorizontalBarChart> {
@@ -60,7 +59,6 @@ public class GraphTask extends AsyncTask<Void, Integer, HorizontalBarChart> {
         for (int i = 0; i <= daysToShow; i++) {
             List<ProfitPair> pairs = getProfitPairsByDayAndMinPercent(dao, date, minPercent);
             countApproximatePercent(pairs);
-            Collections.sort(pairs);
             addToEntriesGroup(entriesGroups, pairs, i);
             addToXAxisNames(daysForXAxis, date);
             date = date.minusDays(1);

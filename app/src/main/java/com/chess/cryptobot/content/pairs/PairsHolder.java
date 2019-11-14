@@ -14,13 +14,17 @@ import com.chess.cryptobot.task.AvailablePairsTask;
 import com.chess.cryptobot.task.PairsUpdateTask;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class PairsHolder extends ContextHolder {
     private List<String> invalidPairs;
     private List<String> availablePairs;
+    private Map<String, Double> bittrexVolumes;
+    private Map<String, Double> livecoinVolumes;
     private List<String> negativePercentPairs;
     private AllPairsPreferences allPairsPrefs;
     private float fee;
@@ -40,7 +44,10 @@ public class PairsHolder extends ContextHolder {
         this.invalidPairs = new ArrayList<>();
         this.availablePairs = new ArrayList<>();
         this.negativePercentPairs = new ArrayList<>();
+        this.bittrexVolumes = new HashMap<>();
+        this.livecoinVolumes = new HashMap<>();
     }
+
 
     private void initAvailablePairs() {
         AvailablePairsTask availablePairsTask = new AvailablePairsTask(this);
@@ -117,9 +124,16 @@ public class PairsHolder extends ContextHolder {
         }
     }
 
+    public void setVolumes(Map<String, Double> bittrexVolumes, Map<String, Double> livecoinVolumes) {
+        this.bittrexVolumes = bittrexVolumes;
+        this.livecoinVolumes = livecoinVolumes;
+    }
+
     @Override
     public void updateItem(ViewItem item) {
         Pair pair = (Pair) item;
+        pair.setLivecoinVolume(livecoinVolumes.get(pair.getName()));
+        pair.setBittrexVolume(bittrexVolumes.get(pair.getName()));
         PairsUpdateTask task = new PairsUpdateTask(this);
         task.execute(pair);
     }

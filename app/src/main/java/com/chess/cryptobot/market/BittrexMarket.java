@@ -3,6 +3,7 @@ package com.chess.cryptobot.market;
 import com.chess.cryptobot.api.BittrexMarketService;
 import com.chess.cryptobot.exceptions.BittrexException;
 import com.chess.cryptobot.exceptions.MarketException;
+import com.chess.cryptobot.model.response.CurrenciesResponse;
 import com.chess.cryptobot.model.response.OrderBookResponse;
 import com.chess.cryptobot.model.response.TickerResponse;
 import com.chess.cryptobot.model.response.bittrex.BittrexResponse;
@@ -83,18 +84,6 @@ public class BittrexMarket extends MarketRequest {
     }
 
     @Override
-    public List<String> getAllMarkets() throws BittrexException {
-        BittrexResponse response;
-        Call<BittrexResponse> call = service.getAllMarkets();
-        try {
-            response = (BittrexResponse) execute(call);
-        }catch (MarketException e) {
-            throw new BittrexException(e.getMessage());
-        }
-        return response.getMarketNames();
-    }
-
-    @Override
     public List<? extends TickerResponse> getTicker() throws MarketException {
         BittrexResponse response;
         Call<BittrexResponse> call = service.getTicker();
@@ -104,5 +93,28 @@ public class BittrexMarket extends MarketRequest {
             throw new BittrexException(e.getMessage());
         }
         return response.getTickers();
+    }
+
+    @Override
+    public List<CurrenciesResponse> getCurrencies() throws MarketException {
+        BittrexResponse response;
+        Call<BittrexResponse> call = service.getCurrencies();
+        try {
+            response = (BittrexResponse) execute(call);
+        }catch (MarketException e) {
+            throw new BittrexException(e.getMessage());
+        }
+        return response.getInfo();
+    }
+
+    @Override
+    public String getAddress() throws MarketException {
+        //TODO
+        return null;
+    }
+
+    @Override
+    public void sendCoins(String coinName, Double amount, String address) throws MarketException {
+        //TODO
     }
 }

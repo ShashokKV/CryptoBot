@@ -1,8 +1,9 @@
 package com.chess.cryptobot.model.response.bittrex;
 
 import com.chess.cryptobot.model.Price;
-import com.chess.cryptobot.model.response.AllMarketsResponse;
 import com.chess.cryptobot.model.response.BalanceResponse;
+import com.chess.cryptobot.model.response.CurrenciesListResponse;
+import com.chess.cryptobot.model.response.CurrenciesResponse;
 import com.chess.cryptobot.model.response.MarketResponse;
 import com.chess.cryptobot.model.response.OrderBookResponse;
 import com.chess.cryptobot.model.response.TickerResponse;
@@ -14,8 +15,7 @@ import java.util.List;
 public class BittrexResponse implements MarketResponse,
         BalanceResponse,
         OrderBookResponse,
-        AllMarketsResponse,
-        TickerResponse
+        CurrenciesListResponse
 {
 
     private Boolean success;
@@ -68,15 +68,6 @@ public class BittrexResponse implements MarketResponse,
         return Arrays.asList(results);
     }
 
-    @Override
-    public List<String> getMarketNames() {
-        List<String> marketNames = new ArrayList<>();
-        for (BittrexGenericResponse result: results) {
-            marketNames.add(result.getMarketName());
-        }
-        return marketNames;
-    }
-
     private List<Price> parsePrices(List<BittrexPrice> prices) {
         ArrayList<Price> parsedPrices = new ArrayList<>();
         prices.forEach(price -> parsedPrices.add(new Price(price.getRate(), price.getQuantity())));
@@ -84,17 +75,7 @@ public class BittrexResponse implements MarketResponse,
     }
 
     @Override
-    public String getTickerName() {
-        return null;
-    }
-
-    @Override
-    public Double getTickerBid() {
-        return null;
-    }
-
-    @Override
-    public Double getTickerAsk() {
-        return null;
+    public List<CurrenciesResponse> getInfo() {
+        return Arrays.asList(results);
     }
 }

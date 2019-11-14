@@ -56,4 +56,9 @@ public abstract class RecyclerViewAdapter<T extends RecyclerView.ViewHolder> ext
         ViewItem viewItem = items.get(position);
         return viewItem.getName().hashCode();
     }
+
+    @Override
+    public int getItemViewType(int position) {
+        return position;
+    }
 }

@@ -7,4 +7,6 @@ public interface TickerResponse {
     Double getTickerBid();
     
     Double getTickerAsk();
+
+    Double getVolume();
 }

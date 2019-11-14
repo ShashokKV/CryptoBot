@@ -17,9 +17,9 @@ public interface BittrexMarketService {
     @GET("public/getorderbook")
     Call<BittrexResponse> getOrderBook(@QueryMap Map<String, String> options);
 
-    @GET("public/getmarkets")
-    Call<BittrexResponse> getAllMarkets();
-
     @GET("public/getmarketsummaries")
     Call<BittrexResponse> getTicker();
+
+    @GET("public/getcurrencies")
+    Call<BittrexResponse> getCurrencies();
 }

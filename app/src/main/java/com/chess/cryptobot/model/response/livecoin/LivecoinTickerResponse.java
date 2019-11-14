@@ -8,13 +8,16 @@ public class LivecoinTickerResponse extends LivecoinResponse implements TickerRe
 
     @SerializedName("symbol")
     @Expose
-    public String symbol;
+    private String symbol;
     @SerializedName("best_bid")
     @Expose
-    public Double bestBid;
+    private Double bestBid;
     @SerializedName("best_ask")
     @Expose
-    public Double bestAsk;
+    private Double bestAsk;
+    @SerializedName("volume")
+    @Expose
+    private Double volume;
 
     @Override
     public String getTickerName() {
@@ -30,5 +33,9 @@ public class LivecoinTickerResponse extends LivecoinResponse implements TickerRe
     @Override
     public Double getTickerAsk() {
         return bestAsk;
+    }
+
+    public Double getVolume() {
+        return volume;
     }
 }

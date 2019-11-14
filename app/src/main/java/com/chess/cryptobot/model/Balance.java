@@ -4,6 +4,8 @@ import android.graphics.Bitmap;
 
 import androidx.annotation.Nullable;
 
+import com.chess.cryptobot.market.Market;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,12 +14,15 @@ public class Balance implements ViewItem {
     private Bitmap coinIcon;
     private Map<String, Double> amounts;
     private String message;
+    private Map<String, Boolean> statuses = new HashMap<>();
 
     public Balance(String coinName) {
         this.coinName = coinName;
         this.amounts = new HashMap<>();
-        this.amounts.put("bittrex", 0.0d);
-        this.amounts.put("livecoin", 0.0d);
+        this.amounts.put(Market.BITTREX_MARKET, 0.0d);
+        this.amounts.put(Market.LIVECOIN_MARKET, 0.0d);
+        this.statuses.put(Market.BITTREX_MARKET, true);
+        this.statuses.put(Market.LIVECOIN_MARKET, true);
     }
 
     @Override
@@ -30,12 +35,6 @@ public class Balance implements ViewItem {
         }else {
             return false;
         }
-    }
-
-    @Override
-    public int compareTo(ViewItem item) {
-        Balance balance = (Balance) item;
-        return this.coinName.compareTo(balance.coinName);
     }
 
     public String getName() {
@@ -55,7 +54,9 @@ public class Balance implements ViewItem {
     }
 
     public Double getAmount(String marketName)  {
-        return this.amounts.get(marketName);
+        Double amount = this.amounts.get(marketName);
+        if (amount==null) return 0.0d;
+        return amount;
     }
 
     public Map<String, Double> getAmounts() {
@@ -68,5 +69,16 @@ public class Balance implements ViewItem {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public void setStatuses(Boolean livecoinStatus, Boolean bittrexStatus) {
+        this.statuses.put(Market.LIVECOIN_MARKET, livecoinStatus);
+        this.statuses.put(Market.BITTREX_MARKET, bittrexStatus);
+    }
+
+    public Boolean getStatus(String marketName) {
+        Boolean status = this.statuses.get(marketName);
+        if (status == null) return true;
+        return status;
     }
 }
