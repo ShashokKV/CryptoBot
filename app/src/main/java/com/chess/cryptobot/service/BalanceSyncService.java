@@ -1,6 +1,7 @@
 package com.chess.cryptobot.service;
 
 import android.app.IntentService;
+import android.app.NotificationManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
@@ -13,8 +14,10 @@ import com.chess.cryptobot.exceptions.SyncServiceException;
 import com.chess.cryptobot.market.Market;
 import com.chess.cryptobot.market.MarketFactory;
 import com.chess.cryptobot.model.response.CurrenciesResponse;
+import com.chess.cryptobot.view.notification.NotificationBuilder;
 
-import java.util.ArrayList;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +27,9 @@ import static com.chess.cryptobot.market.Market.BITTREX_MARKET;
 import static com.chess.cryptobot.market.Market.LIVECOIN_MARKET;
 
 public class BalanceSyncService extends IntentService {
-    private List<String> resultInfo = new ArrayList<>();
+    private static final int NOTIFICATION_ID = 300500;
+    private static final String CHANNEL_ID = "balance_sync_channel";
+    private String resultInfo = "";
     private Map<String, Map<String, Boolean>> statuses = new HashMap<>();
     private Map<String, Map<String, Double>> fees = new HashMap<>();
     private Map<String, Market> marketsMap = new HashMap<>();
@@ -46,7 +51,9 @@ public class BalanceSyncService extends IntentService {
         try {
             initCoinInfo(markets);
         } catch (MarketException e) {
-            e.printStackTrace();
+            updateInfo("BalanceSync", "Can't init coinInfo: "+e.getMessage());
+            makeNotification();
+            return;
         }
 
         coinNames.forEach(coinName -> {
@@ -56,6 +63,8 @@ public class BalanceSyncService extends IntentService {
                 updateInfo(coinName, e.getMessage());
             }
         });
+
+        makeNotification();
     }
 
     private void initCoinInfo(List<Market> markets) throws MarketException {
@@ -80,104 +89,149 @@ public class BalanceSyncService extends IntentService {
         }
 
         if (!checkCoinStatus(coinName)) {
-            throw new SyncServiceException( "Not active");
+            throw new SyncServiceException("Not active");
         }
 
-        Map<String,Double> marketAmounts;
+        Map<String, Double> marketAmounts;
         try {
-            marketAmounts = getMarketsAmmounts(markets, coinName);
+            marketAmounts = getMarketsAmounts(markets, coinName);
         } catch (MarketException e) {
             throw new SyncServiceException(e.getMessage());
         }
-        if (marketAmounts==null) return;
+        if (marketAmounts == null) throw new SyncServiceException("Can't get amounts");
 
-        Double bittrexAm = getAmount(marketAmounts, BITTREX_MARKET);
-        Double livecoinAm = getAmount(marketAmounts, LIVECOIN_MARKET);
-
-        Double livecoinFee = getFee(LIVECOIN_MARKET, coinName);
-        Double bittrexFee = getFee(BITTREX_MARKET, coinName);
-
-        Double bittrexDelta = getDelta(bittrexAm, minBalance);
-        if (needSync(bittrexDelta)) {
-            checkDelta(bittrexDelta, bittrexFee, livecoinAm);
-            try {
-                moveBalances(Objects.requireNonNull(marketsMap.get(LIVECOIN_MARKET)),
-                        Objects.requireNonNull(marketsMap.get(BITTREX_MARKET)), coinName, bittrexDelta);
-            } catch (MarketException e) {
-                throw new SyncServiceException(e.getMessage());
-            }
-        }
-        Double livecoinDelta = getDelta(livecoinAm, minBalance);
-        if (needSync(livecoinDelta)) {
-            checkDelta(livecoinDelta, livecoinFee, bittrexAm);
-            try {
-                moveBalances(Objects.requireNonNull(marketsMap.get(BITTREX_MARKET)),
-                        Objects.requireNonNull(marketsMap.get(LIVECOIN_MARKET)), coinName, livecoinDelta);
-            } catch (MarketException e) {
-                throw new SyncServiceException(e.getMessage());
-            }
+        CoinMover coinMover = new CoinMover(minBalance, coinName);
+        coinMover.setAmounts(marketAmounts);
+        coinMover.setDirection(BITTREX_MARKET, LIVECOIN_MARKET);
+        if (!coinMover.checkAndMove()) {
+            coinMover.setDirection(LIVECOIN_MARKET, BITTREX_MARKET);
+            coinMover.checkAndMove();
         }
     }
 
-    private Double getAmount(Map<String, Double> amounts, String marketName) throws SyncServiceException {
-        Double amount = amounts.get(marketName);
-        if (amount == null) throw new SyncServiceException("Can't get amount");
-        return amount;
-    }
-
-    private Double getFee(String marketName, String coinName) throws SyncServiceException {
-        Map<String, Double> fees = this.fees.get(marketName);
-        if (fees == null) {
-            throw new SyncServiceException("Can't get fees");
-        }
-
-        Double fee = fees.get(coinName);
-        if (fee == null) {
-            throw new SyncServiceException("Can't get fee from "+marketName);
-        }
-        return fee;
-    }
-
-    private boolean checkCoinStatus(String coinName) {
-        Map<String, Boolean> bittrexStatuses = statuses.get(BITTREX_MARKET);
-        if (bittrexStatuses==null) return false;
-        Map<String, Boolean> livecoinStatuses = statuses.get(LIVECOIN_MARKET);
-        if (livecoinStatuses==null) return false;
-
-        Boolean bittrexStatus = bittrexStatuses.get(coinName);
-        Boolean livecoinStatus = livecoinStatuses.get(coinName);
-
-        if (bittrexStatus==null || livecoinStatus==null) return false;
-        return (bittrexStatus && livecoinStatus);
-    }
-
-    private Map<String, Double> getMarketsAmmounts(List<Market> markets, String coinName) throws MarketException {
+    private Map<String, Double> getMarketsAmounts(List<Market> markets, String coinName) throws MarketException {
         Map<String, Double> marketAmounts = new HashMap<>();
         for (Market market : markets) {
-                marketAmounts.put(market.getMarketName(), market.getAmount(coinName));
+            marketAmounts.put(market.getMarketName(), market.getAmount(coinName));
         }
         return marketAmounts;
     }
 
-    private Double getDelta(Double amount, Double minBalance) {
-        return minBalance - amount;
-    }
+    private boolean checkCoinStatus(String coinName) {
+        Map<String, Boolean> bittrexStatuses = statuses.get(BITTREX_MARKET);
+        if (bittrexStatuses == null) return false;
+        Map<String, Boolean> livecoinStatuses = statuses.get(LIVECOIN_MARKET);
+        if (livecoinStatuses == null) return false;
 
-    private boolean needSync(Double delta) {
-        return delta>0;
-    }
+        Boolean bittrexStatus = bittrexStatuses.get(coinName);
+        Boolean livecoinStatus = livecoinStatuses.get(coinName);
 
-    private void checkDelta(Double delta, Double fee,Double fromAmount) throws SyncServiceException {
-        if (fromAmount<(delta+fee)) throw new SyncServiceException("Not enough coins");
-    }
-
-    private void moveBalances(Market moveFrom, Market moveTo, String coinName, Double amount) throws MarketException {
-        String address = moveTo.getAddress();
-
-        moveFrom.sendCoins(coinName, amount, address);
+        if (bittrexStatus == null || livecoinStatus == null) return false;
+        return (bittrexStatus && livecoinStatus);
     }
 
     private void updateInfo(String coinName, String message) {
-        resultInfo.add(String.format("%s: %s", coinName, message));
+        resultInfo = resultInfo.concat(String.format("%s: %s%s", coinName, message, System.lineSeparator()));
+    }
+
+    private void makeNotification() {
+        new NotificationBuilder(this)
+                .setNotificationId(NOTIFICATION_ID)
+                .setChannelId(CHANNEL_ID)
+                .setNotificationText(resultInfo)
+                .setChannelName("Balance sync service")
+                .setImportance(NotificationManager.IMPORTANCE_DEFAULT)
+                .setTitle("Balance sync result")
+                .buildAndNotify();
+    }
+
+    class CoinMover {
+        private Double minBalance;
+        private String coinName;
+        private Map<String, Double> amounts;
+        private String moveFrom;
+        private String moveTo;
+
+        CoinMover(Double minBalance, String coinName) {
+            this.minBalance = minBalance;
+            this.coinName = coinName;
+        }
+
+
+        void setAmounts(Map<String, Double> amounts) {
+            this.amounts = amounts;
+        }
+
+        private void setDirection(String moveFrom, String moveTo) {
+            this.moveFrom = moveFrom;
+            this.moveTo = moveTo;
+        }
+
+        private boolean checkAndMove() throws SyncServiceException {
+            Double fromAmount = getAmount(amounts, moveFrom);
+            Double toAmount = getAmount(amounts, moveTo);
+
+            Double fee = getFee(moveFrom, coinName);
+
+            Market moveFromMarket = Objects.requireNonNull(marketsMap.get(moveFrom));
+            Market moveToMarket = Objects.requireNonNull(marketsMap.get(moveTo));
+
+            Double delta = getDelta(toAmount, minBalance);
+            if (needSync(delta)) {
+                delta = formatAmount(delta + fee);
+                checkDelta(delta, fromAmount);
+                try {
+                    moveBalances(moveFromMarket, moveToMarket, coinName, delta);
+                    return true;
+                } catch (MarketException e) {
+                    throw new SyncServiceException(e.getMessage());
+                }
+            }
+            return false;
+        }
+
+        private Double getAmount(Map<String, Double> amounts, String marketName) throws SyncServiceException {
+            Double amount = amounts.get(marketName);
+            if (amount == null) throw new SyncServiceException("Can't get amount");
+            return amount;
+        }
+
+        private Double getFee(String marketName, String coinName) throws SyncServiceException {
+            Map<String, Double> fees = BalanceSyncService.this.fees.get(marketName);
+            if (fees == null) {
+                throw new SyncServiceException("Can't get fees");
+            }
+
+            Double fee = fees.get(coinName);
+            if (fee == null) {
+                throw new SyncServiceException("Can't get fee from " + marketName);
+            }
+
+            return fee;
+        }
+
+        private Double formatAmount(Double amount) {
+            BigDecimal bd = new BigDecimal(amount).setScale(8, RoundingMode.HALF_UP);
+            return bd.doubleValue();
+        }
+
+        private Double getDelta(Double amount, Double minBalance) {
+            return minBalance - amount;
+        }
+
+        private boolean needSync(Double delta) {
+            return delta > 0;
+        }
+
+        private void checkDelta(Double delta, Double fromAmount) throws SyncServiceException {
+            if (fromAmount < delta) throw new SyncServiceException("Not enough coins");
+        }
+
+        private void moveBalances(Market moveFrom, Market moveTo, String coinName, Double amount) throws MarketException {
+            String address = moveTo.getAddress(coinName);
+            String paymentId = moveFrom.sendCoins(coinName, amount, address);
+
+            updateInfo(coinName, String.format("%s sent from %s, id=%s", amount.toString(), moveFrom.getMarketName(), paymentId));
+        }
     }
 }

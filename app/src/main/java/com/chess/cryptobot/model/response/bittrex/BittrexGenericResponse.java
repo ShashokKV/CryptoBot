@@ -38,6 +38,12 @@ class BittrexGenericResponse implements TickerResponse, CurrenciesResponse {
     @SerializedName("IsActive")
     @Expose
     private Boolean isActive;
+    @SerializedName("CryptoAddress")
+    @Expose
+    private String cryptoAddress;
+    @SerializedName("uuid")
+    @Expose
+    private String uuid;
 
     Double getAvailable() {
         return available;
@@ -81,5 +87,13 @@ class BittrexGenericResponse implements TickerResponse, CurrenciesResponse {
     public Double getFee() {
         if (txFee==null) return 0.0d;
         return txFee;
+    }
+
+    String getCryptoAddress() {
+        return cryptoAddress;
+    }
+
+    public String getUuid() {
+        return uuid;
     }
 }

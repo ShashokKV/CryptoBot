@@ -6,9 +6,11 @@ import com.chess.cryptobot.exceptions.MarketException;
 import com.chess.cryptobot.model.response.CurrenciesResponse;
 import com.chess.cryptobot.model.response.OrderBookResponse;
 import com.chess.cryptobot.model.response.TickerResponse;
+import com.chess.cryptobot.model.response.livecoin.LivecoinAddressResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinBalanceResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinCurrenciesListResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinOrderBookResponse;
+import com.chess.cryptobot.model.response.livecoin.LivecoinPaymentResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinTickerResponse;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -114,14 +116,48 @@ public class LivecoinMarket extends MarketRequest {
     }
 
     @Override
-    public String getAddress() throws MarketException {
-        //TODO
-        return null;
+    public String getAddress(String coinName) throws MarketException {
+        TreeMap<String, String> params = new TreeMap<>();
+        params.put("currency", coinName);
+
+        String hash = makeHash(params);
+
+        TreeMap<String, String> headers = new TreeMap<>();
+        headers.put("API-key", this.apiKey);
+        headers.put("Sign", hash);
+
+        LivecoinAddressResponse response;
+        try {
+            Call<LivecoinAddressResponse> call = service.getAddress(params, headers);
+            response = (LivecoinAddressResponse) execute(call);
+        } catch (MarketException e) {
+            throw new LivecoinException(e.getMessage());
+        }
+        return response.getAddress();
     }
 
     @Override
-    public void sendCoins(String coinName, Double amount, String address) throws MarketException {
-        //TODO
+    public String sendCoins(String coinName, Double amount, String address) throws MarketException {
+        TreeMap<String, String> params = new TreeMap<>();
+        params.put("amount", amount.toString());
+        params.put("currency", coinName);
+        params.put("wallet", address);
+
+        String hash = makeHash(params);
+
+        TreeMap<String, String> headers = new TreeMap<>();
+        headers.put("API-key", this.apiKey);
+        headers.put("Sign", hash);
+        headers.put("Content-Type", "application/x-www-form-urlencoded");
+
+        LivecoinPaymentResponse response;
+        try {
+            Call<LivecoinPaymentResponse> call = service.payment(params, headers);
+            response = (LivecoinPaymentResponse) execute(call);
+        } catch (MarketException e) {
+            throw new LivecoinException(e.getMessage());
+        }
+        return response.getPaymentId();
     }
 
 

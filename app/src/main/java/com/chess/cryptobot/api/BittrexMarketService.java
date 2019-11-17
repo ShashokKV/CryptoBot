@@ -22,4 +22,7 @@ public interface BittrexMarketService {
 
     @GET("public/getcurrencies")
     Call<BittrexResponse> getCurrencies();
+
+    @GET("account/withdraw")
+    Call<BittrexResponse> payment(@QueryMap Map<String, String> options, @HeaderMap Map<String, String> headers);
 }

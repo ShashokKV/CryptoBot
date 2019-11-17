@@ -46,7 +46,20 @@ public class BittrexMarket extends MarketRequest {
 
     @Override
     public Double getAmount(String coinName) throws BittrexException {
-        if (keysIsEmpty()) return 0.0d;
+        BittrexResponse response = this.getBalanceResponse(coinName);
+        if (response==null) return 0.0d;
+        return response.getAmount();
+    }
+
+    @Override
+    public String getAddress(String coinName) throws MarketException {
+        BittrexResponse response = this.getBalanceResponse(coinName);
+        if (response==null) return null;
+        return response.getAddress();
+    }
+
+    private BittrexResponse getBalanceResponse(String coinName) throws BittrexException {
+        if (keysIsEmpty()) return null;
         this.path = this.url.concat("account/getbalance?");
         Map<String, String> params = new TreeMap<>();
         params.put("currency", coinName);
@@ -65,7 +78,7 @@ public class BittrexMarket extends MarketRequest {
         } catch (MarketException e) {
             throw new BittrexException(e.getMessage());
         }
-        return response.getAmount();
+        return response;
     }
 
     @Override
@@ -108,13 +121,27 @@ public class BittrexMarket extends MarketRequest {
     }
 
     @Override
-    public String getAddress() throws MarketException {
-        //TODO
-        return null;
-    }
+    public String sendCoins(String coinName, Double amount, String address) throws MarketException {
+        BittrexResponse response;
+        this.path = this.url.concat("account/withdraw?");
+        Map<String, String> params = new TreeMap<>();
+        params.put("currency", coinName);
+        params.put("quantity", amount.toString());
+        params.put("address", address);
+        params.put("apikey", this.apiKey);
+        params.put("nonce", String.valueOf(System.currentTimeMillis()));
 
-    @Override
-    public void sendCoins(String coinName, Double amount, String address) throws MarketException {
-        //TODO
+        String hash = makeHash(params);
+
+        TreeMap<String, String> headers = new TreeMap<>();
+        headers.put("apisign", hash);
+
+        try {
+            Call<BittrexResponse> call = service.payment(params, headers);
+            response = (BittrexResponse) execute(call);
+        } catch (MarketException e) {
+            throw new BittrexException(e.getMessage());
+        }
+        return response.getPaymentId();
     }
 }

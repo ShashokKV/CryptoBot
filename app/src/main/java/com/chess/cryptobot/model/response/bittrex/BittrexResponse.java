@@ -1,11 +1,13 @@
 package com.chess.cryptobot.model.response.bittrex;
 
 import com.chess.cryptobot.model.Price;
+import com.chess.cryptobot.model.response.AddressResponse;
 import com.chess.cryptobot.model.response.BalanceResponse;
 import com.chess.cryptobot.model.response.CurrenciesListResponse;
 import com.chess.cryptobot.model.response.CurrenciesResponse;
 import com.chess.cryptobot.model.response.MarketResponse;
 import com.chess.cryptobot.model.response.OrderBookResponse;
+import com.chess.cryptobot.model.response.PaymentResponse;
 import com.chess.cryptobot.model.response.TickerResponse;
 
 import java.util.ArrayList;
@@ -15,7 +17,9 @@ import java.util.List;
 public class BittrexResponse implements MarketResponse,
         BalanceResponse,
         OrderBookResponse,
-        CurrenciesListResponse
+        CurrenciesListResponse,
+        AddressResponse,
+        PaymentResponse
 {
 
     private Boolean success;
@@ -77,5 +81,15 @@ public class BittrexResponse implements MarketResponse,
     @Override
     public List<CurrenciesResponse> getInfo() {
         return Arrays.asList(results);
+    }
+
+    @Override
+    public String getAddress() {
+        return results[0].getCryptoAddress();
+    }
+
+    @Override
+    public String getPaymentId() {
+        return results[0].getUuid();
     }
 }

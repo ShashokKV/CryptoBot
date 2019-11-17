@@ -21,9 +21,9 @@ public interface Market {
 
     List<CurrenciesResponse> getCurrencies() throws MarketException;
 
-    String getAddress() throws MarketException;
+    String getAddress(String coinName) throws MarketException;
 
-    void sendCoins(String coinName, Double amount, String address) throws MarketException;
+    String sendCoins(String coinName, Double amount, String address) throws MarketException;
 
     boolean keysIsEmpty();
 }

@@ -1,9 +1,7 @@
 package com.chess.cryptobot.service;
 
 import android.app.Notification;
-import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -25,7 +23,7 @@ import com.chess.cryptobot.market.Market;
 import com.chess.cryptobot.market.MarketFactory;
 import com.chess.cryptobot.model.Pair;
 import com.chess.cryptobot.model.response.OrderBookResponse;
-import com.chess.cryptobot.view.MainActivity;
+import com.chess.cryptobot.view.notification.NotificationBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -113,38 +111,15 @@ public class BotService extends Service {
     }
 
     private Notification buildForegroundNotification() {
-        PendingIntent pendingIntent = getPendingIntent();
-        createForegroundNotificationChannelIfNotExists();
-
-        return new Notification.Builder(BotService.this, FOREGROUND_CHANNEL_ID)
-                .setSmallIcon(R.drawable.round_monetization_on_24)
-                .setContentTitle("Bot is running")
-                .setColorized(true)
-                .setColor(getResources().getColor(R.color.colorPrimary, null))
-                .setContentIntent(pendingIntent)
-                .setCategory(Notification.CATEGORY_SERVICE)
+        return new NotificationBuilder(this)
+                .setTitle("Bot is running")
+                .setImportance(NotificationManager.IMPORTANCE_LOW)
+                .setChannelName(getApplicationContext().getString(R.string.foreground_channel_name))
+                .setChannelId(FOREGROUND_CHANNEL_ID)
+                .setNotificationId(FOREGROUND_NOTIFICATION_ID)
+                .setColor(R.color.colorPrimary)
+                .setExtraFlag("openPairs")
                 .build();
-    }
-
-    private void createForegroundNotificationChannelIfNotExists() {
-        NotificationManager notificationManager = getSystemService(NotificationManager.class);
-
-        NotificationChannel channel = notificationManager.getNotificationChannel(FOREGROUND_CHANNEL_ID);
-        if (channel==null) {
-            CharSequence name = getApplicationContext().getString(R.string.foreground_channel_name);
-            channel = new NotificationChannel(FOREGROUND_CHANNEL_ID, name, NotificationManager.IMPORTANCE_LOW);
-            channel.enableVibration(false);
-            channel.enableLights(false);
-            notificationManager.createNotificationChannel(channel);
-        }
-    }
-
-    private PendingIntent getPendingIntent() {
-        Intent intent = new Intent(BotService.this, MainActivity.class);
-        intent.putExtra("openPairs", true);
-        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        int uniqueInt = (int) (System.currentTimeMillis() & 0xfffffff);
-        return PendingIntent.getActivity(BotService.this, uniqueInt, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     public void update() {
@@ -231,39 +206,21 @@ public class BotService extends Service {
 
         private void makeNotification(List<Pair> profitPairs) {
             String text = getNotificationText(profitPairs);
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            createNotificationChannelIfNotExist(notificationManager);
-            notificationManager.notify(NOTIFICATION_ID, buildNotification(text));
+            new NotificationBuilder(BotService.this)
+                    .setTitle("Profitable pairs found")
+                    .setImportance(NotificationManager.IMPORTANCE_DEFAULT)
+                    .setChannelName(getApplicationContext().getString(R.string.channel_name))
+                    .setChannelId(CHANNEL_ID)
+                    .setNotificationId(NOTIFICATION_ID)
+                    .setExtraFlag("openPairs")
+                    .setNotificationText(text)
+                    .buildAndNotify();
         }
 
         private String getNotificationText(List<Pair> profitPairs) {
             return profitPairs.stream()
                     .map(pair -> String.format(Locale.getDefault(),"%s - %.2f%s", pair.getName(), pair.getPercent(), System.lineSeparator()))
                     .collect(Collectors.joining());
-        }
-
-        private void createNotificationChannelIfNotExist(NotificationManager notificationManager) {
-            NotificationChannel channel = notificationManager.getNotificationChannel(CHANNEL_ID);
-            if (channel==null) {
-                CharSequence name = getApplicationContext().getString(R.string.channel_name);
-                String description = getApplicationContext().getString(R.string.channel_description);
-                channel = new NotificationChannel(CHANNEL_ID, name, NotificationManager.IMPORTANCE_DEFAULT);
-                channel.setDescription(description);
-                notificationManager.createNotificationChannel(channel);
-            }
-        }
-
-        private Notification buildNotification(String notificationText) {
-            PendingIntent pendingIntent = getPendingIntent();
-
-            return new Notification.Builder(BotService.this, CHANNEL_ID)
-                    .setSmallIcon(R.drawable.round_monetization_on_24)
-                    .setContentTitle("Profitable pairs found")
-                    .setStyle(new Notification.BigTextStyle().bigText(notificationText))
-                    .setAutoCancel(true)
-                    .setContentIntent(pendingIntent)
-                    .setCategory(Notification.CATEGORY_SERVICE)
-                    .build();
         }
     }
 

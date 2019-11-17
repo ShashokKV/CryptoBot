@@ -76,11 +76,11 @@ abstract class MarketRequest implements Market {
 
     private String buildQueryString(Map<String, String> args) {
         StringBuilder result = new StringBuilder();
-        for (String hashKey : args.keySet()) {
+        for (String param : args.keySet()) {
             if (result.length() > 0) result.append('&');
             try {
-                result.append(URLEncoder.encode(hashKey, DEFAULT_ENCODING))
-                        .append("=").append(URLEncoder.encode(args.get(hashKey), DEFAULT_ENCODING));
+                result.append(URLEncoder.encode(param, DEFAULT_ENCODING))
+                        .append("=").append(URLEncoder.encode(args.get(param), DEFAULT_ENCODING));
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
