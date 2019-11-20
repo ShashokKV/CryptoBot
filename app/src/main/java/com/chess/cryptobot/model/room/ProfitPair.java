@@ -7,14 +7,18 @@ import androidx.room.PrimaryKey;
 
 import java.time.LocalDateTime;
 
+import static androidx.room.ColumnInfo.INTEGER;
+import static androidx.room.ColumnInfo.REAL;
+import static androidx.room.ColumnInfo.TEXT;
+
 @Entity
-public class ProfitPair implements Comparable<ProfitPair>{
+public class ProfitPair {
     @PrimaryKey(autoGenerate = true)
-    @ColumnInfo(name = "id", typeAffinity = 3)
+    @ColumnInfo(name = "id", typeAffinity = INTEGER)
     private int id;
-    @ColumnInfo(name = "pairName", typeAffinity = 2)
+    @ColumnInfo(name = "pairName", typeAffinity = TEXT)
     private String pairName;
-    @ColumnInfo(name = "percent", typeAffinity = 4)
+    @ColumnInfo(name = "percent", typeAffinity = REAL)
     private Float percent;
     @ColumnInfo(name = "dateCreated")
     private LocalDateTime dateCreated;
@@ -43,17 +47,12 @@ public class ProfitPair implements Comparable<ProfitPair>{
         this.percent = percent;
     }
 
-    public LocalDateTime getDateCreated() {
+    LocalDateTime getDateCreated() {
         return dateCreated;
     }
 
     public void setDateCreated(LocalDateTime dateCreated) {
         this.dateCreated = dateCreated;
-    }
-
-    @Override
-    public int compareTo(ProfitPair pair) {
-        return Math.round((pair.getPercent() - this.getPercent())*100);
     }
 
     @Override

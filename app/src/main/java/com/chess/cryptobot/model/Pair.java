@@ -2,14 +2,20 @@ package com.chess.cryptobot.model;
 
 import androidx.annotation.Nullable;
 
-public class Pair implements ViewItem {
+import java.io.Serializable;
+
+public class Pair implements ViewItem, Serializable {
     private String baseName;
     private String marketName;
     private Double bittrexAsk;
+    private Double bittrexAskQuantity;
     private Double bittrexBid;
+    private Double bittrexBidQuantity;
     private Double bittrexVolume;
     private Double livecoinAsk;
+    private Double livecoinAskQuantity;
     private Double livecoinBid;
+    private Double livecoinBidQuantity;
     private Double livecoinVolume;
     private float percent;
     private String message;
@@ -43,6 +49,14 @@ public class Pair implements ViewItem {
 
     public String getName() {
         return baseName.concat("/").concat(marketName);
+    }
+
+    public String getBaseName() {
+        return baseName;
+    }
+
+    public String getMarketName() {
+        return marketName;
     }
 
     public Double getBittrexAsk() {
@@ -99,6 +113,38 @@ public class Pair implements ViewItem {
 
     public void setPercent(float percent) {
         this.percent = percent;
+    }
+
+    public Double getBittrexAskQuantity() {
+        return bittrexAskQuantity;
+    }
+
+    public void setBittrexAskQuantity(Double bittrexAskQuantity) {
+        this.bittrexAskQuantity = bittrexAskQuantity;
+    }
+
+    public Double getBittrexBidQuantity() {
+        return bittrexBidQuantity;
+    }
+
+    public void setBittrexBidQuantity(Double bittrexBidQuantity) {
+        this.bittrexBidQuantity = bittrexBidQuantity;
+    }
+
+    public Double getLivecoinAskQuantity() {
+        return livecoinAskQuantity;
+    }
+
+    public void setLivecoinAskQuantity(Double livecoinAskQuantity) {
+        this.livecoinAskQuantity = livecoinAskQuantity;
+    }
+
+    public Double getLivecoinBidQuantity() {
+        return livecoinBidQuantity;
+    }
+
+    public void setLivecoinBidQuantity(Double livecoinBidQuantity) {
+        this.livecoinBidQuantity = livecoinBidQuantity;
     }
 
     public String getPairNameForMarket(String marketName) {

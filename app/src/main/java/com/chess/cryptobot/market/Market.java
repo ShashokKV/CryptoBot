@@ -25,5 +25,9 @@ public interface Market {
 
     String sendCoins(String coinName, Double amount, String address) throws MarketException;
 
+    String buy(String pairName, Double price, Double amount) throws MarketException;
+
+    String sell(String pairName, Double price, Double amount) throws MarketException;
+
     boolean keysIsEmpty();
 }

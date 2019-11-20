@@ -178,7 +178,7 @@ public class BalanceSyncService extends IntentService {
 
             Double delta = getDelta(toAmount, minBalance);
             if (needSync(delta)) {
-                delta = formatAmount(delta + fee);
+                delta = formatAmount(recalculateDelta(fromAmount, toAmount, fee));
                 checkDelta(delta, fromAmount);
                 try {
                     moveBalances(moveFromMarket, moveToMarket, coinName, delta);
@@ -208,6 +208,10 @@ public class BalanceSyncService extends IntentService {
             }
 
             return fee;
+        }
+
+        private Double recalculateDelta(Double fromAmount, Double toAmount, Double fee) {
+            return (((fromAmount+toAmount)/2)-toAmount)+fee;
         }
 
         private Double formatAmount(Double amount) {

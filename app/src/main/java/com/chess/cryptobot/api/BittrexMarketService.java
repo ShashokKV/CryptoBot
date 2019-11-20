@@ -23,6 +23,15 @@ public interface BittrexMarketService {
     @GET("public/getcurrencies")
     Call<BittrexResponse> getCurrencies();
 
+    @GET("account/getdepositaddress")
+    Call<BittrexResponse> getAddress(@QueryMap Map<String, String> options, @HeaderMap Map<String, String> headers);
+
     @GET("account/withdraw")
     Call<BittrexResponse> payment(@QueryMap Map<String, String> options, @HeaderMap Map<String, String> headers);
+
+    @GET("market/buylimit")
+    Call<BittrexResponse> buy(@QueryMap Map<String, String> options, @HeaderMap Map<String, String> headers);
+
+    @GET("market/selllimit")
+    Call<BittrexResponse> sell(@QueryMap Map<String, String> options, @HeaderMap Map<String, String> headers);
 }

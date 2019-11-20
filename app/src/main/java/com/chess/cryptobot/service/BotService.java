@@ -22,17 +22,23 @@ import com.chess.cryptobot.exceptions.MarketException;
 import com.chess.cryptobot.market.Market;
 import com.chess.cryptobot.market.MarketFactory;
 import com.chess.cryptobot.model.Pair;
+import com.chess.cryptobot.model.response.CurrenciesResponse;
 import com.chess.cryptobot.model.response.OrderBookResponse;
 import com.chess.cryptobot.view.notification.NotificationBuilder;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.stream.Collectors;
+
+import static com.chess.cryptobot.market.Market.BITTREX_MARKET;
+import static com.chess.cryptobot.market.Market.LIVECOIN_MARKET;
 
 public class BotService extends Service {
     public static final int NOTIFICATION_ID = 100500;
@@ -48,6 +54,7 @@ public class BotService extends Service {
     private Float fee;
     private final IBinder botBinder = new BotBinder();
     private static final String TAG = BotService.class.getSimpleName();
+    private boolean autoTrade;
 
     @Override
     public void onCreate() {
@@ -94,6 +101,7 @@ public class BotService extends Service {
         minPercent = Float.valueOf(Objects.requireNonNull(preferences.getString(getString(R.string.min_profit_percent), "3")));
         fee = Float.valueOf(getString(R.string.bittrex_fee)) + Float.valueOf(getString(R.string.livecoin_fee));
         runPeriod = Integer.valueOf(Objects.requireNonNull(preferences.getString(getString(R.string.service_run_period), "5")));
+        autoTrade = preferences.getBoolean(getString(R.string.auto_trade), false);
     }
 
     private void startTimer() {
@@ -104,7 +112,7 @@ public class BotService extends Service {
     }
 
     private void runTimer(List<Pair> pairs, List<Market> markets) {
-        long period = runPeriod*1000*60;
+        long period = runPeriod * 1000 * 60;
         BotTimerTask botTimerTask = new BotTimerTask(pairs, markets);
         botTimer.scheduleAtFixedRate(botTimerTask, 1000, period);
         Log.d(TAG, "timer started");
@@ -123,7 +131,7 @@ public class BotService extends Service {
     }
 
     public void update() {
-        if (botTimer!=null) botTimer.cancel();
+        if (botTimer != null) botTimer.cancel();
         initFields();
         startTimer();
     }
@@ -147,6 +155,9 @@ public class BotService extends Service {
     private class BotTimerTask extends TimerTask {
         private List<Pair> pairs;
         private List<Market> markets;
+        private Map<String, Map<String, Boolean>> statuses = new HashMap<>();
+        private Map<String, Map<String, Double>> fees = new HashMap<>();
+        private Map<String, Map<String, Double>> amounts = new HashMap<>();
 
         BotTimerTask(List<Pair> pairs, List<Market> markets) {
             this.pairs = pairs;
@@ -156,41 +167,118 @@ public class BotService extends Service {
         @Override
         public void run() {
             Log.d(TAG, "timer running");
-            if (isNotificationShown()) {
+            if (isNotificationShown() && !autoTrade) {
                 Log.d(TAG, "notification shown, do nothing");
+                return;
+            }
+            try {
+                initCoinInfo(markets);
+                if (autoTrade) {
+                    initAmounts(markets);
+                }
+            } catch (MarketException e) {
+                makeNotification(e.getMessage());
                 return;
             }
             List<Pair> profitPairs = getProfitPairs(pairs, markets);
 
             if (!profitPairs.isEmpty()) {
-                makeNotification(profitPairs);
+                makeNotification(getNotificationText(profitPairs));
+            }
+        }
+
+        private void initAmounts(List<Market> markets) throws MarketException {
+            BalancePreferences balancePreferences = new BalancePreferences(BotService.this);
+            Set<String> coinNames = balancePreferences.getItems();
+            for (Market market: markets) {
+                Map<String, Double> amounts = new HashMap<>();
+                for(String coinName: coinNames) {
+                    amounts.put(coinName, market.getAmount(coinName));
+                }
+                this.amounts.put(market.getMarketName(), amounts);
+            }
+        }
+
+        private void initCoinInfo(List<Market> markets) throws MarketException {
+            for (Market market : markets) {
+                List<CurrenciesResponse> currencies = market.getCurrencies();
+                Map<String, Boolean> statuses = new HashMap<>();
+                Map<String, Double> fees = new HashMap<>();
+                currencies.forEach(currency -> {
+                    String currencyName = currency.getCurrencyName();
+                    statuses.put(currencyName, currency.isActive());
+                    fees.put(currencyName, currency.getFee());
+                });
+                this.statuses.put(market.getMarketName(), statuses);
+                this.fees.put(market.getMarketName(), fees);
             }
         }
 
         private List<Pair> getProfitPairs(List<Pair> pairs, List<Market> markets) {
-            List<Pair> profitPairs = new ArrayList<>();
-            pairs.forEach(pair -> {
-                pair = profitPercentForPair(pair, markets);
-                Log.d(TAG, "pair profit percent "+pair.getPercent());
-                if (pair.getPercent()>minPercent) {
-                    profitPairs.add(pair);
-                }
-            });
+            List<Pair> profitPairs;
+            profitPairs = pairs.stream()
+                    .filter(pair -> checkCoinStatus(pair.getBaseName()))
+                    .filter(pair -> checkCoinStatus(pair.getMarketName()))
+                    .peek(pair -> pair = profitPercentForPair(pair, markets))
+                    .filter(pair -> pair.getPercent() > minPercent)
+                    .peek(pair -> {if (autoTrade) beginTrade(pair);})
+                    .collect(Collectors.toCollection(ArrayList::new));
+
             return profitPairs;
         }
 
+        private boolean checkCoinStatus(String coinName) {
+            Map<String, Boolean> bittrexStatuses = statuses.get(BITTREX_MARKET);
+            if (bittrexStatuses == null) return false;
+            Map<String, Boolean> livecoinStatuses = statuses.get(LIVECOIN_MARKET);
+            if (livecoinStatuses == null) return false;
+
+            Boolean bittrexStatus = bittrexStatuses.get(coinName);
+            Boolean livecoinStatus = livecoinStatuses.get(coinName);
+
+            if (bittrexStatus == null || livecoinStatus == null) return false;
+            return (bittrexStatus && livecoinStatus);
+        }
+
+
         private Pair profitPercentForPair(Pair pair, List<Market> markets) {
             PairResponseEnricher enricher = new PairResponseEnricher(pair);
-            for(Market market: markets) {
+            for (Market market : markets) {
                 OrderBookResponse response = null;
                 try {
                     response = market.getOrderBook(pair.getPairNameForMarket(market.getMarketName()));
-                } catch (MarketException ignored) {}
-                if (response!=null) {
+                } catch (MarketException ignored) {
+                }
+                if (response != null) {
                     enricher.enrichWithResponse(response);
                 }
             }
             return enricher.countPercent(fee).getPair();
+        }
+
+        private void beginTrade(Pair pair) {
+            Intent intent = new Intent(BotService.this, TradingService.class);
+            intent.putExtra(Pair.class.getName(), pair);
+            intent.putExtra("livecoinBaseFee", getFee(LIVECOIN_MARKET, pair.getBaseName()));
+            intent.putExtra("livecoinMarketFee", getFee(LIVECOIN_MARKET, pair.getMarketName()));
+            intent.putExtra("bittrexBaseFee", getFee(BITTREX_MARKET, pair.getBaseName()));
+            intent.putExtra("bittrexMarketFee", getFee(BITTREX_MARKET, pair.getMarketName()));
+            intent.putExtra("livecoinBaseAmount", getAmount(LIVECOIN_MARKET, pair.getBaseName()));
+            intent.putExtra("livecoinMarketAmount", getAmount(LIVECOIN_MARKET, pair.getMarketName()));
+            intent.putExtra("bittrexBaseAmount", getAmount(BITTREX_MARKET, pair.getBaseName()));
+            intent.putExtra("bittrexMarketAmount", getAmount(BITTREX_MARKET, pair.getMarketName()));
+
+            startService(intent);
+        }
+
+        private Double getFee(String marketName, String coinName) {
+            Map<String, Double> fees = this.fees.get(marketName);
+            return Objects.requireNonNull(fees).get(coinName);
+        }
+
+        private Double getAmount(String marketName, String coinName) {
+            Map<String, Double> amounts = this.amounts.get(marketName);
+            return Objects.requireNonNull(amounts).get(coinName);
         }
 
         private boolean isNotificationShown() {
@@ -198,14 +286,13 @@ public class BotService extends Service {
 
             for (StatusBarNotification notification : notifications) {
                 if (notification.getId() == NOTIFICATION_ID) {
-                   return true;
+                    return true;
                 }
             }
             return false;
         }
 
-        private void makeNotification(List<Pair> profitPairs) {
-            String text = getNotificationText(profitPairs);
+        private void makeNotification(String text) {
             new NotificationBuilder(BotService.this)
                     .setTitle("Profitable pairs found")
                     .setImportance(NotificationManager.IMPORTANCE_DEFAULT)
@@ -219,7 +306,7 @@ public class BotService extends Service {
 
         private String getNotificationText(List<Pair> profitPairs) {
             return profitPairs.stream()
-                    .map(pair -> String.format(Locale.getDefault(),"%s - %.2f%s", pair.getName(), pair.getPercent(), System.lineSeparator()))
+                    .map(pair -> String.format(Locale.getDefault(), "%s - %.2f%s", pair.getName(), pair.getPercent(), System.lineSeparator()))
                     .collect(Collectors.joining());
         }
     }

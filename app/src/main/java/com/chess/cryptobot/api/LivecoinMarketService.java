@@ -6,6 +6,7 @@ import com.chess.cryptobot.model.response.livecoin.LivecoinCurrenciesListRespons
 import com.chess.cryptobot.model.response.livecoin.LivecoinOrderBookResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinPaymentResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinTickerResponse;
+import com.chess.cryptobot.model.response.livecoin.LivecoinTradeResponse;
 
 import java.util.List;
 import java.util.Map;
@@ -38,4 +39,12 @@ public interface LivecoinMarketService {
     @FormUrlEncoded
     @POST("payment/out/coin")
     Call<LivecoinPaymentResponse> payment(@FieldMap Map<String, String> params, @HeaderMap Map<String, String> headers);
+
+    @FormUrlEncoded
+    @POST("exchange/buylimit")
+    Call<LivecoinTradeResponse> buy(@FieldMap Map<String, String> params, @HeaderMap Map<String, String> headers);
+
+    @FormUrlEncoded
+    @POST("exchange/selllimit")
+    Call<LivecoinTradeResponse> sell(@FieldMap Map<String, String> params, @HeaderMap Map<String, String> headers);
 }

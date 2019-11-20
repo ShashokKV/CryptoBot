@@ -15,10 +15,14 @@ public class PairResponseEnricher {
    public void enrichWithResponse(OrderBookResponse response) {
         if (response instanceof BittrexResponse) {
             pair.setBittrexAsk(response.asks().get(0).getValue());
+            pair.setBittrexAskQuantity(response.asks().get(0).getQuantity());
             pair.setBittrexBid(response.bids().get(0).getValue());
+            pair.setBittrexBidQuantity(response.bids().get(0).getQuantity());
         } else if (response instanceof LivecoinOrderBookResponse){
             pair.setLivecoinAsk(response.asks().get(0).getValue());
+            pair.setLivecoinAskQuantity(response.asks().get(0).getQuantity());
             pair.setLivecoinBid(response.bids().get(0).getValue());
+            pair.setLivecoinBidQuantity(response.bids().get(0).getQuantity());
         }
    }
 

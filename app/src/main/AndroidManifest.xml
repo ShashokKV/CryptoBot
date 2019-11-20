@@ -39,6 +39,7 @@
         <service android:name=".service.BotService" >
         </service>
         <service android:name=".service.BalanceSyncService" />
+        <service android:name=".service.TradingService" />
 
     </application>
 

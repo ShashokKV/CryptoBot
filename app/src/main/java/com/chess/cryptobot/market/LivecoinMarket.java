@@ -10,7 +10,6 @@ import com.chess.cryptobot.model.response.livecoin.LivecoinAddressResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinBalanceResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinCurrenciesListResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinOrderBookResponse;
-import com.chess.cryptobot.model.response.livecoin.LivecoinPaymentResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinTickerResponse;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -149,7 +148,7 @@ public class LivecoinMarket extends MarketRequest {
         headers.put("API-key", this.apiKey);
         headers.put("Sign", hash);
         headers.put("Content-Type", "application/x-www-form-urlencoded");
-
+/*
         LivecoinPaymentResponse response;
         try {
             Call<LivecoinPaymentResponse> call = service.payment(params, headers);
@@ -157,7 +156,58 @@ public class LivecoinMarket extends MarketRequest {
         } catch (MarketException e) {
             throw new LivecoinException(e.getMessage());
         }
-        return response.getPaymentId();
+        return response.getPaymentId();*/
+        return "paymentId";
+    }
+
+    @Override
+    public String buy(String pairName, Double price, Double amount) throws MarketException {
+        TreeMap<String, String> params = new TreeMap<>();
+        params.put("currencyPair", pairName);
+        params.put("price", price.toString());
+        params.put("quantity", amount.toString());
+
+        String hash = makeHash(params);
+
+        TreeMap<String, String> headers = new TreeMap<>();
+        headers.put("API-key", this.apiKey);
+        headers.put("Sign", hash);
+        headers.put("Content-Type", "application/x-www-form-urlencoded");
+/*
+        LivecoinTradeResponse response;
+        try {
+            Call<LivecoinTradeResponse> call = service.buy(params, headers);
+            response = (LivecoinTradeResponse) execute(call);
+        } catch (MarketException e) {
+            throw new LivecoinException(e.getMessage());
+        }
+        return response.getTradeId();*/
+        return "buyId";
+    }
+
+    @Override
+    public String sell(String pairName, Double price, Double amount) throws MarketException {
+        TreeMap<String, String> params = new TreeMap<>();
+        params.put("currencyPair", pairName);
+        params.put("price", price.toString());
+        params.put("quantity", amount.toString());
+
+        String hash = makeHash(params);
+
+        TreeMap<String, String> headers = new TreeMap<>();
+        headers.put("API-key", this.apiKey);
+        headers.put("Sign", hash);
+        headers.put("Content-Type", "application/x-www-form-urlencoded");
+/*
+        LivecoinTradeResponse response;
+        try {
+            Call<LivecoinTradeResponse> call = service.sell(params, headers);
+            response = (LivecoinTradeResponse) execute(call);
+        } catch (MarketException e) {
+            throw new LivecoinException(e.getMessage());
+        }
+        return response.getTradeId();*/
+        return "sellId";
     }
 
 
