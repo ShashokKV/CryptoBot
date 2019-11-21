@@ -19,11 +19,12 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class TradingService extends IntentService {
     private final static int NOTIFICATION_ID = 400500;
     private static final String CHANNEL_ID = "trading_chanel";
-    private String resultInfo;
+    private String resultInfo = "";
     private Pair pair;
     private BittrexMarket bittrexMarket;
     private LivecoinMarket livecoinMarket;
@@ -39,6 +40,43 @@ public class TradingService extends IntentService {
 
     public TradingService() {
         super("TradingService");
+    }
+
+    @Override
+    protected void onHandleIntent(@Nullable Intent intent) {
+        if (intent==null) return;
+        initFromIntent(intent);
+        initMarkets();
+        try {
+            initAmounts();
+        }catch (MarketException e) {
+            makeNotification(e.getMessage());
+        }
+
+        Trader trader = new Trader(pair);
+        if(trader.countMinQuantity()<=0) return;
+
+        try {
+            trader.buy();
+            trader.sell();
+        }catch (MarketException e) {
+            trader.updateInfo(e.getMessage());
+        }
+
+        makeNotification(resultInfo);
+
+          trader.syncBalance();
+    }
+
+    private void initFromIntent(Intent intent) {
+        this.pair = (Pair) intent.getSerializableExtra(Pair.class.getName());
+        livecoinBaseFee = intent.getDoubleExtra("livecoinBaseFee", 0.0d);
+        livecoinMarketFee = intent.getDoubleExtra("livecoinMarketFee", 0.0d);
+        bittrexBaseFee = intent.getDoubleExtra("bittrexBaseFee", 0.0d);
+        bittrexMarketFee = intent.getDoubleExtra("bittrexMarketFee", 0.0d);
+    }
+
+    private void initMarkets() {
         List<Market> markets = new MarketFactory().getMarkets(this, PreferenceManager.getDefaultSharedPreferences(this));
         markets.forEach(market -> {
             if (market instanceof BittrexMarket) {
@@ -49,40 +87,15 @@ public class TradingService extends IntentService {
         });
     }
 
-    @Override
-    protected void onHandleIntent(@Nullable Intent intent) {
-        if (intent==null) return;
-        initFromIntent(intent);
-
-        Trader trader = new Trader(pair);
-        trader.countMinQuantity();
-
-        try {
-            trader.buy();
-            trader.sell();
-        }catch (MarketException e) {
-            makeNotification(e.getMessage());
-        }
-
-        makeNotification(resultInfo);
-
-        trader.syncBalance();
-    }
-
-    private void initFromIntent(Intent intent) {
-        this.pair = (Pair) intent.getSerializableExtra(Pair.class.getName());
-        livecoinBaseFee = intent.getDoubleExtra("livecoinBaseFee", 0.0d);
-        livecoinMarketFee = intent.getDoubleExtra("livecoinMarketFee", 0.0d);
-        bittrexBaseFee = intent.getDoubleExtra("bittrexBaseFee", 0.0d);
-        bittrexMarketFee = intent.getDoubleExtra("bittrexMarketFee", 0.0d);
-
-        livecoinBaseAmount = intent.getDoubleExtra("livecoinBaseAmount", 0.0d);
-        livecoinMarketAmount = intent.getDoubleExtra("livecoinMarketAmount", 0.0d);
-        bittrexBaseAmount = intent.getDoubleExtra("bittrexBaseAmount", 0.0d);
-        bittrexMarketAmount = intent.getDoubleExtra("bittrexMarketAmount", 0.0d);
+    private void initAmounts() throws MarketException {
+        livecoinBaseAmount = livecoinMarket.getAmount(pair.getBaseName());
+        bittrexBaseAmount = bittrexMarket.getAmount(pair.getBaseName());
+        livecoinMarketAmount = livecoinMarket.getAmount(pair.getMarketName());
+        bittrexMarketAmount = bittrexMarket.getAmount(pair.getMarketName());
     }
 
     private void makeNotification(String message) {
+        if (message.isEmpty()) return;
         new NotificationBuilder(this)
                 .setNotificationId(NOTIFICATION_ID)
                 .setChannelId(CHANNEL_ID)
@@ -92,6 +105,8 @@ public class TradingService extends IntentService {
                 .setTitle("Trading result")
                 .setNotificationText(message)
                 .buildAndNotify();
+
+        resultInfo="";
     }
 
     private class Trader {
@@ -103,7 +118,7 @@ public class TradingService extends IntentService {
         private String sellPairName, buyPairName;
 
         Trader(Pair pair) {
-            if ((pair.getBittrexBid()-pair.getLivecoinAsk())>(pair.getLivecoinBid()-pair.getLivecoinAsk())) {
+            if ((pair.getBittrexBid()-pair.getLivecoinAsk())>(pair.getLivecoinBid()-pair.getBittrexAsk())) {
                 bidPrice = pair.getBittrexBid();
                 askPrice = pair.getLivecoinAsk();
                 sellMarket = bittrexMarket;
@@ -138,9 +153,9 @@ public class TradingService extends IntentService {
             }
         }
 
-        private void countMinQuantity() {
+        private Double countMinQuantity() {
             Double buyQuantity, sellQuantity, resultQuantity;
-            buyQuantity = baseAmount*askPrice-buyFee;
+            buyQuantity = (baseAmount/askPrice)-buyFee;
             sellQuantity = marketAmount-sellFee;
             if (buyQuantity<sellQuantity) {
                 resultQuantity = buyQuantity;
@@ -151,21 +166,23 @@ public class TradingService extends IntentService {
                 quantity = resultQuantity;
             }
             //-1% for trading fee
-            quantity = formatAmount(quantity - quantity/100);
+            quantity = formatAmount(quantity - (quantity/100));
+
+            return quantity;
         }
 
         private void buy() throws MarketException {
             Double price = formatAmount(askPrice);
             String operationId = buyMarket.buy(buyPairName, price, quantity);
-            updateInfo(String.format("buy %s%s for %s on %s, id=%s", quantity.toString(), buyPairName,
-                    price.toString(), buyMarket.getMarketName(), operationId));
+            updateInfo(String.format(Locale.getDefault(), "buy %.8f%s for %.8f on %s, id=%s", quantity, buyPairName,
+                    price, buyMarket.getMarketName(), operationId));
         }
 
         private void sell() throws MarketException {
             Double price = formatAmount(bidPrice);
             String operationId = sellMarket.sell(sellPairName, price, quantity);
-            updateInfo(String.format("sell %s%s for %s on %s, id=%s", quantity.toString(), sellPairName,
-                    price.toString(), sellMarket.getMarketName(), operationId));
+            updateInfo(String.format(Locale.getDefault(), "sell %.8f%s for %.8f on %s, id=%s", quantity, sellPairName,
+                    price, sellMarket.getMarketName(), operationId));
         }
 
         private Double formatAmount(Double amount) {

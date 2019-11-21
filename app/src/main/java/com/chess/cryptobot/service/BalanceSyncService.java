@@ -84,7 +84,8 @@ public class BalanceSyncService extends IntentService {
 
     private void sync(String coinName, List<Market> markets) throws SyncServiceException {
         Double minBalance = new BalancePreferences(this).getMinBalance(coinName);
-        if (minBalance == 0.0f) {
+
+        if (minBalance == 0.0d) {
             throw new SyncServiceException("Min balance not set");
         }
 
@@ -103,6 +104,7 @@ public class BalanceSyncService extends IntentService {
         CoinMover coinMover = new CoinMover(minBalance, coinName);
         coinMover.setAmounts(marketAmounts);
         coinMover.setDirection(BITTREX_MARKET, LIVECOIN_MARKET);
+
         if (!coinMover.checkAndMove()) {
             coinMover.setDirection(LIVECOIN_MARKET, BITTREX_MARKET);
             coinMover.checkAndMove();
@@ -112,7 +114,7 @@ public class BalanceSyncService extends IntentService {
     private Map<String, Double> getMarketsAmounts(List<Market> markets, String coinName) throws MarketException {
         Map<String, Double> marketAmounts = new HashMap<>();
         for (Market market : markets) {
-            marketAmounts.put(market.getMarketName(), market.getAmount(coinName));
+                marketAmounts.put(market.getMarketName(), market.getAmount(coinName));
         }
         return marketAmounts;
     }
@@ -135,6 +137,7 @@ public class BalanceSyncService extends IntentService {
     }
 
     private void makeNotification() {
+        if (resultInfo.isEmpty()) return;
         new NotificationBuilder(this)
                 .setNotificationId(NOTIFICATION_ID)
                 .setChannelId(CHANNEL_ID)
@@ -143,6 +146,8 @@ public class BalanceSyncService extends IntentService {
                 .setImportance(NotificationManager.IMPORTANCE_DEFAULT)
                 .setTitle("Balance sync result")
                 .buildAndNotify();
+
+        resultInfo="";
     }
 
     class CoinMover {
@@ -170,7 +175,6 @@ public class BalanceSyncService extends IntentService {
         private boolean checkAndMove() throws SyncServiceException {
             Double fromAmount = getAmount(amounts, moveFrom);
             Double toAmount = getAmount(amounts, moveTo);
-
             Double fee = getFee(moveFrom, coinName);
 
             Market moveFromMarket = Objects.requireNonNull(marketsMap.get(moveFrom));

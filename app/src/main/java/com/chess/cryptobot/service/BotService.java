@@ -157,7 +157,6 @@ public class BotService extends Service {
         private List<Market> markets;
         private Map<String, Map<String, Boolean>> statuses = new HashMap<>();
         private Map<String, Map<String, Double>> fees = new HashMap<>();
-        private Map<String, Map<String, Double>> amounts = new HashMap<>();
 
         BotTimerTask(List<Pair> pairs, List<Market> markets) {
             this.pairs = pairs;
@@ -173,29 +172,14 @@ public class BotService extends Service {
             }
             try {
                 initCoinInfo(markets);
-                if (autoTrade) {
-                    initAmounts(markets);
-                }
             } catch (MarketException e) {
                 makeNotification(e.getMessage());
                 return;
             }
             List<Pair> profitPairs = getProfitPairs(pairs, markets);
 
-            if (!profitPairs.isEmpty()) {
+            if (!profitPairs.isEmpty() && !autoTrade) {
                 makeNotification(getNotificationText(profitPairs));
-            }
-        }
-
-        private void initAmounts(List<Market> markets) throws MarketException {
-            BalancePreferences balancePreferences = new BalancePreferences(BotService.this);
-            Set<String> coinNames = balancePreferences.getItems();
-            for (Market market: markets) {
-                Map<String, Double> amounts = new HashMap<>();
-                for(String coinName: coinNames) {
-                    amounts.put(coinName, market.getAmount(coinName));
-                }
-                this.amounts.put(market.getMarketName(), amounts);
             }
         }
 
@@ -240,7 +224,6 @@ public class BotService extends Service {
             return (bittrexStatus && livecoinStatus);
         }
 
-
         private Pair profitPercentForPair(Pair pair, List<Market> markets) {
             PairResponseEnricher enricher = new PairResponseEnricher(pair);
             for (Market market : markets) {
@@ -263,10 +246,6 @@ public class BotService extends Service {
             intent.putExtra("livecoinMarketFee", getFee(LIVECOIN_MARKET, pair.getMarketName()));
             intent.putExtra("bittrexBaseFee", getFee(BITTREX_MARKET, pair.getBaseName()));
             intent.putExtra("bittrexMarketFee", getFee(BITTREX_MARKET, pair.getMarketName()));
-            intent.putExtra("livecoinBaseAmount", getAmount(LIVECOIN_MARKET, pair.getBaseName()));
-            intent.putExtra("livecoinMarketAmount", getAmount(LIVECOIN_MARKET, pair.getMarketName()));
-            intent.putExtra("bittrexBaseAmount", getAmount(BITTREX_MARKET, pair.getBaseName()));
-            intent.putExtra("bittrexMarketAmount", getAmount(BITTREX_MARKET, pair.getMarketName()));
 
             startService(intent);
         }
@@ -274,11 +253,6 @@ public class BotService extends Service {
         private Double getFee(String marketName, String coinName) {
             Map<String, Double> fees = this.fees.get(marketName);
             return Objects.requireNonNull(fees).get(coinName);
-        }
-
-        private Double getAmount(String marketName, String coinName) {
-            Map<String, Double> amounts = this.amounts.get(marketName);
-            return Objects.requireNonNull(amounts).get(coinName);
         }
 
         private boolean isNotificationShown() {

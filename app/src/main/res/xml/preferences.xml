@@ -26,6 +26,9 @@
     </androidx.preference.PreferenceCategory>
     <androidx.preference.PreferenceCategory
         android:title="Trading preferences">
+        <CheckBoxPreference
+            android:title="AutoTrade"
+            android:key="@string/auto_trade"/>
         <androidx.preference.EditTextPreference
             android:title="Minimum profit percent"
             android:key="@string/min_profit_percent"

@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
@@ -49,6 +50,7 @@ public class MainActivity extends AppCompatActivity implements DialogListener {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_layout);
+        this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
 
         BottomNavigationView navigation = findViewById(R.id.bottom_navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
@@ -69,9 +71,9 @@ public class MainActivity extends AppCompatActivity implements DialogListener {
         }
         fragmentManager.beginTransaction().add(R.id.include, graphFragment, "3").hide(graphFragment).commit();
 
+        botIsActive = BotService.isRunning;
         updateBot();
         runWork();
-        botIsActive = BotService.isRunning;
     }
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener

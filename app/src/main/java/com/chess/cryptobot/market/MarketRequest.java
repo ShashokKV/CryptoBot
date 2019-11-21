@@ -1,8 +1,10 @@
 package com.chess.cryptobot.market;
 
 import com.chess.cryptobot.exceptions.MarketException;
+import com.chess.cryptobot.model.response.ErrorResponse;
 import com.chess.cryptobot.model.response.MarketResponse;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -14,6 +16,7 @@ import java.util.Map;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -98,12 +101,18 @@ abstract class MarketRequest implements Market {
             Response<?> result = call.execute();
             response = (MarketResponse) result.body();
             if (response == null) {
-                throw new MarketException("No response");
+                ResponseBody errorBody = result.errorBody();
+                if (errorBody == null) {
+                    throw new MarketException("No response");
+                } else {
+                    Gson gson = new GsonBuilder().create();
+                    ErrorResponse errorResponse = gson.fromJson(errorBody.string(), ErrorResponse.class);
+                    throw new MarketException(errorResponse.getErrorMessage());
+                }
             } else if (!response.success()) {
                 throw new MarketException(response.message());
             }
-        } catch (
-                IOException e) {
+        } catch (IOException e) {
             throw new MarketException(e.getMessage());
         }
         return response;

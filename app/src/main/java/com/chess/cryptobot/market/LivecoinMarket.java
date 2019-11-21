@@ -10,7 +10,9 @@ import com.chess.cryptobot.model.response.livecoin.LivecoinAddressResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinBalanceResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinCurrenciesListResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinOrderBookResponse;
+import com.chess.cryptobot.model.response.livecoin.LivecoinPaymentResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinTickerResponse;
+import com.chess.cryptobot.model.response.livecoin.LivecoinTradeResponse;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -148,7 +150,7 @@ public class LivecoinMarket extends MarketRequest {
         headers.put("API-key", this.apiKey);
         headers.put("Sign", hash);
         headers.put("Content-Type", "application/x-www-form-urlencoded");
-/*
+
         LivecoinPaymentResponse response;
         try {
             Call<LivecoinPaymentResponse> call = service.payment(params, headers);
@@ -156,8 +158,7 @@ public class LivecoinMarket extends MarketRequest {
         } catch (MarketException e) {
             throw new LivecoinException(e.getMessage());
         }
-        return response.getPaymentId();*/
-        return "paymentId";
+        return response.getPaymentId();
     }
 
     @Override
@@ -173,7 +174,7 @@ public class LivecoinMarket extends MarketRequest {
         headers.put("API-key", this.apiKey);
         headers.put("Sign", hash);
         headers.put("Content-Type", "application/x-www-form-urlencoded");
-/*
+
         LivecoinTradeResponse response;
         try {
             Call<LivecoinTradeResponse> call = service.buy(params, headers);
@@ -181,8 +182,7 @@ public class LivecoinMarket extends MarketRequest {
         } catch (MarketException e) {
             throw new LivecoinException(e.getMessage());
         }
-        return response.getTradeId();*/
-        return "buyId";
+        return response.getTradeId();
     }
 
     @Override
@@ -198,7 +198,7 @@ public class LivecoinMarket extends MarketRequest {
         headers.put("API-key", this.apiKey);
         headers.put("Sign", hash);
         headers.put("Content-Type", "application/x-www-form-urlencoded");
-/*
+
         LivecoinTradeResponse response;
         try {
             Call<LivecoinTradeResponse> call = service.sell(params, headers);
@@ -206,8 +206,7 @@ public class LivecoinMarket extends MarketRequest {
         } catch (MarketException e) {
             throw new LivecoinException(e.getMessage());
         }
-        return response.getTradeId();*/
-        return "sellId";
+        return response.getTradeId();
     }
 
 

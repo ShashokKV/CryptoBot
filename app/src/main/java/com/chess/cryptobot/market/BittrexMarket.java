@@ -150,16 +150,14 @@ public class BittrexMarket extends MarketRequest {
 
         TreeMap<String, String> headers = new TreeMap<>();
         headers.put("apisign", hash);
-        /*
+
         try {
             Call<BittrexResponse> call = service.payment(params, headers);
             response = (BittrexResponse) execute(call);
         } catch (MarketException e) {
             throw new BittrexException(e.getMessage());
         }
-        return response.getPaymentId();*/
-
-        return "paymentId";
+        return response.getPaymentId();
     }
 
     @Override
@@ -177,15 +175,14 @@ public class BittrexMarket extends MarketRequest {
 
         TreeMap<String, String> headers = new TreeMap<>();
         headers.put("apisign", hash);
-/*
+
         try {
             Call<BittrexResponse> call = service.buy(params, headers);
             response = (BittrexResponse) execute(call);
         } catch (MarketException e) {
             throw new BittrexException(e.getMessage());
         }
-        return response.getTradeId();*/
-        return "buyId";
+        return response.getTradeId();
     }
 
     @Override
@@ -203,7 +200,7 @@ public class BittrexMarket extends MarketRequest {
 
         TreeMap<String, String> headers = new TreeMap<>();
         headers.put("apisign", hash);
-/*
+
         try {
             Call<BittrexResponse> call = service.sell(params, headers);
             response = (BittrexResponse) execute(call);
@@ -211,7 +208,6 @@ public class BittrexMarket extends MarketRequest {
             throw new BittrexException(e.getMessage());
         }
 
-        return response.getTradeId();*/
-        return "sellId";
+        return response.getTradeId();
     }
 }

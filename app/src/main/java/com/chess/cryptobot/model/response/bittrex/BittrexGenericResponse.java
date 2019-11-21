@@ -46,6 +46,7 @@ class BittrexGenericResponse implements TickerResponse, CurrenciesResponse {
     private String uuid;
 
     Double getAvailable() {
+        if (available==null) return 0.0d;
         return available;
     }
 

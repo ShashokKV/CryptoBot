@@ -61,4 +61,5 @@
     <string name="sync_balances_title">Sync all balances?</string>
     <string name="volume">volume</string>
     <string name="auto_trade">auto_trade</string>
+    <string name="begin_trade">Begin trade?</string>
 </resources>
