@@ -51,7 +51,7 @@ public class AvailablePairsTask extends MarketTask<Integer, List<String>> {
 
     private List<String> getPairNames(List<? extends TickerResponse> tickers) {
         List<String> pairNames = new ArrayList<>();
-        tickers.forEach(ticker -> pairNames.add(ticker.getTickerName()));
+        tickers.forEach(ticker -> pairNames.add(ticker.getMarketName()));
         return pairNames;
     }
 
@@ -64,7 +64,7 @@ public class AvailablePairsTask extends MarketTask<Integer, List<String>> {
     }
 
     private void updateVolumes(Map<String, Double> volumeMap, List<? extends TickerResponse> tickers) {
-        tickers.forEach(ticker -> volumeMap.put(ticker.getTickerName(), ticker.getVolume()));
+        tickers.forEach(ticker -> volumeMap.put(ticker.getMarketName(), ticker.getVolume()));
     }
 
     @Override
@@ -83,6 +83,7 @@ public class AvailablePairsTask extends MarketTask<Integer, List<String>> {
         pairsHolder.setAvailablePairs(excludePairs(allPairNames, holder));
         pairsHolder.setVolumes(bittrexVolumes, livecoinVolumes);
         pairsHolder.removeInvalidPairs();
+        pairsHolder.updateAllItems();
     }
 
     @Override

@@ -23,11 +23,11 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 abstract class MarketRequest implements Market {
-    String url;
+    final String url;
     String path;
-    String apiKey;
+    final String apiKey;
     String algorithm;
-    private String secretKey;
+    private final String secretKey;
     private final String DEFAULT_ENCODING = "UTF-8";
 
     MarketRequest(String url, String apiKey, String secretKey) {

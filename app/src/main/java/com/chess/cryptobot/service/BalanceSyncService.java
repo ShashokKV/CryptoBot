@@ -30,9 +30,9 @@ public class BalanceSyncService extends IntentService {
     private static final int NOTIFICATION_ID = 300500;
     private static final String CHANNEL_ID = "balance_sync_channel";
     private String resultInfo = "";
-    private Map<String, Map<String, Boolean>> statuses = new HashMap<>();
-    private Map<String, Map<String, Double>> fees = new HashMap<>();
-    private Map<String, Market> marketsMap = new HashMap<>();
+    private final Map<String, Map<String, Boolean>> statuses = new HashMap<>();
+    private final Map<String, Map<String, Double>> fees = new HashMap<>();
+    private final Map<String, Market> marketsMap = new HashMap<>();
 
     public BalanceSyncService() {
         super("BalanceSyncService");
@@ -151,8 +151,8 @@ public class BalanceSyncService extends IntentService {
     }
 
     class CoinMover {
-        private Double minBalance;
-        private String coinName;
+        private final Double minBalance;
+        private final String coinName;
         private Map<String, Double> amounts;
         private String moveFrom;
         private String moveTo;

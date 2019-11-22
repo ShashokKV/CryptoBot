@@ -17,7 +17,7 @@ import com.chess.cryptobot.market.Market;
 import com.chess.cryptobot.model.Balance;
 
 public class BalanceAdapter extends RecyclerViewAdapter<BalanceAdapter.BalanceViewHolder> {
-    private RecyclerViewOnClickListener mListener;
+    private final RecyclerViewOnClickListener mListener;
 
     public BalanceAdapter(BalanceHolder balanceHolder) {
         super(balanceHolder);
@@ -55,10 +55,10 @@ public class BalanceAdapter extends RecyclerViewAdapter<BalanceAdapter.BalanceVi
     class BalanceViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         private RecyclerViewOnClickListener mOnClickListener;
 
-        TextView livecoinBalanceView;
-        TextView bittrexBalanceView;
-        TextView cryptoNameView;
-        ImageView cryptoImageView;
+        final TextView livecoinBalanceView;
+        final TextView bittrexBalanceView;
+        final TextView cryptoNameView;
+        final ImageView cryptoImageView;
 
         BalanceViewHolder(View view, RecyclerViewOnClickListener onClickListener) {
             this(view);

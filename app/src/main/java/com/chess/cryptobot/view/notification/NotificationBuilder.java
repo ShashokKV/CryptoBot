@@ -11,7 +11,7 @@ import com.chess.cryptobot.R;
 import com.chess.cryptobot.view.MainActivity;
 
 public class NotificationBuilder {
-    private Context context;
+    private final Context context;
     private int notificationId;
     private String channelId;
     private String channelName;
@@ -20,7 +20,7 @@ public class NotificationBuilder {
     private int importance;
     private String title;
     private Integer color;
-    private NotificationManager notificationManager;
+    private final NotificationManager notificationManager;
 
     public NotificationBuilder(Context context) {
         this.context = context;
@@ -68,7 +68,7 @@ public class NotificationBuilder {
     }
 
     public void buildAndNotify()  {
-        notificationManager.notify(notificationId, buildNotification());
+        notificationManager.notify(notificationId, build());
     }
 
     public Notification build() {

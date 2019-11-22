@@ -2,7 +2,7 @@ package com.chess.cryptobot.model.response;
 
 public interface TickerResponse {
     
-    String getTickerName();
+    String getMarketName();
     
     Double getTickerBid();
     

@@ -5,8 +5,8 @@ import androidx.annotation.Nullable;
 import java.io.Serializable;
 
 public class Pair implements ViewItem, Serializable {
-    private String baseName;
-    private String marketName;
+    private final String baseName;
+    private final String marketName;
     private Double bittrexAsk;
     private Double bittrexAskQuantity;
     private Double bittrexBid;

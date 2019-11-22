@@ -21,7 +21,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 public class CoinImageTask extends AsyncTask<Balance, Integer, Balance> {
-    private WeakReference<BalanceHolder> balanceHolderWeakReference;
+    private final WeakReference<BalanceHolder> balanceHolderWeakReference;
     private final static String TAG = "CoinImageTask";
 
     public CoinImageTask(BalanceHolder balanceHolder) {

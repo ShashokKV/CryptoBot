@@ -71,7 +71,7 @@ public class MarketWorker extends Worker {
         for (Market market : markets) {
             List<? extends TickerResponse> tickers = market.getTicker();
             tickers.forEach(ticker -> {
-                String tickerName = ticker.getTickerName();
+                String tickerName = ticker.getMarketName();
                 if (allPairNames.contains(tickerName)) {
                     Pair pair = createOrGetPair(tickerName, tickerPairs);
                     enrichFromTickerByMarket(pair, ticker, market.getMarketName());

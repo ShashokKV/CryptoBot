@@ -45,14 +45,14 @@ public class PairsAdapter extends RecyclerViewAdapter<PairsAdapter.PairsViewHold
     }
 
     class PairsViewHolder extends RecyclerView.ViewHolder {
-        TextView pairNameView;
-        TextView bittrexAskView;
-        TextView bittrextBidView;
-        TextView bittrexVolumeView;
-        TextView livecoinAskVeiw;
-        TextView livecoinBidView;
-        TextView livecoinVolumeView;
-        TextView percent;
+        final TextView pairNameView;
+        final TextView bittrexAskView;
+        final TextView bittrextBidView;
+        final TextView bittrexVolumeView;
+        final TextView livecoinAskVeiw;
+        final TextView livecoinBidView;
+        final TextView livecoinVolumeView;
+        final TextView percent;
 
         PairsViewHolder(@NonNull View itemView) {
             super(itemView);

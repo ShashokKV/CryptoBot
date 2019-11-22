@@ -11,7 +11,7 @@ import java.io.IOException;
 
 public class BittrexTypeAdapter extends TypeAdapter<BittrexResponse> {
 
-    private Gson gson = new Gson();
+    private final Gson gson = new Gson();
 
     @Override
     public void write(JsonWriter jsonWriter, BittrexResponse response) {

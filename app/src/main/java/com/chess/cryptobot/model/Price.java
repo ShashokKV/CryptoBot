@@ -1,8 +1,8 @@
 package com.chess.cryptobot.model;
 
 public class Price {
-    private Double value;
-    private Double quantity;
+    private final Double value;
+    private final Double quantity;
 
     public Price(Double value, Double quantity) {
         this.value = value;

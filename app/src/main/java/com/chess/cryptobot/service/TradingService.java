@@ -36,6 +36,7 @@ public class TradingService extends IntentService {
     private Double livecoinMarketAmount;
     private Double bittrexBaseAmount;
     private Double bittrexMarketAmount;
+    private Double minMarketQuantity;
 
 
     public TradingService() {
@@ -54,7 +55,8 @@ public class TradingService extends IntentService {
         }
 
         Trader trader = new Trader(pair);
-        if(trader.countMinQuantity()<=0) return;
+        Double traderMinQuantity = trader.countMinQuantity();
+        if(traderMinQuantity<=0 || traderMinQuantity<minMarketQuantity) return;
 
         try {
             trader.buy();
@@ -74,6 +76,7 @@ public class TradingService extends IntentService {
         livecoinMarketFee = intent.getDoubleExtra("livecoinMarketFee", 0.0d);
         bittrexBaseFee = intent.getDoubleExtra("bittrexBaseFee", 0.0d);
         bittrexMarketFee = intent.getDoubleExtra("bittrexMarketFee", 0.0d);
+        minMarketQuantity = intent.getDoubleExtra("minQuantity", 0.0d);
     }
 
     private void initMarkets() {
@@ -110,12 +113,17 @@ public class TradingService extends IntentService {
     }
 
     private class Trader {
-        private Double bidPrice, askPrice;
+        private final Double bidPrice;
+        private final Double askPrice;
         private Double quantity;
-        private Market sellMarket, buyMarket;
-        private Double sellFee, buyFee;
-        private Double baseAmount, marketAmount;
-        private String sellPairName, buyPairName;
+        private final Market sellMarket;
+        private final Market buyMarket;
+        private final Double sellFee;
+        private final Double buyFee;
+        private final Double baseAmount;
+        private final Double marketAmount;
+        private final String sellPairName;
+        private final String buyPairName;
 
         Trader(Pair pair) {
             if ((pair.getBittrexBid()-pair.getLivecoinAsk())>(pair.getLivecoinBid()-pair.getBittrexAsk())) {

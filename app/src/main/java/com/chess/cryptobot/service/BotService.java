@@ -24,6 +24,7 @@ import com.chess.cryptobot.market.MarketFactory;
 import com.chess.cryptobot.model.Pair;
 import com.chess.cryptobot.model.response.CurrenciesResponse;
 import com.chess.cryptobot.model.response.OrderBookResponse;
+import com.chess.cryptobot.model.response.TradeLimitResponse;
 import com.chess.cryptobot.view.notification.NotificationBuilder;
 
 import java.util.ArrayList;
@@ -41,8 +42,8 @@ import static com.chess.cryptobot.market.Market.BITTREX_MARKET;
 import static com.chess.cryptobot.market.Market.LIVECOIN_MARKET;
 
 public class BotService extends Service {
-    public static final int NOTIFICATION_ID = 100500;
-    public static final int FOREGROUND_NOTIFICATION_ID = 200500;
+    private static final int NOTIFICATION_ID = 100500;
+    private static final int FOREGROUND_NOTIFICATION_ID = 200500;
 
     public static boolean isRunning;
     private final static String CHANNEL_ID = "profit_pairs_channel_id";
@@ -55,11 +56,6 @@ public class BotService extends Service {
     private final IBinder botBinder = new BotBinder();
     private static final String TAG = BotService.class.getSimpleName();
     private boolean autoTrade;
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-    }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -153,10 +149,11 @@ public class BotService extends Service {
     }
 
     private class BotTimerTask extends TimerTask {
-        private List<Pair> pairs;
-        private List<Market> markets;
-        private Map<String, Map<String, Boolean>> statuses = new HashMap<>();
-        private Map<String, Map<String, Double>> fees = new HashMap<>();
+        private final List<Pair> pairs;
+        private final List<Market> markets;
+        private final Map<String, Map<String, Boolean>> statuses = new HashMap<>();
+        private final Map<String, Map<String, Double>> fees = new HashMap<>();
+        private final Map<String, TradeLimitResponse> minQuantities = new HashMap<>();
 
         BotTimerTask(List<Pair> pairs, List<Market> markets) {
             this.pairs = pairs;
@@ -171,7 +168,10 @@ public class BotService extends Service {
                 return;
             }
             try {
-                initCoinInfo(markets);
+                initCoinInfo();
+                if (autoTrade) {
+                    initMinQuantities();
+                }
             } catch (MarketException e) {
                 makeNotification(e.getMessage());
                 return;
@@ -183,7 +183,7 @@ public class BotService extends Service {
             }
         }
 
-        private void initCoinInfo(List<Market> markets) throws MarketException {
+        private void initCoinInfo() throws MarketException {
             for (Market market : markets) {
                 List<CurrenciesResponse> currencies = market.getCurrencies();
                 Map<String, Boolean> statuses = new HashMap<>();
@@ -198,6 +198,12 @@ public class BotService extends Service {
             }
         }
 
+        private void initMinQuantities() throws MarketException {
+            for (Market market : markets) {
+                minQuantities.put(market.getMarketName(), market.getMinQuantity());
+            }
+        }
+
         private List<Pair> getProfitPairs(List<Pair> pairs, List<Market> markets) {
             List<Pair> profitPairs;
             profitPairs = pairs.stream()
@@ -205,7 +211,9 @@ public class BotService extends Service {
                     .filter(pair -> checkCoinStatus(pair.getMarketName()))
                     .peek(pair -> pair = profitPercentForPair(pair, markets))
                     .filter(pair -> pair.getPercent() > minPercent)
-                    .peek(pair -> {if (autoTrade) beginTrade(pair);})
+                    .peek(pair -> {
+                        if (autoTrade) beginTrade(pair);
+                    })
                     .collect(Collectors.toCollection(ArrayList::new));
 
             return profitPairs;
@@ -246,6 +254,7 @@ public class BotService extends Service {
             intent.putExtra("livecoinMarketFee", getFee(LIVECOIN_MARKET, pair.getMarketName()));
             intent.putExtra("bittrexBaseFee", getFee(BITTREX_MARKET, pair.getBaseName()));
             intent.putExtra("bittrexMarketFee", getFee(BITTREX_MARKET, pair.getMarketName()));
+            intent.putExtra("minQuantity", getMinQuantity(pair));
 
             startService(intent);
         }
@@ -253,6 +262,25 @@ public class BotService extends Service {
         private Double getFee(String marketName, String coinName) {
             Map<String, Double> fees = this.fees.get(marketName);
             return Objects.requireNonNull(fees).get(coinName);
+        }
+
+        private Double getMinQuantity(Pair pair) {
+            Double resultQuantity=null;
+            for(Market market: markets) {
+                String marketName = market.getMarketName();
+                TradeLimitResponse response = minQuantities.get(marketName);
+                if (response!=null) {
+                    Double quantity = response.getTradeLimitByName(pair.getPairNameForMarket(marketName));
+                    if (resultQuantity==null) {
+                        resultQuantity = quantity;
+                    }else {
+                        if (quantity>resultQuantity) {
+                            resultQuantity = quantity;
+                        }
+                    }
+                }
+            }
+            return resultQuantity;
         }
 
         private boolean isNotificationShown() {

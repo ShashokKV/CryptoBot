@@ -9,7 +9,7 @@ import com.chess.cryptobot.content.balance.BalancePreferences;
 import com.chess.cryptobot.view.dialog.MinBalanceDialog;
 
 public class BalanceViewOnClickListener implements RecyclerViewOnClickListener {
-    private BalanceHolder balanceHolder;
+    private final BalanceHolder balanceHolder;
 
     BalanceViewOnClickListener(BalanceHolder balanceHolder) {
         this.balanceHolder = balanceHolder;

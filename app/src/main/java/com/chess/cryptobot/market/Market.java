@@ -4,6 +4,7 @@ import com.chess.cryptobot.exceptions.MarketException;
 import com.chess.cryptobot.model.response.CurrenciesResponse;
 import com.chess.cryptobot.model.response.OrderBookResponse;
 import com.chess.cryptobot.model.response.TickerResponse;
+import com.chess.cryptobot.model.response.TradeLimitResponse;
 
 import java.util.List;
 
@@ -20,6 +21,8 @@ public interface Market {
     List<? extends TickerResponse> getTicker() throws MarketException;
 
     List<CurrenciesResponse> getCurrencies() throws MarketException;
+
+    TradeLimitResponse getMinQuantity() throws MarketException;
 
     String getAddress(String coinName) throws MarketException;
 

@@ -10,8 +10,8 @@ import com.chess.cryptobot.market.MarketFactory;
 import java.lang.ref.WeakReference;
 import java.util.List;
 
-public abstract class MarketTask<S, T> extends AsyncTask<S, Integer, T> {
-    private WeakReference<ContextHolder> holderWeakReference;
+abstract class MarketTask<S, T> extends AsyncTask<S, Integer, T> {
+    private final WeakReference<ContextHolder> holderWeakReference;
 
     MarketTask(ContextHolder holder) {
         this.holderWeakReference = new WeakReference<>(holder);
@@ -43,13 +43,13 @@ public abstract class MarketTask<S, T> extends AsyncTask<S, Integer, T> {
         return postMarketProcess(result);
     }
 
-    public abstract void preMarketProcess(S param);
+    protected abstract void preMarketProcess(S param);
 
-    public abstract T marketProcess(Market market, S param) throws MarketException;
+    protected abstract T marketProcess(Market market, S param) throws MarketException;
 
-    public abstract T postMarketProcess(T result);
+    protected abstract T postMarketProcess(T result);
 
-    public abstract T exceptionProcess(S param, String exceptionMessage);
+    protected abstract T exceptionProcess(S param, String exceptionMessage);
 
     @Override
     protected void onPostExecute(T result) {
@@ -60,7 +60,7 @@ public abstract class MarketTask<S, T> extends AsyncTask<S, Integer, T> {
         doInPostExecute(result, holder);
     }
 
-    public abstract void doInPostExecute(T result, ContextHolder holder);
+    protected abstract void doInPostExecute(T result, ContextHolder holder);
 
     @Override
     protected void onCancelled(T result) {
@@ -73,7 +73,7 @@ public abstract class MarketTask<S, T> extends AsyncTask<S, Integer, T> {
         }
     }
 
-    public abstract void doInOnCanceled(T result, ContextHolder holder);
+    protected abstract void doInOnCanceled(T result, ContextHolder holder);
 
     @Override
     protected void onProgressUpdate(Integer... values) {

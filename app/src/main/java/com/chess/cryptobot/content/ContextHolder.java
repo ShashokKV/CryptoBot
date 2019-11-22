@@ -14,11 +14,11 @@ import java.util.List;
 import java.util.Set;
 
 public abstract class ContextHolder {
-    private Fragment fr;
+    private final Fragment fr;
     private List<ViewItem> viewItems;
-    private Preferences prefs;
+    private final Preferences prefs;
 
-    public ContextHolder(Fragment fr) {
+    protected ContextHolder(Fragment fr) {
         this.fr = fr;
         initFields();
         prefs = initPrefs(fr.getContext());
@@ -30,9 +30,9 @@ public abstract class ContextHolder {
         viewItems = new ArrayList<>();
     }
 
-    public abstract Preferences initPrefs(Context context);
+    protected abstract Preferences initPrefs(Context context);
 
-    public abstract void initViewItems(Set<String> itemsSet);
+    protected abstract void initViewItems(Set<String> itemsSet);
 
     public synchronized void add(ViewItem viewItem) {
         addItemToList(viewItem);
@@ -46,11 +46,31 @@ public abstract class ContextHolder {
         viewItems.add(viewItem);
     }
 
+    protected void retainAll(List<ViewItem> viewItems) {
+        List<ViewItem> invalidItems = new ArrayList<>(getViewItems());
+        getViewItems().retainAll(viewItems);
+
+        invalidItems.forEach(viewItem -> {
+            if (!getViewItems().contains(viewItem)) {
+                removeFromPrefs(viewItem);
+            }
+        });
+        getMainFragment().updateAllItems();
+    }
+
+    private void removeFromAdapter(ViewItem viewItem) {
+        getMainFragment().deleteItemByPosition(viewItems.indexOf(viewItem));
+    }
+
+    private void removeFromPrefs(ViewItem viewItem) {
+        getPrefs().removeItem(viewItem.getName());
+    }
+
     public synchronized void remove(ViewItem item) {
         if (item == null) return;
-        getMainFragment().deleteItemByPosition(viewItems.indexOf(item));
-        this.viewItems.remove(item);
-        getPrefs().removeItem(item.getName());
+        removeFromAdapter(item);
+        viewItems.remove(item);
+        removeFromPrefs(item);
     }
 
     public synchronized void setItem(ViewItem updatedItem) {
@@ -68,7 +88,7 @@ public abstract class ContextHolder {
         viewItems.forEach(this::updateItem);
     }
 
-    public abstract void updateItem(ViewItem item);
+    protected abstract void updateItem(ViewItem item);
 
     protected ViewItem getItemByName(String itemName) throws ItemNotFoundException {
         for (ViewItem item : viewItems) {

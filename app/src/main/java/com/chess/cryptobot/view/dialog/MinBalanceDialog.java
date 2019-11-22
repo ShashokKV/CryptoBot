@@ -8,9 +8,9 @@ import com.chess.cryptobot.R;
 import com.chess.cryptobot.content.balance.BalanceHolder;
 
 public class MinBalanceDialog extends CryptoDialog {
-private String coinName;
-private Double minBalance;
-private BalanceHolder balanceHolder;
+private final String coinName;
+private final Double minBalance;
+private final BalanceHolder balanceHolder;
 
     public MinBalanceDialog(BalanceHolder balanceHolder, String coinName, Double minBalance) {
         this.coinName = coinName;

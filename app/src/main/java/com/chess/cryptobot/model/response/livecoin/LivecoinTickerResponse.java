@@ -20,7 +20,7 @@ public class LivecoinTickerResponse extends LivecoinResponse implements TickerRe
     private Double volume;
 
     @Override
-    public String getTickerName() {
+    public String getMarketName() {
         String[] split = symbol.split("/");
         return split[1].concat("/").concat(split[0]);
     }

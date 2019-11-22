@@ -10,11 +10,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Balance implements ViewItem {
-    private String coinName;
+    private final String coinName;
     private Bitmap coinIcon;
-    private Map<String, Double> amounts;
+    private final Map<String, Double> amounts;
     private String message;
-    private Map<String, Boolean> statuses = new HashMap<>();
+    private final Map<String, Boolean> statuses = new HashMap<>();
 
     public Balance(String coinName) {
         this.coinName = coinName;

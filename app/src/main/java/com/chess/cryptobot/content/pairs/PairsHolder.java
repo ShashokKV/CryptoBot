@@ -35,7 +35,6 @@ public class PairsHolder extends ContextHolder {
         if (context != null) {
             fee = initFee(context);
         }
-        initAvailablePairs();
     }
 
     @Override
@@ -49,7 +48,7 @@ public class PairsHolder extends ContextHolder {
     }
 
 
-    private void initAvailablePairs() {
+    public void initAvailablePairs() {
         AvailablePairsTask availablePairsTask = new AvailablePairsTask(this);
         availablePairsTask.execute(0);
     }
@@ -74,7 +73,7 @@ public class PairsHolder extends ContextHolder {
     public void updateFromBalance() {
         BalancePreferences balancePreferences = new BalancePreferences(getContext());
         Set<String> coinNames = balancePreferences.getItems();
-        List<Pair> balancePairs = new ArrayList<>();
+        List<ViewItem> balancePairs = new ArrayList<>();
         for (String baseName : coinNames) {
             for (String marketName : coinNames) {
                 if (!baseName.equals(marketName)) {
@@ -98,7 +97,7 @@ public class PairsHolder extends ContextHolder {
         }
     }
 
-    private void addIfNotExists(List<Pair> balancePairs) {
+    private void addIfNotExists(List<ViewItem> balancePairs) {
         balancePairs.forEach(tradingPair -> {
             if (!getViewItems().contains(tradingPair)) {
                 add(tradingPair);
@@ -106,22 +105,14 @@ public class PairsHolder extends ContextHolder {
         });
     }
 
-    private void removeIfNotExists(List<Pair> balancePairs) {
-        for (int i = 0; i < getViewItems().size(); i++) {
-            Pair pair = (Pair) getViewItems().get(i);
-            if (!balancePairs.contains(pair)) {
-                remove(pair);
-            }
-        }
+    private void removeIfNotExists(List<ViewItem> balancePairs) {
+        this.retainAll(balancePairs);
     }
 
     public void removeInvalidPairs() {
-        for (int i = 0; i < getViewItems().size(); i++) {
-            Pair pair = (Pair) getViewItems().get(i);
-            if (!availablePairs.contains(pair.getName())) {
-                remove(pair);
-            }
-        }
+        List<ViewItem> pairs = new ArrayList<>();
+        availablePairs.forEach(pairName -> pairs.add(Pair.fromPairName(pairName)));
+       this.retainAll(pairs);
     }
 
     public void setVolumes(Map<String, Double> bittrexVolumes, Map<String, Double> livecoinVolumes) {

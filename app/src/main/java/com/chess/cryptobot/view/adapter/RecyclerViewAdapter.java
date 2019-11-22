@@ -10,7 +10,7 @@ import java.util.List;
 
 public abstract class RecyclerViewAdapter<T extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<T> {
     private List<ViewItem> items;
-    private ContextHolder holder;
+    private final ContextHolder holder;
 
     RecyclerViewAdapter(ContextHolder holder) {
         this.setHasStableIds(true);

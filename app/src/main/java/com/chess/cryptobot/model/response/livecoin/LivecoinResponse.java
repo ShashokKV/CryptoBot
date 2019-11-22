@@ -11,6 +11,9 @@ public class LivecoinResponse implements MarketResponse {
     @SerializedName("errorMessage")
     @Expose
     private String errorMessage;
+    @SerializedName("exception")
+    @Expose
+    private String exception;
 
     @Override
     public boolean success() {
@@ -20,6 +23,7 @@ public class LivecoinResponse implements MarketResponse {
 
     @Override
     public String message() {
+        if (errorMessage==null) return exception;
         return errorMessage;
     }
 }

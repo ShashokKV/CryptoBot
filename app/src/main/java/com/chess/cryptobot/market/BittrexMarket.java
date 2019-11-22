@@ -6,12 +6,14 @@ import com.chess.cryptobot.exceptions.MarketException;
 import com.chess.cryptobot.model.response.CurrenciesResponse;
 import com.chess.cryptobot.model.response.OrderBookResponse;
 import com.chess.cryptobot.model.response.TickerResponse;
+import com.chess.cryptobot.model.response.TradeLimitResponse;
 import com.chess.cryptobot.model.response.bittrex.BittrexResponse;
 import com.chess.cryptobot.model.response.bittrex.BittrexTypeAdapter;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -19,7 +21,7 @@ import retrofit2.Call;
 import retrofit2.Retrofit;
 
 public class BittrexMarket extends MarketRequest {
-    private BittrexMarketService service;
+    private final BittrexMarketService service;
 
     BittrexMarket(String url, String apiKey, String secretKey) {
         super(url, apiKey, secretKey);
@@ -136,12 +138,24 @@ public class BittrexMarket extends MarketRequest {
     }
 
     @Override
+    public TradeLimitResponse getMinQuantity() throws MarketException {
+        BittrexResponse response;
+        Call<BittrexResponse> call = service.getMinTradeSize();
+        try {
+            response = (BittrexResponse) execute(call);
+        }catch (MarketException e) {
+            throw new BittrexException(e.getMessage());
+        }
+        return response;
+    }
+
+    @Override
     public String sendCoins(String coinName, Double amount, String address) throws MarketException {
         BittrexResponse response;
         this.path = this.url.concat("account/withdraw?");
         Map<String, String> params = new TreeMap<>();
         params.put("currency", coinName);
-        params.put("quantity", amount.toString());
+        params.put("quantity", String.format(Locale.getDefault(), "%.8f", amount));
         params.put("address", address);
         params.put("apikey", this.apiKey);
         params.put("nonce", String.valueOf(System.currentTimeMillis()));
@@ -166,8 +180,8 @@ public class BittrexMarket extends MarketRequest {
         this.path = this.url.concat("market/buylimit?");
         Map<String, String> params = new TreeMap<>();
         params.put("market", pairName);
-        params.put("quantity", amount.toString());
-        params.put("address", amount.toString());
+        params.put("quantity", String.format(Locale.getDefault(), "%.8f", amount));
+        params.put("rate", String.format(Locale.getDefault(), "%.8f", price));
         params.put("apikey", this.apiKey);
         params.put("nonce", String.valueOf(System.currentTimeMillis()));
 
@@ -191,8 +205,8 @@ public class BittrexMarket extends MarketRequest {
         this.path = this.url.concat("market/selllimit?");
         Map<String, String> params = new TreeMap<>();
         params.put("market", pairName);
-        params.put("quantity", amount.toString());
-        params.put("rate", amount.toString());
+        params.put("quantity", String.format(Locale.getDefault(), "%.8f", amount));
+        params.put("rate", String.format(Locale.getDefault(), "%.8f", price));
         params.put("apikey", this.apiKey);
         params.put("nonce", String.valueOf(System.currentTimeMillis()));
 

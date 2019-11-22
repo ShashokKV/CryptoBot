@@ -8,7 +8,7 @@ import com.chess.cryptobot.R;
 import com.chess.cryptobot.content.balance.BalanceHolder;
 
 public class CryptoNameDialog extends CryptoDialog {
-private BalanceHolder balanceHolder;
+private final BalanceHolder balanceHolder;
 
     public CryptoNameDialog(BalanceHolder balanceHolder) {
         this.balanceHolder = balanceHolder;

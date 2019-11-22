@@ -9,7 +9,7 @@ import com.chess.cryptobot.exceptions.ItemNotFoundException;
 import com.chess.cryptobot.model.Balance;
 
 public class SwipeBalanceCallback extends ItemTouchHelper.SimpleCallback {
-    private BalanceHolder balanceHolder;
+    private final BalanceHolder balanceHolder;
 
     public SwipeBalanceCallback(BalanceHolder balanceHolder) {
         super(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);

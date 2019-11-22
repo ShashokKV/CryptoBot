@@ -1,5 +1,6 @@
 package com.chess.cryptobot.api;
 
+import com.chess.cryptobot.model.response.livecoin.LivecoinTradeLimitResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinAddressResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinBalanceResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinCurrenciesListResponse;
@@ -33,18 +34,21 @@ public interface LivecoinMarketService {
     @GET("info/coinInfo")
     Call<LivecoinCurrenciesListResponse> getCurrencies();
 
+    @GET("exchange/restrictions")
+    Call<LivecoinTradeLimitResponse> getMinTradeSize();
+
     @GET("payment/get/address")
     Call<LivecoinAddressResponse> getAddress(@QueryMap Map<String, String> options, @HeaderMap Map<String, String> headers);
 
     @FormUrlEncoded
     @POST("payment/out/coin")
-    Call<LivecoinPaymentResponse> payment(@FieldMap Map<String, String> params, @HeaderMap Map<String, String> headers);
+    Call<LivecoinPaymentResponse> payment(@FieldMap(encoded = true) Map<String, String> params, @HeaderMap Map<String, String> headers);
 
     @FormUrlEncoded
     @POST("exchange/buylimit")
-    Call<LivecoinTradeResponse> buy(@FieldMap Map<String, String> params, @HeaderMap Map<String, String> headers);
+    Call<LivecoinTradeResponse> buy(@FieldMap(encoded = true) Map<String, String> params, @HeaderMap Map<String, String> headers);
 
     @FormUrlEncoded
     @POST("exchange/selllimit")
-    Call<LivecoinTradeResponse> sell(@FieldMap Map<String, String> params, @HeaderMap Map<String, String> headers);
+    Call<LivecoinTradeResponse> sell(@FieldMap(encoded = true) Map<String, String> params, @HeaderMap Map<String, String> headers);
 }

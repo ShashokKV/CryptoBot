@@ -53,7 +53,7 @@ public class PairsFragment extends MainFragment {
         if (!hidden) {
             PairsHolder pairsHolder = (PairsHolder) getHolder();
             pairsHolder.updateFromBalance();
-            pairsHolder.updateAllItems();
+            pairsHolder.initAvailablePairs();
         }
     }
 }

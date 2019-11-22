@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements DialogListener {
             openPairs = intent.getBooleanExtra("openPairs", false);
         }
         if (openPairs) {
-            fragmentManager.beginTransaction().add(R.id.include, pairFragment, "2").show(pairFragment).commit();
+            fragmentManager.beginTransaction().add(R.id.include, pairFragment, "2").hide(pairFragment).show(pairFragment).commit();
             fragmentManager.beginTransaction().add(R.id.include, balanceFragment, "1").hide(balanceFragment).commit();
             active = pairFragment;
         }else {
@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements DialogListener {
         runWork();
     }
 
-    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
+    private final BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = item -> {
         switch (item.getItemId()) {
             case R.id.activity_balance:
@@ -170,7 +170,7 @@ public class MainActivity extends AppCompatActivity implements DialogListener {
         }
     }
 
-    public void toggleBot() {
+    private void toggleBot() {
         if (BotService.isRunning) {
             stopBot();
         } else {
@@ -183,14 +183,14 @@ public class MainActivity extends AppCompatActivity implements DialogListener {
         if (!isBound) {
             Intent intent = new Intent(this, BotService.class);
             bindService(intent, boundServiceConnection, BIND_AUTO_CREATE);
+        } else {
+            botService.update();
         }
-        botService.update();
     }
 
     private void startBot() {
         Intent intent = new Intent(this, BotService.class);
         startForegroundService(intent);
-        bindService(intent, boundServiceConnection, BIND_AUTO_CREATE);
         botIsActive = true;
     }
 
@@ -219,12 +219,13 @@ public class MainActivity extends AppCompatActivity implements DialogListener {
     }
 
 
-    private ServiceConnection boundServiceConnection = new ServiceConnection() {
+    private final ServiceConnection boundServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
 
             BotService.BotBinder binderBridge = (BotService.BotBinder) service ;
             botService = binderBridge.getService();
+            botService.update();
             isBound = true;
         }
 

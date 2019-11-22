@@ -9,6 +9,7 @@ import com.chess.cryptobot.model.response.MarketResponse;
 import com.chess.cryptobot.model.response.OrderBookResponse;
 import com.chess.cryptobot.model.response.PaymentResponse;
 import com.chess.cryptobot.model.response.TickerResponse;
+import com.chess.cryptobot.model.response.TradeLimitResponse;
 import com.chess.cryptobot.model.response.TradeResponse;
 
 import java.util.ArrayList;
@@ -21,12 +22,13 @@ public class BittrexResponse implements MarketResponse,
         CurrenciesListResponse,
         AddressResponse,
         PaymentResponse,
-        TradeResponse
+        TradeResponse,
+        TradeLimitResponse
 {
 
     private Boolean success;
-    public String message;
-    private BittrexGenericResponse[] results;
+    private String message;
+    private final BittrexGenericResponse[] results;
 
     BittrexResponse(BittrexGenericResponse[] results) {
         this.results = results;
@@ -98,5 +100,15 @@ public class BittrexResponse implements MarketResponse,
     @Override
     public String getTradeId() {
         return results[0].getUuid();
+    }
+
+    @Override
+    public Double getTradeLimitByName(String pairName) {
+        for(BittrexGenericResponse result: results) {
+            if (result.getPairName().equals(pairName)) {
+                return result.getMinTradeSize();
+            }
+        }
+        return null;
     }
 }

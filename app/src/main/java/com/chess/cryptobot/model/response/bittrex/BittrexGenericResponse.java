@@ -19,7 +19,7 @@ class BittrexGenericResponse implements TickerResponse, CurrenciesResponse {
     private List<BittrexPrice> sell;
     @SerializedName("MarketName")
     @Expose
-    private String tickerName;
+    private String marketName;
     @SerializedName("Bid")
     @Expose
     private Double tickerBid;
@@ -44,6 +44,10 @@ class BittrexGenericResponse implements TickerResponse, CurrenciesResponse {
     @SerializedName("uuid")
     @Expose
     private String uuid;
+    @SerializedName("MinTradeSize")
+    @Expose
+    private Double minTradeSize;
+
 
     Double getAvailable() {
         if (available==null) return 0.0d;
@@ -58,7 +62,7 @@ class BittrexGenericResponse implements TickerResponse, CurrenciesResponse {
         return sell;
     }
 
-    public String getTickerName() {return tickerName.replace("-", "/");}
+    public String getMarketName() {return marketName.replace("-", "/");}
 
     public Double getTickerBid() {
         return tickerBid;
@@ -96,5 +100,13 @@ class BittrexGenericResponse implements TickerResponse, CurrenciesResponse {
 
     String getUuid() {
         return uuid;
+    }
+
+    public String getPairName() {
+        return marketName;
+    }
+
+    Double getMinTradeSize() {
+        return minTradeSize;
     }
 }

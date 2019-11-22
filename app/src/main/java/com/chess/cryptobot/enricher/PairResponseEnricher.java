@@ -6,7 +6,7 @@ import com.chess.cryptobot.model.response.bittrex.BittrexResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinOrderBookResponse;
 
 public class PairResponseEnricher {
-    private Pair pair;
+    private final Pair pair;
 
     public PairResponseEnricher(Pair pair) {
         this.pair = pair;

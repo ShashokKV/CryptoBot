@@ -10,6 +10,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -19,8 +20,6 @@ import com.chess.cryptobot.R;
 import com.chess.cryptobot.content.ContextHolder;
 import com.chess.cryptobot.model.ViewItem;
 import com.chess.cryptobot.view.adapter.RecyclerViewAdapter;
-
-import java.util.Objects;
 
 public abstract class MainFragment<T extends RecyclerView.ViewHolder> extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private RecyclerViewAdapter<T> adapter;
@@ -59,17 +58,17 @@ public abstract class MainFragment<T extends RecyclerView.ViewHolder> extends Fr
         holder.updateAllItems();
     }
 
-    public abstract void beforeRefresh();
+    protected abstract void beforeRefresh();
 
-    public abstract View initFragmentView(LayoutInflater inflater, ViewGroup container);
+    protected abstract View initFragmentView(LayoutInflater inflater, ViewGroup container);
 
-    public abstract ContextHolder initHolder();
+    protected abstract ContextHolder initHolder();
 
-    public abstract RecyclerView initRecyclerView(View view);
+    protected abstract RecyclerView initRecyclerView(View view);
 
-    public abstract RecyclerViewAdapter<T> initAdapter(ContextHolder holder);
+    protected abstract RecyclerViewAdapter<T> initAdapter(ContextHolder holder);
 
-    public abstract SwipeRefreshLayout initSwipeRefresh(View view);
+    protected abstract SwipeRefreshLayout initSwipeRefresh(View view);
 
     public void addItem() { adapter.notifyItemInserted();  }
 
@@ -85,6 +84,10 @@ public abstract class MainFragment<T extends RecyclerView.ViewHolder> extends Fr
         return adapter.itemNameByPosition(position);
     }
 
+    public void updateAllItems() {
+        adapter.notifyDataSetChanged();
+    }
+
     public void makeToast(String message) {
         if (message!=null && !message.isEmpty()) {
             Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
@@ -92,12 +95,16 @@ public abstract class MainFragment<T extends RecyclerView.ViewHolder> extends Fr
     }
 
     public void showSpinner() {
-        ProgressBar spinner = Objects.requireNonNull(getActivity()).findViewById(R.id.progressBar);
+        FragmentActivity activity = getActivity();
+        if (activity==null) return;
+        ProgressBar spinner = activity.findViewById(R.id.progressBar);
         spinner.setVisibility(View.VISIBLE);
     }
 
     public void hideSpinner() {
-        ProgressBar spinner = Objects.requireNonNull(getActivity()).findViewById(R.id.progressBar);
+        FragmentActivity activity = getActivity();
+        if (activity==null) return;
+        ProgressBar spinner = activity.findViewById(R.id.progressBar);
         spinner.setVisibility(View.GONE);
     }
 

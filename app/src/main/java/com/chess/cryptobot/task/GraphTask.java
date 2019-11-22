@@ -31,10 +31,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GraphTask extends AsyncTask<Void, Integer, HorizontalBarChart> {
-    private WeakReference<GraphFragment> graphFragmentWeakReference;
+    private final WeakReference<GraphFragment> graphFragmentWeakReference;
     private List<String> allPairNames;
-    private int daysToShow;
-    private float minPercent;
+    private final int daysToShow;
+    private final float minPercent;
     private float maxPercent;
 
     public GraphTask(GraphFragment graphFragment, int daysToShow, float minPercent) {
