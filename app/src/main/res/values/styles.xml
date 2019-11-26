@@ -15,6 +15,7 @@
         <item name="android:divider">@color/dividerColor</item>
         <item name="alertDialogTheme">@style/AlertDialogTheme</item>
     </style>
+
     <style name="AlertDialogTheme" parent="ThemeOverlay.AppCompat.Dialog.Alert">
         <item name="buttonBarNegativeButtonStyle">@style/NegativeButtonStyle</item>
         <item name="buttonBarPositiveButtonStyle">@style/PositiveButtonStyle</item>

@@ -70,7 +70,9 @@ public abstract class MainFragment<T extends RecyclerView.ViewHolder> extends Fr
 
     protected abstract SwipeRefreshLayout initSwipeRefresh(View view);
 
-    public void addItem() { adapter.notifyItemInserted();  }
+    public void addItem() {
+        adapter.notifyItemInserted();
+    }
 
     public void updateItem(ViewItem item) {
         adapter.updateItem(item);
@@ -89,21 +91,21 @@ public abstract class MainFragment<T extends RecyclerView.ViewHolder> extends Fr
     }
 
     public void makeToast(String message) {
-        if (message!=null && !message.isEmpty()) {
+        if (message != null && !message.isEmpty()) {
             Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
         }
     }
 
     public void showSpinner() {
         FragmentActivity activity = getActivity();
-        if (activity==null) return;
+        if (activity == null) return;
         ProgressBar spinner = activity.findViewById(R.id.progressBar);
         spinner.setVisibility(View.VISIBLE);
     }
 
     public void hideSpinner() {
         FragmentActivity activity = getActivity();
-        if (activity==null) return;
+        if (activity == null) return;
         ProgressBar spinner = activity.findViewById(R.id.progressBar);
         spinner.setVisibility(View.GONE);
     }

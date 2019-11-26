@@ -1,19 +1,19 @@
 package com.chess.cryptobot.api;
 
-import com.chess.cryptobot.model.response.livecoin.LivecoinTradeLimitResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinAddressResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinBalanceResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinCurrenciesListResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinOrderBookResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinPaymentResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinTickerResponse;
+import com.chess.cryptobot.model.response.livecoin.LivecoinTradeLimitResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinTradeResponse;
 
 import java.util.List;
 import java.util.Map;
 
 import retrofit2.Call;
-import retrofit2.http.FieldMap;
+import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.HeaderMap;
@@ -23,10 +23,10 @@ import retrofit2.http.QueryMap;
 public interface LivecoinMarketService {
 
     @GET("payment/balance")
-    Call<LivecoinBalanceResponse> getBalance(@QueryMap Map<String, String> options, @HeaderMap Map<String, String> headers);
+    Call<LivecoinBalanceResponse> getBalance(@QueryMap(encoded = true) Map<String, String> options, @HeaderMap Map<String, String> headers);
 
     @GET("exchange/order_book")
-    Call<LivecoinOrderBookResponse> getOrderBook(@QueryMap Map<String, String> options);
+    Call<LivecoinOrderBookResponse> getOrderBook(@QueryMap(encoded = true) Map<String, String> options);
 
     @GET("exchange/ticker")
     Call<List<LivecoinTickerResponse>> getTicker();
@@ -38,17 +38,26 @@ public interface LivecoinMarketService {
     Call<LivecoinTradeLimitResponse> getMinTradeSize();
 
     @GET("payment/get/address")
-    Call<LivecoinAddressResponse> getAddress(@QueryMap Map<String, String> options, @HeaderMap Map<String, String> headers);
+    Call<LivecoinAddressResponse> getAddress(@QueryMap(encoded = true) Map<String, String> options, @HeaderMap Map<String, String> headers);
 
     @FormUrlEncoded
     @POST("payment/out/coin")
-    Call<LivecoinPaymentResponse> payment(@FieldMap(encoded = true) Map<String, String> params, @HeaderMap Map<String, String> headers);
+    Call<LivecoinPaymentResponse> payment(@Field(value = "amount", encoded = true) String amount,
+                                          @Field(value = "currency", encoded = true) String currency,
+                                          @Field(value = "wallet", encoded = true) String wallet,
+                                          @HeaderMap Map<String, String> headers);
 
     @FormUrlEncoded
     @POST("exchange/buylimit")
-    Call<LivecoinTradeResponse> buy(@FieldMap(encoded = true) Map<String, String> params, @HeaderMap Map<String, String> headers);
+    Call<LivecoinTradeResponse> buy(@Field(value = "currencyPair", encoded = true) String currencyPair,
+                                    @Field(value = "price", encoded = true) String price,
+                                    @Field(value = "quantity", encoded = true) String quantity,
+                                    @HeaderMap Map<String, String> headers);
 
     @FormUrlEncoded
     @POST("exchange/selllimit")
-    Call<LivecoinTradeResponse> sell(@FieldMap(encoded = true) Map<String, String> params, @HeaderMap Map<String, String> headers);
+    Call<LivecoinTradeResponse> sell(@Field(value = "currencyPair", encoded = true) String currencyPair,
+                                     @Field(value = "price", encoded = true) String price,
+                                     @Field(value = "quantity", encoded = true) String quantity,
+                                     @HeaderMap Map<String, String> headers);
 }

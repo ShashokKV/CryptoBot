@@ -57,14 +57,14 @@ public class MainActivity extends AppCompatActivity implements DialogListener {
 
         Intent intent = getIntent();
         boolean openPairs = false;
-        if (intent!=null) {
+        if (intent != null) {
             openPairs = intent.getBooleanExtra("openPairs", false);
         }
         if (openPairs) {
             fragmentManager.beginTransaction().add(R.id.include, pairFragment, "2").hide(pairFragment).show(pairFragment).commit();
             fragmentManager.beginTransaction().add(R.id.include, balanceFragment, "1").hide(balanceFragment).commit();
             active = pairFragment;
-        }else {
+        } else {
             fragmentManager.beginTransaction().add(R.id.include, pairFragment, "2").hide(pairFragment).commit();
             fragmentManager.beginTransaction().add(R.id.include, balanceFragment, "1").show(balanceFragment).commit();
             active = balanceFragment;
@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements DialogListener {
                 active = pairFragment;
                 return true;
 
-            case  R.id.activity_graph:
+            case R.id.activity_graph:
                 fragmentManager.beginTransaction().hide(active).show(graphFragment).commit();
                 active = graphFragment;
                 return true;
@@ -100,7 +100,10 @@ public class MainActivity extends AppCompatActivity implements DialogListener {
     @Override
     protected void onStop() {
         if (BotService.isRunning) {
-            if (isBound) unbindService(boundServiceConnection);
+            if (isBound) {
+                unbindService(boundServiceConnection);
+                isBound = false;
+            }
         }
         super.onStop();
     }
@@ -155,7 +158,7 @@ public class MainActivity extends AppCompatActivity implements DialogListener {
             Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
             startActivity(intent);
             return true;
-        }else if(id == R.id.bot_toggle) {
+        } else if (id == R.id.bot_toggle) {
             toggleBot();
             toggleIcon(item);
         }
@@ -165,7 +168,7 @@ public class MainActivity extends AppCompatActivity implements DialogListener {
     private void toggleIcon(MenuItem item) {
         if (botIsActive) {
             item.setIcon(R.drawable.outline_toggle_on_24);
-        }else {
+        } else {
             item.setIcon(R.drawable.outline_toggle_off_24);
         }
     }
@@ -183,6 +186,7 @@ public class MainActivity extends AppCompatActivity implements DialogListener {
         if (!isBound) {
             Intent intent = new Intent(this, BotService.class);
             bindService(intent, boundServiceConnection, BIND_AUTO_CREATE);
+            isBound = true;
         } else {
             botService.update();
         }
@@ -196,7 +200,11 @@ public class MainActivity extends AppCompatActivity implements DialogListener {
 
     private void stopBot() {
         Intent intent = new Intent(this, BotService.class);
-        if (isBound) unbindService(boundServiceConnection);
+        if (isBound) {
+            unbindService(boundServiceConnection);
+            isBound = false;
+        }
+
         stopService(intent);
         botIsActive = false;
     }
@@ -223,7 +231,7 @@ public class MainActivity extends AppCompatActivity implements DialogListener {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
 
-            BotService.BotBinder binderBridge = (BotService.BotBinder) service ;
+            BotService.BotBinder binderBridge = (BotService.BotBinder) service;
             botService = binderBridge.getService();
             botService.update();
             isBound = true;
@@ -231,7 +239,7 @@ public class MainActivity extends AppCompatActivity implements DialogListener {
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            botService= null;
+            botService = null;
             isBound = false;
         }
     };

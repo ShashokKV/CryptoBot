@@ -67,7 +67,7 @@ public class NotificationBuilder {
         return this;
     }
 
-    public void buildAndNotify()  {
+    public void buildAndNotify() {
         notificationManager.notify(notificationId, build());
     }
 

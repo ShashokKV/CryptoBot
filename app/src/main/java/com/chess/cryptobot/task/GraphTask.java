@@ -95,7 +95,7 @@ public class GraphTask extends AsyncTask<Void, Integer, HorizontalBarChart> {
     private void countApproximatePercent(List<ProfitPair> pairs) {
         pairs.forEach(pair -> {
             float approximatePercent = pair.getPercent() / pair.getId();
-            if (approximatePercent>maxPercent) maxPercent = approximatePercent;
+            if (approximatePercent > maxPercent) maxPercent = approximatePercent;
             pair.setPercent(approximatePercent);
         });
     }
@@ -120,7 +120,7 @@ public class GraphTask extends AsyncTask<Void, Integer, HorizontalBarChart> {
         for (int i = 0; i < allPairNames.size(); i++) {
             DataSet dataSet = new BarDataSet(entriesGroups.get(i), allPairNames.get(i));
             dataSet.setColor(colors[i]);
-            dataSets.add((IBarDataSet)dataSet);
+            dataSets.add((IBarDataSet) dataSet);
         }
         return dataSets;
     }
@@ -160,7 +160,7 @@ public class GraphTask extends AsyncTask<Void, Integer, HorizontalBarChart> {
         customizeYAxis(barChart.getAxis(YAxis.AxisDependency.RIGHT), textColor);
         customizeLegend(barChart.getLegend(), textColor);
         customizeBarChart(barChart);
-        if (dataSets.size()>1) barChart.groupBars(0, groupSpace, barSpace);
+        if (dataSets.size() > 1) barChart.groupBars(0, groupSpace, barSpace);
 
         return barChart;
     }
@@ -177,8 +177,8 @@ public class GraphTask extends AsyncTask<Void, Integer, HorizontalBarChart> {
 
     private float calculateBarWidth(int elementsCount, float groupSpace, float barSpace) {
         // (barSpace + barWidth) * elementsCount + groupSpace = 1
-        if (elementsCount==0) return 1f-barSpace;
-        return ((1f-barSpace)/elementsCount - groupSpace);
+        if (elementsCount == 0) return 1f - barSpace;
+        return ((1f - barSpace) / elementsCount - groupSpace);
     }
 
     private void customizeXAxis(XAxis xAxis, int textColor, List<String> axisNames) {
@@ -189,9 +189,9 @@ public class GraphTask extends AsyncTask<Void, Integer, HorizontalBarChart> {
         ValueFormatter formatter = new ValueFormatter() {
             @Override
             public String getAxisLabel(float value, AxisBase axis) {
-                if (value<0) {
+                if (value < 0) {
                     return "";
-                }else if(value>=axisNames.size()) {
+                } else if (value >= axisNames.size()) {
                     return "";
                 }
                 return axisNames.get((int) value);
@@ -209,8 +209,8 @@ public class GraphTask extends AsyncTask<Void, Integer, HorizontalBarChart> {
 
     private int[] generateColors(int colorsCount) {
         int[] colors = new int[colorsCount];
-        for (int i=0; i<colorsCount; i++) {
-            colors[i] = Color.rgb((int)(Math.random()*255), (int)(Math.random()*255), (int)(Math.random()*255));
+        for (int i = 0; i < colorsCount; i++) {
+            colors[i] = Color.rgb((int) (Math.random() * 255), (int) (Math.random() * 255), (int) (Math.random() * 255));
         }
         return colors;
     }

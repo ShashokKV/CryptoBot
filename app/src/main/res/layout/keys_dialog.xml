@@ -11,6 +11,6 @@
         android:hint="@string/paste_key_here"
         android:importantForAutofill="no"
         android:inputType="text"
-        android:textColor="@color/colorAccent"/>
+        android:textColor="@color/colorAccent" />
 
 </LinearLayout>

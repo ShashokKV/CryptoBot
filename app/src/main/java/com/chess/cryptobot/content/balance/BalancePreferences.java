@@ -19,7 +19,7 @@ public class BalancePreferences extends Preferences {
     }
 
     public Double getMinBalance(String coinName) {
-        return Double.parseDouble(Objects.requireNonNull(getSharedPreferences().getString("min_".concat(coinName),"0.0")));
+        return Double.parseDouble(Objects.requireNonNull(getSharedPreferences().getString("min_".concat(coinName), "0.0")));
     }
 
     void setMinBalance(String coinName, Double minBalance) {

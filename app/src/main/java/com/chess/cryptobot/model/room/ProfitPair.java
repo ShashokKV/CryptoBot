@@ -57,14 +57,14 @@ public class ProfitPair {
 
     @Override
     public boolean equals(@Nullable Object obj) {
-        if (obj==null) return false;
+        if (obj == null) return false;
         if (obj.equals(this)) return true;
 
         if (obj instanceof ProfitPair) {
             return this.getPairName().equals(((ProfitPair) obj).getPairName());
-        }else if(obj instanceof String) {
+        } else if (obj instanceof String) {
             return this.getPairName().equals(obj);
-        }else {
+        } else {
             return false;
         }
     }

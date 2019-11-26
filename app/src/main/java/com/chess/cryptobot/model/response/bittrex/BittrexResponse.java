@@ -23,8 +23,7 @@ public class BittrexResponse implements MarketResponse,
         AddressResponse,
         PaymentResponse,
         TradeResponse,
-        TradeLimitResponse
-{
+        TradeLimitResponse {
 
     private Boolean success;
     private String message;
@@ -104,7 +103,7 @@ public class BittrexResponse implements MarketResponse,
 
     @Override
     public Double getTradeLimitByName(String pairName) {
-        for(BittrexGenericResponse result: results) {
+        for (BittrexGenericResponse result : results) {
             if (result.getPairName().equals(pairName)) {
                 return result.getMinTradeSize();
             }

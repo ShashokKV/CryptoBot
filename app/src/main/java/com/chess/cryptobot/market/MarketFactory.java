@@ -26,17 +26,17 @@ public class MarketFactory {
     }
 
     private Market getMarket(String marketName, SharedPreferences preferences, Context context) {
-        if (context==null) return null;
+        if (context == null) return null;
         if (marketName.equals("bittrex")) {
             return new BittrexMarket(context.getString(R.string.bittrex_url),
                     preferences.getString(context.getString(R.string.bittrex_api_key), null),
                     preferences.getString(context.getString(R.string.bittrex_secret_key), null));
-        }else if(marketName.equals("livecoin")) {
+        } else if (marketName.equals("livecoin")) {
             return new LivecoinMarket(context.getString(R.string.livecoin_url),
                     preferences.getString(context.getString(R.string.livecoin_api_key), null),
                     preferences.getString(context.getString(R.string.livecoin_secret_key), null));
-        }else {
-            throw new IllegalArgumentException("Unknoqn market: "+marketName);
+        } else {
+            throw new IllegalArgumentException("Unknoqn market: " + marketName);
         }
     }
 }

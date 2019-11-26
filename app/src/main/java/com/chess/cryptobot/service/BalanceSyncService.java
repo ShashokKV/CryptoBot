@@ -51,7 +51,7 @@ public class BalanceSyncService extends IntentService {
         try {
             initCoinInfo(markets);
         } catch (MarketException e) {
-            updateInfo("BalanceSync", "Can't init coinInfo: "+e.getMessage());
+            updateInfo("BalanceSync", "Can't init coinInfo: " + e.getMessage());
             makeNotification();
             return;
         }
@@ -114,7 +114,7 @@ public class BalanceSyncService extends IntentService {
     private Map<String, Double> getMarketsAmounts(List<Market> markets, String coinName) throws MarketException {
         Map<String, Double> marketAmounts = new HashMap<>();
         for (Market market : markets) {
-                marketAmounts.put(market.getMarketName(), market.getAmount(coinName));
+            marketAmounts.put(market.getMarketName(), market.getAmount(coinName));
         }
         return marketAmounts;
     }
@@ -147,7 +147,7 @@ public class BalanceSyncService extends IntentService {
                 .setTitle("Balance sync result")
                 .buildAndNotify();
 
-        resultInfo="";
+        resultInfo = "";
     }
 
     class CoinMover {
@@ -215,7 +215,7 @@ public class BalanceSyncService extends IntentService {
         }
 
         private Double recalculateDelta(Double fromAmount, Double toAmount, Double fee) {
-            return (((fromAmount+toAmount)/2)-toAmount)+fee;
+            return (((fromAmount + toAmount) / 2) - toAmount) + fee;
         }
 
         private Double formatAmount(Double amount) {

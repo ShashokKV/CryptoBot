@@ -13,7 +13,7 @@ public class ErrorResponse {
     private String message;
 
     public String getErrorMessage() {
-        if (errorMessage==null) return message;
+        if (errorMessage == null) return message;
         return errorMessage;
     }
 }

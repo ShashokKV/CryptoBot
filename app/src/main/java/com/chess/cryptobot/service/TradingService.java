@@ -3,10 +3,12 @@ package com.chess.cryptobot.service;
 import android.app.IntentService;
 import android.app.NotificationManager;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 import androidx.annotation.Nullable;
 
+import com.chess.cryptobot.R;
 import com.chess.cryptobot.exceptions.MarketException;
 import com.chess.cryptobot.market.BittrexMarket;
 import com.chess.cryptobot.market.LivecoinMarket;
@@ -21,6 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import static com.chess.cryptobot.service.TradingService.Strategy.MIN_TRADE;
+
 public class TradingService extends IntentService {
     private final static int NOTIFICATION_ID = 400500;
     private static final String CHANNEL_ID = "trading_chanel";
@@ -28,16 +32,11 @@ public class TradingService extends IntentService {
     private Pair pair;
     private BittrexMarket bittrexMarket;
     private LivecoinMarket livecoinMarket;
-    private Double livecoinBaseFee;
-    private Double livecoinMarketFee;
-    private Double bittrexBaseFee;
-    private Double bittrexMarketFee;
     private Double livecoinBaseAmount;
     private Double livecoinMarketAmount;
     private Double bittrexBaseAmount;
     private Double bittrexMarketAmount;
     private Double minMarketQuantity;
-
 
     public TradingService() {
         super("TradingService");
@@ -45,37 +44,36 @@ public class TradingService extends IntentService {
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
-        if (intent==null) return;
+        if (intent == null) return;
+
         initFromIntent(intent);
         initMarkets();
+
         try {
             initAmounts();
-        }catch (MarketException e) {
+        } catch (MarketException e) {
             makeNotification(e.getMessage());
         }
 
-        Trader trader = new Trader(pair);
-        Double traderMinQuantity = trader.countMinQuantity();
-        if(traderMinQuantity<=0 || traderMinQuantity<minMarketQuantity) return;
+        Trader trader = new Trader(pair, getStrategy());
+        if (trader.quantity <= 0) return;
 
         try {
             trader.buy();
             trader.sell();
-        }catch (MarketException e) {
+        } catch (MarketException e) {
             trader.updateInfo(e.getMessage());
+            makeNotification(resultInfo);
+            return;
         }
 
         makeNotification(resultInfo);
 
-          trader.syncBalance();
+        trader.syncBalance();
     }
 
     private void initFromIntent(Intent intent) {
         this.pair = (Pair) intent.getSerializableExtra(Pair.class.getName());
-        livecoinBaseFee = intent.getDoubleExtra("livecoinBaseFee", 0.0d);
-        livecoinMarketFee = intent.getDoubleExtra("livecoinMarketFee", 0.0d);
-        bittrexBaseFee = intent.getDoubleExtra("bittrexBaseFee", 0.0d);
-        bittrexMarketFee = intent.getDoubleExtra("bittrexMarketFee", 0.0d);
         minMarketQuantity = intent.getDoubleExtra("minQuantity", 0.0d);
     }
 
@@ -84,7 +82,7 @@ public class TradingService extends IntentService {
         markets.forEach(market -> {
             if (market instanceof BittrexMarket) {
                 bittrexMarket = (BittrexMarket) market;
-            }else if (market instanceof LivecoinMarket) {
+            } else if (market instanceof LivecoinMarket) {
                 livecoinMarket = (LivecoinMarket) market;
             }
         });
@@ -95,6 +93,11 @@ public class TradingService extends IntentService {
         bittrexBaseAmount = bittrexMarket.getAmount(pair.getBaseName());
         livecoinMarketAmount = livecoinMarket.getAmount(pair.getMarketName());
         bittrexMarketAmount = bittrexMarket.getAmount(pair.getMarketName());
+    }
+
+    private Strategy getStrategy() {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        return Strategy.valueOf(preferences.getString(getResources().getString(R.string.trade_strategy), "MIN_PAIR"));
     }
 
     private void makeNotification(String message) {
@@ -109,7 +112,7 @@ public class TradingService extends IntentService {
                 .setNotificationText(message)
                 .buildAndNotify();
 
-        resultInfo="";
+        resultInfo = "";
     }
 
     private class Trader {
@@ -118,28 +121,22 @@ public class TradingService extends IntentService {
         private Double quantity;
         private final Market sellMarket;
         private final Market buyMarket;
-        private final Double sellFee;
-        private final Double buyFee;
         private final Double baseAmount;
         private final Double marketAmount;
         private final String sellPairName;
         private final String buyPairName;
+        private Strategy strategy;
 
-        Trader(Pair pair) {
-            if ((pair.getBittrexBid()-pair.getLivecoinAsk())>(pair.getLivecoinBid()-pair.getBittrexAsk())) {
+        Trader(Pair pair, Strategy strategy) {
+            this.strategy = strategy;
+            if ((pair.getBittrexBid() - pair.getLivecoinAsk()) > (pair.getLivecoinBid() - pair.getBittrexAsk())) {
                 bidPrice = pair.getBittrexBid();
                 askPrice = pair.getLivecoinAsk();
                 sellMarket = bittrexMarket;
                 buyMarket = livecoinMarket;
-                if (pair.getBittrexBidQuantity()<pair.getLivecoinAskQuantity()) {
-                    quantity = pair.getBittrexBidQuantity();
-                }else {
-                    quantity = pair.getLivecoinAskQuantity();
-                }
-                buyFee = livecoinMarketFee;
-                sellFee = bittrexBaseFee;
-                baseAmount = livecoinBaseAmount;
+                baseAmount = livecoinBaseAmount / askPrice;
                 marketAmount = bittrexMarketAmount;
+                quantity = countMinQuantity(pair.getBittrexBidQuantity(), pair.getLivecoinAskQuantity());
                 sellPairName = pair.getPairNameForMarket(bittrexMarket.getMarketName());
                 buyPairName = pair.getPairNameForMarket(livecoinMarket.getMarketName());
             } else {
@@ -147,34 +144,42 @@ public class TradingService extends IntentService {
                 askPrice = pair.getBittrexAsk();
                 sellMarket = livecoinMarket;
                 buyMarket = bittrexMarket;
-                if (pair.getLivecoinBidQuantity()<pair.getBittrexAskQuantity()) {
-                    quantity = pair.getLivecoinBidQuantity();
-                }else {
-                    quantity = pair.getBittrexAskQuantity();
-                }
-                buyFee = bittrexMarketFee;
-                sellFee = livecoinBaseFee;
-                baseAmount = bittrexBaseAmount;
+                baseAmount = bittrexBaseAmount / askPrice;
                 marketAmount = livecoinMarketAmount;
+                quantity = countMinQuantity(pair.getBittrexBidQuantity(), pair.getLivecoinAskQuantity());
                 sellPairName = pair.getPairNameForMarket(livecoinMarket.getMarketName());
                 buyPairName = pair.getPairNameForMarket(bittrexMarket.getMarketName());
             }
         }
 
-        private Double countMinQuantity() {
-            Double buyQuantity, sellQuantity, resultQuantity;
-            buyQuantity = (baseAmount/askPrice)-buyFee;
-            sellQuantity = marketAmount-sellFee;
-            if (buyQuantity<sellQuantity) {
-                resultQuantity = buyQuantity;
-            } else {
-                resultQuantity = sellQuantity;
+        private Double countMinQuantity(Double bidQuantity, Double askQuantity) {
+            Double minAvailableAmount = baseAmount<marketAmount ? baseAmount : marketAmount;
+
+            switch (strategy) {
+                case MIN_PAIR:
+                    quantity = bidQuantity<askQuantity ? bidQuantity : askQuantity;
+                    break;
+
+                case MAX_PAIR:
+                    quantity = bidQuantity>askQuantity ? bidQuantity : askQuantity;
+                    break;
+                case ALL_BALANCE:
+                    quantity = minAvailableAmount;
+                    break;
             }
-            if (resultQuantity<quantity) {
-                quantity = resultQuantity;
+
+            if (quantity<minMarketQuantity) {
+                if (strategy == MIN_TRADE) {
+                    quantity = minMarketQuantity;
+                }else {
+                    return 0.0d;
+                }
             }
+
+            if (quantity>minAvailableAmount) return 0.0d;
+
             //-1% for trading fee
-            quantity = formatAmount(quantity - (quantity/100));
+            quantity = formatAmount(quantity - (quantity / 100));
 
             return quantity;
         }
@@ -212,7 +217,10 @@ public class TradingService extends IntentService {
         }
     }
 
-
-
-
+    public enum Strategy {
+        MIN_PAIR,
+        MAX_PAIR,
+        MIN_TRADE,
+        ALL_BALANCE
+    }
 }

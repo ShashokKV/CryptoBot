@@ -19,9 +19,9 @@ public abstract class CryptoDialog extends DialogFragment {
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        try{
+        try {
             dialogListener = (DialogListener) context;
-        }catch (ClassCastException e) {
+        } catch (ClassCastException e) {
             throw new ClassCastException(context.toString()
                     + " must implement DialogListener");
         }

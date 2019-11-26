@@ -152,7 +152,6 @@ public class BotService extends Service {
         private final List<Pair> pairs;
         private final List<Market> markets;
         private final Map<String, Map<String, Boolean>> statuses = new HashMap<>();
-        private final Map<String, Map<String, Double>> fees = new HashMap<>();
         private final Map<String, TradeLimitResponse> minQuantities = new HashMap<>();
 
         BotTimerTask(List<Pair> pairs, List<Market> markets) {
@@ -163,23 +162,25 @@ public class BotService extends Service {
         @Override
         public void run() {
             Log.d(TAG, "timer running");
+
             if (isNotificationShown() && !autoTrade) {
                 Log.d(TAG, "notification shown, do nothing");
                 return;
             }
+
             try {
                 initCoinInfo();
                 if (autoTrade) {
                     initMinQuantities();
                 }
             } catch (MarketException e) {
-                makeNotification(e.getMessage());
+                makeNotification("Exception", e.getMessage());
                 return;
             }
             List<Pair> profitPairs = getProfitPairs(pairs, markets);
 
             if (!profitPairs.isEmpty() && !autoTrade) {
-                makeNotification(getNotificationText(profitPairs));
+                makeNotification("Profitable pairs found", getNotificationText(profitPairs));
             }
         }
 
@@ -187,14 +188,8 @@ public class BotService extends Service {
             for (Market market : markets) {
                 List<CurrenciesResponse> currencies = market.getCurrencies();
                 Map<String, Boolean> statuses = new HashMap<>();
-                Map<String, Double> fees = new HashMap<>();
-                currencies.forEach(currency -> {
-                    String currencyName = currency.getCurrencyName();
-                    statuses.put(currencyName, currency.isActive());
-                    fees.put(currencyName, currency.getFee());
-                });
+                currencies.forEach(currency -> statuses.put(currency.getCurrencyName(), currency.isActive()));
                 this.statuses.put(market.getMarketName(), statuses);
-                this.fees.put(market.getMarketName(), fees);
             }
         }
 
@@ -250,31 +245,22 @@ public class BotService extends Service {
         private void beginTrade(Pair pair) {
             Intent intent = new Intent(BotService.this, TradingService.class);
             intent.putExtra(Pair.class.getName(), pair);
-            intent.putExtra("livecoinBaseFee", getFee(LIVECOIN_MARKET, pair.getBaseName()));
-            intent.putExtra("livecoinMarketFee", getFee(LIVECOIN_MARKET, pair.getMarketName()));
-            intent.putExtra("bittrexBaseFee", getFee(BITTREX_MARKET, pair.getBaseName()));
-            intent.putExtra("bittrexMarketFee", getFee(BITTREX_MARKET, pair.getMarketName()));
             intent.putExtra("minQuantity", getMinQuantity(pair));
 
             startService(intent);
         }
 
-        private Double getFee(String marketName, String coinName) {
-            Map<String, Double> fees = this.fees.get(marketName);
-            return Objects.requireNonNull(fees).get(coinName);
-        }
-
         private Double getMinQuantity(Pair pair) {
-            Double resultQuantity=null;
-            for(Market market: markets) {
+            Double resultQuantity = null;
+            for (Market market : markets) {
                 String marketName = market.getMarketName();
                 TradeLimitResponse response = minQuantities.get(marketName);
-                if (response!=null) {
+                if (response != null) {
                     Double quantity = response.getTradeLimitByName(pair.getPairNameForMarket(marketName));
-                    if (resultQuantity==null) {
+                    if (resultQuantity == null) {
                         resultQuantity = quantity;
-                    }else {
-                        if (quantity>resultQuantity) {
+                    } else {
+                        if (quantity > resultQuantity) {
                             resultQuantity = quantity;
                         }
                     }
@@ -294,9 +280,9 @@ public class BotService extends Service {
             return false;
         }
 
-        private void makeNotification(String text) {
+        private void makeNotification(String title, String text) {
             new NotificationBuilder(BotService.this)
-                    .setTitle("Profitable pairs found")
+                    .setTitle(title)
                     .setImportance(NotificationManager.IMPORTANCE_DEFAULT)
                     .setChannelName(getApplicationContext().getString(R.string.channel_name))
                     .setChannelId(CHANNEL_ID)

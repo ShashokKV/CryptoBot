@@ -37,8 +37,8 @@ public class Pair implements ViewItem, Serializable {
 
     @Override
     public boolean equals(@Nullable Object obj) {
-        if (obj==null) return false;
-        if (obj==this) return true;
+        if (obj == null) return false;
+        if (obj == this) return true;
         if (obj instanceof Pair) {
             Pair pair = (Pair) obj;
             return pair.marketName.equals(this.marketName) &&
@@ -150,7 +150,7 @@ public class Pair implements ViewItem, Serializable {
     public String getPairNameForMarket(String marketName) {
         if (marketName.equals("bittrex")) {
             return getBittrexPairName();
-        }else {
+        } else {
             return getLIvecoinPairName();
         }
     }

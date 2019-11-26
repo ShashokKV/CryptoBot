@@ -42,10 +42,10 @@ public class PairsUpdateTask extends MarketTask<Pair, Pair> {
     @Override
     public void doInPostExecute(Pair pair, ContextHolder holder) {
         PairsHolder pairsHolder = (PairsHolder) holder;
-        if (pair.getPercent()<0) {
+        if (pair.getPercent() < 0) {
             pairsHolder.remove(pair);
             pairsHolder.addToNegativePercentPairs(pair);
-        }else {
+        } else {
             pairsHolder.setItem(pair);
         }
     }
@@ -53,7 +53,7 @@ public class PairsUpdateTask extends MarketTask<Pair, Pair> {
     @Override
     public void doInOnCanceled(Pair pair, ContextHolder holder) {
         String message = pair.getMessage();
-        if (message==null) return;
+        if (message == null) return;
         PairsHolder pairsHolder = (PairsHolder) holder;
         if (message.contains("Unknown currency pair") || message.contains("INVALID_MARKET")) {
             pairsHolder.addToInvalidPairs(pair);

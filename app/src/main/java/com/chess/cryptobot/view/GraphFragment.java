@@ -19,7 +19,7 @@ import com.github.mikephil.charting.charts.HorizontalBarChart;
 import java.util.Objects;
 
 public class GraphFragment extends Fragment {
-private HorizontalBarChart chart;
+    private HorizontalBarChart chart;
 
     @Nullable
     @Override

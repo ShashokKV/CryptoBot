@@ -34,7 +34,7 @@ public class BalanceHolder extends ContextHolder {
     private void checkIfHasKeys() {
         hasKeys = true;
         MarketFactory factory = new MarketFactory();
-        for (Market market: factory.getMarkets(this)) {
+        for (Market market : factory.getMarkets(this)) {
             if (market.keysIsEmpty()) {
                 hasKeys = false;
                 break;
@@ -105,7 +105,7 @@ public class BalanceHolder extends ContextHolder {
 
     public void setMinBalance(String coinName, Double minBalance) {
         BalancePreferences preferences = (BalancePreferences) getPrefs();
-        preferences.setMinBalance(coinName,minBalance);
+        preferences.setMinBalance(coinName, minBalance);
     }
 
     public void setCurrencyStatus(Map<String, Boolean> bittrexStatuses, Map<String, Boolean> livecoinStatuses) {

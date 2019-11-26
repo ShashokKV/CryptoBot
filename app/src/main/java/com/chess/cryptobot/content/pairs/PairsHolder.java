@@ -112,7 +112,7 @@ public class PairsHolder extends ContextHolder {
     public void removeInvalidPairs() {
         List<ViewItem> pairs = new ArrayList<>();
         availablePairs.forEach(pairName -> pairs.add(Pair.fromPairName(pairName)));
-       this.retainAll(pairs);
+        this.retainAll(pairs);
     }
 
     public void setVolumes(Map<String, Double> bittrexVolumes, Map<String, Double> livecoinVolumes) {

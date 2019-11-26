@@ -11,6 +11,6 @@
         android:hint="@string/_0"
         android:importantForAutofill="no"
         android:inputType="numberDecimal"
-        android:textColor="@color/colorAccent"/>
+        android:textColor="@color/colorAccent" />
 
 </LinearLayout>

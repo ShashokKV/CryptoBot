@@ -9,7 +9,7 @@ import androidx.core.app.NavUtils;
 
 import com.chess.cryptobot.R;
 
-public class SettingsActivity extends AppCompatActivity  {
+public class SettingsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,7 +27,7 @@ public class SettingsActivity extends AppCompatActivity  {
                 .commit();
     }
 
- @Override
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == android.R.id.home) {

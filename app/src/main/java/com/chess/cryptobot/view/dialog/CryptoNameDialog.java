@@ -8,7 +8,7 @@ import com.chess.cryptobot.R;
 import com.chess.cryptobot.content.balance.BalanceHolder;
 
 public class CryptoNameDialog extends CryptoDialog {
-private final BalanceHolder balanceHolder;
+    private final BalanceHolder balanceHolder;
 
     public CryptoNameDialog(BalanceHolder balanceHolder) {
         this.balanceHolder = balanceHolder;
@@ -18,7 +18,7 @@ private final BalanceHolder balanceHolder;
     EditText enrichEditText(EditText editText) {
         editText.setId(R.id.name_dialog_edit_text);
         editText.setTextColor(getResources().getColor(R.color.colorAccent, null));
-        editText.setInputType(InputType.TYPE_CLASS_TEXT |  InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS);
+        editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS);
         return editText;
     }
 

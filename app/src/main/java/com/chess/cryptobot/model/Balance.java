@@ -32,7 +32,7 @@ public class Balance implements ViewItem {
         if (balanceObj instanceof Balance) {
             Balance balance = (Balance) balanceObj;
             return (balance.getName().equals(this.coinName));
-        }else {
+        } else {
             return false;
         }
     }
@@ -53,9 +53,9 @@ public class Balance implements ViewItem {
         this.amounts.put(marketName, amount);
     }
 
-    public Double getAmount(String marketName)  {
+    public Double getAmount(String marketName) {
         Double amount = this.amounts.get(marketName);
-        if (amount==null) return 0.0d;
+        if (amount == null) return 0.0d;
         return amount;
     }
 

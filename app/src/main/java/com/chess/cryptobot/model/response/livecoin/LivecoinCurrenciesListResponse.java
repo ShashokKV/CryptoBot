@@ -15,7 +15,7 @@ public class LivecoinCurrenciesListResponse extends LivecoinResponse implements 
     public Info[] info;
 
     public List<CurrenciesResponse> getInfo() {
-        if (this.info ==null) return new ArrayList<>();
+        if (this.info == null) return new ArrayList<>();
         return Arrays.asList(this.info);
     }
 }
@@ -39,13 +39,13 @@ class Info implements CurrenciesResponse {
 
     @Override
     public Boolean isActive() {
-        if (walletStatus==null) return false;
+        if (walletStatus == null) return false;
         return walletStatus.equals("normal");
     }
 
     @Override
     public Double getFee() {
-        if (withdrawFee==null) return withdrawFee;
+        if (withdrawFee == null) return withdrawFee;
         return withdrawFee;
     }
 }

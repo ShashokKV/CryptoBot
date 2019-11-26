@@ -26,7 +26,7 @@ public class BalanceUpdateTask extends MarketTask<Balance, Balance> {
 
     @Override
     public Balance postMarketProcess(Balance balance) {
-        if (hashCode==balance.getAmounts().hashCode()) return null;
+        if (hashCode == balance.getAmounts().hashCode()) return null;
         return balance;
     }
 

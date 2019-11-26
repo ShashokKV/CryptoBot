@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <item type="id" name="name_dialog_edit_text"/>
-    <item type="id" name="name_dialog_title"/>
-    <item type="id" name="min_balance_edit_text"/>
-    <item type="id" name="min_balance_title"/>
+    <item name="name_dialog_edit_text" type="id" />
+    <item name="name_dialog_title" type="id" />
+    <item name="min_balance_edit_text" type="id" />
+    <item name="min_balance_title" type="id" />
 
 </resources>

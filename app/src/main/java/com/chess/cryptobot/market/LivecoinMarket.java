@@ -7,20 +7,23 @@ import com.chess.cryptobot.model.response.CurrenciesResponse;
 import com.chess.cryptobot.model.response.OrderBookResponse;
 import com.chess.cryptobot.model.response.TickerResponse;
 import com.chess.cryptobot.model.response.TradeLimitResponse;
-import com.chess.cryptobot.model.response.livecoin.LivecoinTradeLimitResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinAddressResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinBalanceResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinCurrenciesListResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinOrderBookResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinPaymentResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinTickerResponse;
+import com.chess.cryptobot.model.response.livecoin.LivecoinTradeLimitResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinTradeResponse;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TreeMap;
 
 import retrofit2.Call;
@@ -77,7 +80,7 @@ public class LivecoinMarket extends MarketRequest {
     @Override
     public OrderBookResponse getOrderBook(String pairName) throws LivecoinException {
         LivecoinOrderBookResponse response;
-        TreeMap<String, String> params = new TreeMap<>();
+        Map<String, String> params = new LinkedHashMap<>();
         params.put("currencyPair", pairName);
         params.put("groupByPrice", "true");
         params.put("depth", "10");
@@ -113,7 +116,7 @@ public class LivecoinMarket extends MarketRequest {
         Call<LivecoinCurrenciesListResponse> call = service.getCurrencies();
         try {
             response = (LivecoinCurrenciesListResponse) execute(call);
-        }catch (MarketException e) {
+        } catch (MarketException e) {
             throw new LivecoinException(e.getMessage());
         }
         return response.getInfo();
@@ -125,7 +128,7 @@ public class LivecoinMarket extends MarketRequest {
         Call<LivecoinTradeLimitResponse> call = service.getMinTradeSize();
         try {
             response = (LivecoinTradeLimitResponse) execute(call);
-        }catch (MarketException e) {
+        } catch (MarketException e) {
             throw new LivecoinException(e.getMessage());
         }
         return response;
@@ -133,12 +136,12 @@ public class LivecoinMarket extends MarketRequest {
 
     @Override
     public String getAddress(String coinName) throws MarketException {
-        TreeMap<String, String> params = new TreeMap<>();
+        Map<String, String> params = new LinkedHashMap<>();
         params.put("currency", coinName);
 
         String hash = makeHash(params);
 
-        TreeMap<String, String> headers = new TreeMap<>();
+        Map<String, String> headers = new HashMap<>();
         headers.put("API-key", this.apiKey);
         headers.put("Sign", hash);
 
@@ -154,20 +157,24 @@ public class LivecoinMarket extends MarketRequest {
 
     @Override
     public String sendCoins(String coinName, Double amount, String address) throws MarketException {
-        TreeMap<String, String> params = new TreeMap<>();
-        params.put("amount", String.format(Locale.getDefault(), "%.8f", amount));
+        Map<String, String> params = new LinkedHashMap<>();
+        params.put("amount", String.format(Locale.US, "%.8f", amount));
         params.put("currency", coinName);
         params.put("wallet", address);
 
         String hash = makeHash(params);
 
-        TreeMap<String, String> headers = new TreeMap<>();
+        Map<String, String> headers = new HashMap<>();
         headers.put("API-key", this.apiKey);
         headers.put("Sign", hash);
 
         LivecoinPaymentResponse response;
         try {
-            Call<LivecoinPaymentResponse> call = service.payment(params, headers);
+            Call<LivecoinPaymentResponse> call = service.payment(
+                    params.get("amount"),
+                    params.get("currency"),
+                    params.get("wallet"),
+                    headers);
             response = (LivecoinPaymentResponse) execute(call);
         } catch (MarketException e) {
             throw new LivecoinException(e.getMessage());
@@ -177,20 +184,24 @@ public class LivecoinMarket extends MarketRequest {
 
     @Override
     public String buy(String pairName, Double price, Double amount) throws MarketException {
-        TreeMap<String, String> params = new TreeMap<>();
+        Map<String, String> params = new LinkedHashMap<>();
         params.put("currencyPair", pairName);
-        params.put("price", String.format(Locale.getDefault(), "%.8f", price));
-        params.put("quantity", String.format(Locale.getDefault(), "%.8f", amount));
+        params.put("price", String.format(Locale.US, "%.8f", price));
+        params.put("quantity", String.format(Locale.US, "%.8f", amount));
 
         String hash = makeHash(params);
 
-        TreeMap<String, String> headers = new TreeMap<>();
+        Map<String, String> headers = new HashMap<>();
         headers.put("API-key", this.apiKey);
         headers.put("Sign", hash);
 
         LivecoinTradeResponse response;
         try {
-            Call<LivecoinTradeResponse> call = service.buy(params, headers);
+            Call<LivecoinTradeResponse> call = service.buy(
+                    params.get("currencyPair"),
+                    params.get("price"),
+                    params.get("quantity"),
+                    headers);
             response = (LivecoinTradeResponse) execute(call);
         } catch (MarketException e) {
             throw new LivecoinException(e.getMessage());
@@ -200,20 +211,24 @@ public class LivecoinMarket extends MarketRequest {
 
     @Override
     public String sell(String pairName, Double price, Double amount) throws MarketException {
-        TreeMap<String, String> params = new TreeMap<>();
+        Map<String, String> params = new LinkedHashMap<>();
         params.put("currencyPair", pairName);
-        params.put("price", String.format(Locale.getDefault(), "%.8f", price));
-        params.put("quantity", String.format(Locale.getDefault(), "%.8f", amount));
+        params.put("price", String.format(Locale.US, "%.8f", price));
+        params.put("quantity", String.format(Locale.US, "%.8f", amount));
 
         String hash = makeHash(params);
 
-        TreeMap<String, String> headers = new TreeMap<>();
+        Map<String, String> headers = new HashMap<>();
         headers.put("API-key", this.apiKey);
         headers.put("Sign", hash);
 
         LivecoinTradeResponse response;
         try {
-            Call<LivecoinTradeResponse> call = service.sell(params, headers);
+            Call<LivecoinTradeResponse> call = service.sell(
+                    params.get("currencyPair"),
+                    params.get("price"),
+                    params.get("quantity"),
+                    headers);
             response = (LivecoinTradeResponse) execute(call);
         } catch (MarketException e) {
             throw new LivecoinException(e.getMessage());

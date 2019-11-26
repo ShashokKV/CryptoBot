@@ -17,13 +17,13 @@ public class LivecoinResponse implements MarketResponse {
 
     @Override
     public boolean success() {
-        if (success==null) return true;
+        if (success == null) return true;
         return success;
     }
 
     @Override
     public String message() {
-        if (errorMessage==null) return exception;
+        if (errorMessage == null) return exception;
         return errorMessage;
     }
 }

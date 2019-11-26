@@ -32,11 +32,12 @@ public class CoinImageTask extends AsyncTask<Balance, Integer, Balance> {
     protected Balance doInBackground(Balance... balances) {
         boolean updated = false;
         Balance balance = balances[0];
-            try{
-                Bitmap bitmap = getImage(balance.getName());
-                balance.setCoinIcon(bitmap);
-                updated = true;
-            }catch (IOException ignored){}
+        try {
+            Bitmap bitmap = getImage(balance.getName());
+            balance.setCoinIcon(bitmap);
+            updated = true;
+        } catch (IOException ignored) {
+        }
 
         if (!updated) {
             cancel(true);
@@ -47,16 +48,16 @@ public class CoinImageTask extends AsyncTask<Balance, Integer, Balance> {
 
     @Override
     protected void onPostExecute(@Nullable Balance balance) {
-        if (balance==null) return;
+        if (balance == null) return;
         BalanceHolder balanceHolder = balanceHolderWeakReference.get();
-        if (balanceHolder!=null) balanceHolder.setItem(balance);
+        if (balanceHolder != null) balanceHolder.setItem(balance);
     }
 
     private Bitmap getImage(String coinName) throws IOException {
         Bitmap bitmap;
-        try{
+        try {
             bitmap = loadImage(coinName);
-        }catch (IOException e) {
+        } catch (IOException e) {
             bitmap = downloadImage(coinName);
             saveImage(bitmap, fileName(coinName));
         }
@@ -67,7 +68,7 @@ public class CoinImageTask extends AsyncTask<Balance, Integer, Balance> {
     private Bitmap loadImage(String coinName) throws IOException {
         Context context = getContext();
         if (context == null) return null;
-        try(FileInputStream fileInputStream = context.openFileInput(fileName(coinName))) {
+        try (FileInputStream fileInputStream = context.openFileInput(fileName(coinName))) {
             return BitmapFactory.decodeStream(fileInputStream);
         }
     }
@@ -79,7 +80,7 @@ public class CoinImageTask extends AsyncTask<Balance, Integer, Balance> {
     private void saveImage(Bitmap bitmap, String fileName) {
         Context context = getContext();
         if (context == null || bitmap == null) return;
-        try(FileOutputStream out = context.openFileOutput(fileName, Context.MODE_PRIVATE)) {
+        try (FileOutputStream out = context.openFileOutput(fileName, Context.MODE_PRIVATE)) {
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
         } catch (IOException e) {
             Log.d(TAG, e.getLocalizedMessage());
@@ -88,8 +89,8 @@ public class CoinImageTask extends AsyncTask<Balance, Integer, Balance> {
 
     private Bitmap downloadImage(String coinName) throws IOException {
         URL imageUrl = imageUrl(coinName);
-        if (imageUrl==null) return null;
-        try(InputStream inputStream = imageUrl.openStream()) {
+        if (imageUrl == null) return null;
+        try (InputStream inputStream = imageUrl.openStream()) {
             return BitmapFactory.decodeStream(inputStream);
         }
     }
@@ -102,9 +103,9 @@ public class CoinImageTask extends AsyncTask<Balance, Integer, Balance> {
 
     private Context getContext() {
         BalanceHolder balanceHolder = balanceHolderWeakReference.get();
-        if (balanceHolder!=null) {
+        if (balanceHolder != null) {
             return balanceHolder.getContext();
-        }else {
+        } else {
             cancel(true);
             return null;
         }

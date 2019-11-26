@@ -26,7 +26,7 @@ public class SwipeBalanceCallback extends ItemTouchHelper.SimpleCallback {
         Balance balance;
         try {
             balance = balanceHolder.getBalanceByPosition(viewHolder.getAdapterPosition());
-        }catch (ItemNotFoundException e) {
+        } catch (ItemNotFoundException e) {
             return;
         }
         balanceHolder.remove(balance);

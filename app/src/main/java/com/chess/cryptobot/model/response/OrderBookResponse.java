@@ -7,5 +7,6 @@ import java.util.List;
 public interface OrderBookResponse {
 
     List<Price> bids();
+
     List<Price> asks();
 }

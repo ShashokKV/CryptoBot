@@ -14,7 +14,7 @@ public class LivecoinTradeLimitResponse extends LivecoinResponse implements Trad
 
     @Override
     public Double getTradeLimitByName(String pairName) {
-        for(Restriction restriction: restrictions) {
+        for (Restriction restriction : restrictions) {
             if (restriction.getCurrencyPair().equals(pairName)) {
                 return restriction.getMinLimitQuantity();
             }

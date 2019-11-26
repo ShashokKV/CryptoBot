@@ -51,7 +51,7 @@ public class MarketWorker extends Worker {
         List<Pair> tickerPairs;
         try {
             tickerPairs = getTickerPairs(markets);
-        }catch (MarketException e) {
+        } catch (MarketException e) {
             e.printStackTrace();
             return Result.failure();
         }

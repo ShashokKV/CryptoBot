@@ -11,6 +11,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.crypto.Mac;
@@ -92,7 +93,7 @@ abstract class MarketRequest implements Market {
     }
 
     String makeHash(Map<String, String> queryParams) {
-        return encode(String.format("%s%s", this.path, buildQueryString(queryParams)));
+        return encode(String.format(Locale.US, "%s%s", this.path, buildQueryString(queryParams)));
     }
 
     MarketResponse execute(Call<? extends MarketResponse> call) throws MarketException {

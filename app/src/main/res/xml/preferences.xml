@@ -1,48 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <androidx.preference.PreferenceCategory
-        android:title="@string/bittrex_api_keys"
-        android:key="bittrex_keys">
+        android:key="bittrex_keys"
+        android:title="@string/bittrex_api_keys">
         <androidx.preference.EditTextPreference
+            android:dialogLayout="@layout/keys_dialog"
             android:key="@string/bittrex_api_key"
-            android:title="@string/api_key"
-            android:dialogLayout="@layout/keys_dialog"/>
+            android:title="@string/api_key" />
         <androidx.preference.EditTextPreference
+            android:dialogLayout="@layout/keys_dialog"
             android:key="@string/bittrex_secret_key"
-            android:title="@string/secret_key"
-            android:dialogLayout="@layout/keys_dialog"/>
+            android:title="@string/secret_key" />
     </androidx.preference.PreferenceCategory>
     <androidx.preference.PreferenceCategory
-        android:title="@string/livecoin_api_keys"
-        android:key="livecoin_keys">
+        android:key="livecoin_keys"
+        android:title="@string/livecoin_api_keys">
         <androidx.preference.EditTextPreference
+            android:dialogLayout="@layout/keys_dialog"
             android:key="@string/livecoin_api_key"
-            android:title="@string/api_key"
-            android:dialogLayout="@layout/keys_dialog"/>
+            android:title="@string/api_key" />
         <androidx.preference.EditTextPreference
+            android:dialogLayout="@layout/keys_dialog"
             android:key="@string/livecoin_secret_key"
-            android:title="@string/secret_key"
-            android:dialogLayout="@layout/keys_dialog"/>
+            android:title="@string/secret_key" />
     </androidx.preference.PreferenceCategory>
-    <androidx.preference.PreferenceCategory
-        android:title="Trading preferences">
+    <androidx.preference.PreferenceCategory android:title="Trading preferences">
         <CheckBoxPreference
-            android:title="AutoTrade"
-            android:key="@string/auto_trade"/>
+            android:key="@string/auto_trade"
+            android:title="AutoTrade" />
+        <ListPreference
+            android:entries="@array/strategy_entries"
+            android:key="@string/trade_strategy"
+            android:title="Trade Strategy"
+            app:entryValues="@array/strategy_values" />
         <androidx.preference.EditTextPreference
-            android:title="Minimum profit percent"
+            android:defaultValue="3"
+            android:dialogLayout="@layout/number_dialog"
             android:key="@string/min_profit_percent"
-            android:dialogLayout="@layout/number_dialog"
-            android:defaultValue="3"/>
+            android:title="Minimum profit percent" />
         <androidx.preference.EditTextPreference
-            android:title="Run period in minutes"
+            android:defaultValue="5"
+            android:dialogLayout="@layout/number_dialog"
             android:key="@string/service_run_period"
-            android:dialogLayout="@layout/number_dialog"
-            android:defaultValue="5"/>
+            android:title="Run period in minutes" />
         <androidx.preference.EditTextPreference
-            android:title="Statistic collection period"
-            android:key="@string/statistic_run_period"
+            android:defaultValue="30"
             android:dialogLayout="@layout/number_dialog"
-            android:defaultValue="30"/>
+            android:key="@string/statistic_run_period"
+            android:title="Statistic collection period" />
     </androidx.preference.PreferenceCategory>
 </androidx.preference.PreferenceScreen>

@@ -81,7 +81,7 @@ public abstract class ContextHolder {
             }
         }
 
-       getMainFragment().updateItem(updatedItem);
+        getMainFragment().updateItem(updatedItem);
     }
 
     public void updateAllItems() {

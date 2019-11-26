@@ -4,7 +4,7 @@ import com.chess.cryptobot.model.response.TickerResponse;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class LivecoinTickerResponse extends LivecoinResponse implements TickerResponse  {
+public class LivecoinTickerResponse extends LivecoinResponse implements TickerResponse {
 
     @SerializedName("symbol")
     @Expose

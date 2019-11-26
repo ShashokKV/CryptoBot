@@ -52,7 +52,7 @@ public class BalanceAdapter extends RecyclerViewAdapter<BalanceAdapter.BalanceVi
         if (bitmap != null) balanceViewHolder.cryptoImageView.setImageBitmap(bitmap);
     }
 
-    class BalanceViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    class BalanceViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private RecyclerViewOnClickListener mOnClickListener;
 
         final TextView livecoinBalanceView;
