@@ -41,9 +41,6 @@ class BittrexGenericResponse implements TickerResponse, CurrenciesResponse {
     @SerializedName("Address")
     @Expose
     private String address;
-    @SerializedName("uuid")
-    @Expose
-    private String uuid;
     @SerializedName("MinTradeSize")
     @Expose
     private Double minTradeSize;
@@ -96,10 +93,6 @@ class BittrexGenericResponse implements TickerResponse, CurrenciesResponse {
 
     String getAddress() {
         return address;
-    }
-
-    String getUuid() {
-        return uuid;
     }
 
     public String getPairName() {

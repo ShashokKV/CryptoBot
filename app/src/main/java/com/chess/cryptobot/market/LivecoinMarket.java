@@ -11,10 +11,9 @@ import com.chess.cryptobot.model.response.livecoin.LivecoinAddressResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinBalanceResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinCurrenciesListResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinOrderBookResponse;
-import com.chess.cryptobot.model.response.livecoin.LivecoinPaymentResponse;
+import com.chess.cryptobot.model.response.livecoin.LivecoinResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinTickerResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinTradeLimitResponse;
-import com.chess.cryptobot.model.response.livecoin.LivecoinTradeResponse;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -156,7 +155,7 @@ public class LivecoinMarket extends MarketRequest {
     }
 
     @Override
-    public String sendCoins(String coinName, Double amount, String address) throws MarketException {
+    public void sendCoins(String coinName, Double amount, String address) throws MarketException {
         Map<String, String> params = new LinkedHashMap<>();
         params.put("amount", String.format(Locale.US, "%.8f", amount));
         params.put("currency", coinName);
@@ -168,22 +167,20 @@ public class LivecoinMarket extends MarketRequest {
         headers.put("API-key", this.apiKey);
         headers.put("Sign", hash);
 
-        LivecoinPaymentResponse response;
         try {
-            Call<LivecoinPaymentResponse> call = service.payment(
+            Call<LivecoinResponse> call = service.payment(
                     params.get("amount"),
                     params.get("currency"),
                     params.get("wallet"),
                     headers);
-            response = (LivecoinPaymentResponse) execute(call);
+            execute(call);
         } catch (MarketException e) {
             throw new LivecoinException(e.getMessage());
         }
-        return response.getPaymentId();
     }
 
     @Override
-    public String buy(String pairName, Double price, Double amount) throws MarketException {
+    public void buy(String pairName, Double price, Double amount) throws MarketException {
         Map<String, String> params = new LinkedHashMap<>();
         params.put("currencyPair", pairName);
         params.put("price", String.format(Locale.US, "%.8f", price));
@@ -195,22 +192,20 @@ public class LivecoinMarket extends MarketRequest {
         headers.put("API-key", this.apiKey);
         headers.put("Sign", hash);
 
-        LivecoinTradeResponse response;
         try {
-            Call<LivecoinTradeResponse> call = service.buy(
+            Call<LivecoinResponse> call = service.buy(
                     params.get("currencyPair"),
                     params.get("price"),
                     params.get("quantity"),
                     headers);
-            response = (LivecoinTradeResponse) execute(call);
+            execute(call);
         } catch (MarketException e) {
             throw new LivecoinException(e.getMessage());
         }
-        return response.getTradeId();
     }
 
     @Override
-    public String sell(String pairName, Double price, Double amount) throws MarketException {
+    public void sell(String pairName, Double price, Double amount) throws MarketException {
         Map<String, String> params = new LinkedHashMap<>();
         params.put("currencyPair", pairName);
         params.put("price", String.format(Locale.US, "%.8f", price));
@@ -222,19 +217,15 @@ public class LivecoinMarket extends MarketRequest {
         headers.put("API-key", this.apiKey);
         headers.put("Sign", hash);
 
-        LivecoinTradeResponse response;
         try {
-            Call<LivecoinTradeResponse> call = service.sell(
+            Call<LivecoinResponse> call = service.sell(
                     params.get("currencyPair"),
                     params.get("price"),
                     params.get("quantity"),
                     headers);
-            response = (LivecoinTradeResponse) execute(call);
+            execute(call);
         } catch (MarketException e) {
             throw new LivecoinException(e.getMessage());
         }
-        return response.getTradeId();
     }
-
-
 }

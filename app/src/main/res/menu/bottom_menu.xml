@@ -9,13 +9,19 @@
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/activity_pairs"
-        android:icon="@drawable/round_timeline_24"
+        android:icon="@drawable/baseline_trending_up_24"
         android:title="@string/trading_pairs"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/activity_graph"
-        android:icon="@drawable/baseline_sync_alt_24"
+        android:icon="@drawable/baseline_assessment_24"
         android:title="@string/profit_graph"
         app:showAsAction="ifRoom" />
+
+<!--    <item-->
+<!--        android:id="@+id/activity_transactions"-->
+<!--        android:icon="@drawable/round_timeline_24"-->
+<!--        android:title="@string/transactions"-->
+<!--        app:showAsAction="ifRoom" />-->
 </menu>

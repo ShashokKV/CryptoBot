@@ -16,6 +16,7 @@ import com.chess.cryptobot.market.Market;
 import com.chess.cryptobot.market.MarketFactory;
 import com.chess.cryptobot.model.Pair;
 import com.chess.cryptobot.view.notification.NotificationBuilder;
+import com.chess.cryptobot.view.notification.NotificationID;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -26,7 +27,6 @@ import java.util.Locale;
 import static com.chess.cryptobot.service.TradingService.Strategy.MIN_TRADE;
 
 public class TradingService extends IntentService {
-    private final static int NOTIFICATION_ID = 400500;
     private static final String CHANNEL_ID = "trading_chanel";
     private String resultInfo = "";
     private Pair pair;
@@ -52,7 +52,7 @@ public class TradingService extends IntentService {
         try {
             initAmounts();
         } catch (MarketException e) {
-            makeNotification(e.getMessage());
+            makeNotification("Init amounts exception", e.getMessage());
         }
 
         Trader trader = new Trader(pair, getStrategy());
@@ -63,11 +63,11 @@ public class TradingService extends IntentService {
             trader.sell();
         } catch (MarketException e) {
             trader.updateInfo(e.getMessage());
-            makeNotification(resultInfo);
+            makeNotification("Trade exception", resultInfo);
             return;
         }
 
-        makeNotification(resultInfo);
+        makeNotification("Trading results", resultInfo);
 
         trader.syncBalance();
     }
@@ -100,15 +100,15 @@ public class TradingService extends IntentService {
         return Strategy.valueOf(preferences.getString(getResources().getString(R.string.trade_strategy), "MIN_PAIR"));
     }
 
-    private void makeNotification(String message) {
+    private void makeNotification(String title, String message) {
         if (message.isEmpty()) return;
         new NotificationBuilder(this)
-                .setNotificationId(NOTIFICATION_ID)
+                .setNotificationId(NotificationID.getID())
                 .setChannelId(CHANNEL_ID)
                 .setNotificationText(resultInfo)
                 .setChannelName("Trading service")
                 .setImportance(NotificationManager.IMPORTANCE_DEFAULT)
-                .setTitle("Trading result")
+                .setTitle(title)
                 .setNotificationText(message)
                 .buildAndNotify();
 
@@ -186,16 +186,16 @@ public class TradingService extends IntentService {
 
         private void buy() throws MarketException {
             Double price = formatAmount(askPrice);
-            String operationId = buyMarket.buy(buyPairName, price, quantity);
-            updateInfo(String.format(Locale.getDefault(), "buy %.8f%s for %.8f on %s, id=%s", quantity, buyPairName,
-                    price, buyMarket.getMarketName(), operationId));
+            buyMarket.buy(buyPairName, price, quantity);
+            updateInfo(String.format(Locale.getDefault(), "buy %.8f%s for %.8f on %s", quantity, buyPairName,
+                    price, buyMarket.getMarketName()));
         }
 
         private void sell() throws MarketException {
             Double price = formatAmount(bidPrice);
-            String operationId = sellMarket.sell(sellPairName, price, quantity);
-            updateInfo(String.format(Locale.getDefault(), "sell %.8f%s for %.8f on %s, id=%s", quantity, sellPairName,
-                    price, sellMarket.getMarketName(), operationId));
+            sellMarket.sell(sellPairName, price, quantity);
+            updateInfo(String.format(Locale.getDefault(), "sell %.8f%s for %.8f on %s", quantity, sellPairName,
+                    price, sellMarket.getMarketName()));
         }
 
         private Double formatAmount(Double amount) {

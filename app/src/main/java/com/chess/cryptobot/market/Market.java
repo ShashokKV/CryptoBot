@@ -26,11 +26,11 @@ public interface Market {
 
     String getAddress(String coinName) throws MarketException;
 
-    String sendCoins(String coinName, Double amount, String address) throws MarketException;
+    void sendCoins(String coinName, Double amount, String address) throws MarketException;
 
-    String buy(String pairName, Double price, Double amount) throws MarketException;
+    void buy(String pairName, Double price, Double amount) throws MarketException;
 
-    String sell(String pairName, Double price, Double amount) throws MarketException;
+    void sell(String pairName, Double price, Double amount) throws MarketException;
 
     boolean keysIsEmpty();
 }

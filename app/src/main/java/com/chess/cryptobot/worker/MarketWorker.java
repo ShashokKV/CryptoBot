@@ -19,6 +19,7 @@ import com.chess.cryptobot.model.response.TickerResponse;
 import com.chess.cryptobot.model.room.CryptoBotDatabase;
 import com.chess.cryptobot.model.room.ProfitPair;
 import com.chess.cryptobot.model.room.ProfitPairDao;
+import com.chess.cryptobot.util.CoinInfo;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ import java.util.Set;
 public class MarketWorker extends Worker {
     private Set<String> allPairNames;
     private Float fee;
+    private CoinInfo coinInfo;
     private CryptoBotDatabase database;
 
     public MarketWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
@@ -50,8 +52,9 @@ public class MarketWorker extends Worker {
         List<Market> markets = marketFactory.getMarkets(context, PreferenceManager.getDefaultSharedPreferences(context));
         List<Pair> tickerPairs;
         try {
+            coinInfo = new CoinInfo(markets);
             tickerPairs = getTickerPairs(markets);
-        } catch (MarketException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return Result.failure();
         }
@@ -74,8 +77,10 @@ public class MarketWorker extends Worker {
                 String tickerName = ticker.getMarketName();
                 if (allPairNames.contains(tickerName)) {
                     Pair pair = createOrGetPair(tickerName, tickerPairs);
-                    enrichFromTickerByMarket(pair, ticker, market.getMarketName());
-                    if (!tickerPairs.contains(pair)) tickerPairs.add(pair);
+                    if (coinInfo.checkCoinStatus(pair.getBaseName()) && coinInfo.checkCoinStatus(pair.getMarketName())) {
+                        enrichFromTickerByMarket(pair, ticker, market.getMarketName());
+                        if (!tickerPairs.contains(pair)) tickerPairs.add(pair);
+                    }
                 }
             });
         }

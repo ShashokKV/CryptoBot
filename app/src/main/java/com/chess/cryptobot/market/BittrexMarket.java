@@ -151,8 +151,7 @@ public class BittrexMarket extends MarketRequest {
     }
 
     @Override
-    public String sendCoins(String coinName, Double amount, String address) throws MarketException {
-        BittrexResponse response;
+    public void sendCoins(String coinName, Double amount, String address) throws MarketException {
         this.path = this.url.concat("account/withdraw?");
         Map<String, String> params = new LinkedHashMap<>();
         params.put("currency", coinName);
@@ -174,16 +173,14 @@ public class BittrexMarket extends MarketRequest {
                     params.get("apikey"),
                     params.get("nonce"),
                     headers);
-            response = (BittrexResponse) execute(call);
+            execute(call);
         } catch (MarketException e) {
             throw new BittrexException(e.getMessage());
         }
-        return response.getPaymentId();
     }
 
     @Override
-    public String buy(String pairName, Double price, Double amount) throws MarketException {
-        BittrexResponse response;
+    public void buy(String pairName, Double price, Double amount) throws MarketException {
         this.path = this.url.concat("market/buylimit?");
         Map<String, String> params = new LinkedHashMap<>();
         params.put("market", pairName);
@@ -205,16 +202,14 @@ public class BittrexMarket extends MarketRequest {
                     params.get("apikey"),
                     params.get("nonce"),
                     headers);
-            response = (BittrexResponse) execute(call);
+            execute(call);
         } catch (MarketException e) {
             throw new BittrexException(e.getMessage());
         }
-        return response.getTradeId();
     }
 
     @Override
-    public String sell(String pairName, Double price, Double amount) throws MarketException {
-        BittrexResponse response;
+    public void sell(String pairName, Double price, Double amount) throws MarketException {
         this.path = this.url.concat("market/selllimit?");
         Map<String, String> params = new LinkedHashMap<>();
         params.put("market", pairName);
@@ -236,11 +231,9 @@ public class BittrexMarket extends MarketRequest {
                     params.get("apikey"),
                     params.get("nonce"),
                     headers);
-            response = (BittrexResponse) execute(call);
+            execute(call);
         } catch (MarketException e) {
             throw new BittrexException(e.getMessage());
         }
-
-        return response.getTradeId();
     }
 }

@@ -22,9 +22,9 @@ import com.chess.cryptobot.exceptions.MarketException;
 import com.chess.cryptobot.market.Market;
 import com.chess.cryptobot.market.MarketFactory;
 import com.chess.cryptobot.model.Pair;
-import com.chess.cryptobot.model.response.CurrenciesResponse;
 import com.chess.cryptobot.model.response.OrderBookResponse;
 import com.chess.cryptobot.model.response.TradeLimitResponse;
+import com.chess.cryptobot.util.CoinInfo;
 import com.chess.cryptobot.view.notification.NotificationBuilder;
 
 import java.util.ArrayList;
@@ -37,9 +37,6 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.stream.Collectors;
-
-import static com.chess.cryptobot.market.Market.BITTREX_MARKET;
-import static com.chess.cryptobot.market.Market.LIVECOIN_MARKET;
 
 public class BotService extends Service {
     private static final int NOTIFICATION_ID = 100500;
@@ -151,8 +148,8 @@ public class BotService extends Service {
     private class BotTimerTask extends TimerTask {
         private final List<Pair> pairs;
         private final List<Market> markets;
-        private final Map<String, Map<String, Boolean>> statuses = new HashMap<>();
         private final Map<String, TradeLimitResponse> minQuantities = new HashMap<>();
+        private CoinInfo coinInfo;
 
         BotTimerTask(List<Pair> pairs, List<Market> markets) {
             this.pairs = pairs;
@@ -163,33 +160,24 @@ public class BotService extends Service {
         public void run() {
             Log.d(TAG, "timer running");
 
-            if (isNotificationShown() && !autoTrade) {
+            if (!autoTrade && isNotificationShown()) {
                 Log.d(TAG, "notification shown, do nothing");
                 return;
             }
 
             try {
-                initCoinInfo();
+                coinInfo = new CoinInfo(markets);
                 if (autoTrade) {
                     initMinQuantities();
                 }
             } catch (MarketException e) {
-                makeNotification("Exception", e.getMessage());
+                if (!isNotificationShown()) makeNotification("Init min quantities exception", e.getMessage());
                 return;
             }
             List<Pair> profitPairs = getProfitPairs(pairs, markets);
 
             if (!profitPairs.isEmpty() && !autoTrade) {
                 makeNotification("Profitable pairs found", getNotificationText(profitPairs));
-            }
-        }
-
-        private void initCoinInfo() throws MarketException {
-            for (Market market : markets) {
-                List<CurrenciesResponse> currencies = market.getCurrencies();
-                Map<String, Boolean> statuses = new HashMap<>();
-                currencies.forEach(currency -> statuses.put(currency.getCurrencyName(), currency.isActive()));
-                this.statuses.put(market.getMarketName(), statuses);
             }
         }
 
@@ -200,40 +188,32 @@ public class BotService extends Service {
         }
 
         private List<Pair> getProfitPairs(List<Pair> pairs, List<Market> markets) {
-            List<Pair> profitPairs;
-            profitPairs = pairs.stream()
-                    .filter(pair -> checkCoinStatus(pair.getBaseName()))
-                    .filter(pair -> checkCoinStatus(pair.getMarketName()))
-                    .peek(pair -> pair = profitPercentForPair(pair, markets))
-                    .filter(pair -> pair.getPercent() > minPercent)
-                    .peek(pair -> {
-                        if (autoTrade) beginTrade(pair);
-                    })
-                    .collect(Collectors.toCollection(ArrayList::new));
+
+            List<Pair> profitPairs = new ArrayList<>();
+
+            for (Pair pair: pairs) {
+                if (coinInfo.checkCoinStatus(pair.getBaseName()) &&
+                        coinInfo.checkCoinStatus(pair.getMarketName())) {
+                    Pair profitPair = profitPercentForPair(pair, markets);
+                    if (profitPair!=null && profitPair.getPercent() > minPercent) {
+                        if (autoTrade) beginTrade(profitPair);
+                        profitPairs.add(profitPair);
+                    }
+                }
+            }
 
             return profitPairs;
-        }
-
-        private boolean checkCoinStatus(String coinName) {
-            Map<String, Boolean> bittrexStatuses = statuses.get(BITTREX_MARKET);
-            if (bittrexStatuses == null) return false;
-            Map<String, Boolean> livecoinStatuses = statuses.get(LIVECOIN_MARKET);
-            if (livecoinStatuses == null) return false;
-
-            Boolean bittrexStatus = bittrexStatuses.get(coinName);
-            Boolean livecoinStatus = livecoinStatuses.get(coinName);
-
-            if (bittrexStatus == null || livecoinStatus == null) return false;
-            return (bittrexStatus && livecoinStatus);
         }
 
         private Pair profitPercentForPair(Pair pair, List<Market> markets) {
             PairResponseEnricher enricher = new PairResponseEnricher(pair);
             for (Market market : markets) {
-                OrderBookResponse response = null;
+                OrderBookResponse response;
                 try {
                     response = market.getOrderBook(pair.getPairNameForMarket(market.getMarketName()));
-                } catch (MarketException ignored) {
+                } catch (MarketException e) {
+                    if (!isNotificationShown()) makeNotification("Get order book exception", e.getMessage());
+                    return null;
                 }
                 if (response != null) {
                     enricher.enrichWithResponse(response);

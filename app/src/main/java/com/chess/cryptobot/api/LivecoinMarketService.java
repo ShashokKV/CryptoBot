@@ -4,10 +4,9 @@ import com.chess.cryptobot.model.response.livecoin.LivecoinAddressResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinBalanceResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinCurrenciesListResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinOrderBookResponse;
-import com.chess.cryptobot.model.response.livecoin.LivecoinPaymentResponse;
+import com.chess.cryptobot.model.response.livecoin.LivecoinResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinTickerResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinTradeLimitResponse;
-import com.chess.cryptobot.model.response.livecoin.LivecoinTradeResponse;
 
 import java.util.List;
 import java.util.Map;
@@ -42,21 +41,21 @@ public interface LivecoinMarketService {
 
     @FormUrlEncoded
     @POST("payment/out/coin")
-    Call<LivecoinPaymentResponse> payment(@Field(value = "amount", encoded = true) String amount,
-                                          @Field(value = "currency", encoded = true) String currency,
-                                          @Field(value = "wallet", encoded = true) String wallet,
-                                          @HeaderMap Map<String, String> headers);
+    Call<LivecoinResponse> payment(@Field(value = "amount", encoded = true) String amount,
+                                   @Field(value = "currency", encoded = true) String currency,
+                                   @Field(value = "wallet", encoded = true) String wallet,
+                                   @HeaderMap Map<String, String> headers);
 
     @FormUrlEncoded
     @POST("exchange/buylimit")
-    Call<LivecoinTradeResponse> buy(@Field(value = "currencyPair", encoded = true) String currencyPair,
+    Call<LivecoinResponse> buy(@Field(value = "currencyPair", encoded = true) String currencyPair,
                                     @Field(value = "price", encoded = true) String price,
                                     @Field(value = "quantity", encoded = true) String quantity,
                                     @HeaderMap Map<String, String> headers);
 
     @FormUrlEncoded
     @POST("exchange/selllimit")
-    Call<LivecoinTradeResponse> sell(@Field(value = "currencyPair", encoded = true) String currencyPair,
+    Call<LivecoinResponse> sell(@Field(value = "currencyPair", encoded = true) String currencyPair,
                                      @Field(value = "price", encoded = true) String price,
                                      @Field(value = "quantity", encoded = true) String quantity,
                                      @HeaderMap Map<String, String> headers);

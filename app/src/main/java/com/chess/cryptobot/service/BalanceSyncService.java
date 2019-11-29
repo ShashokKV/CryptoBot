@@ -13,8 +13,9 @@ import com.chess.cryptobot.exceptions.MarketException;
 import com.chess.cryptobot.exceptions.SyncServiceException;
 import com.chess.cryptobot.market.Market;
 import com.chess.cryptobot.market.MarketFactory;
-import com.chess.cryptobot.model.response.CurrenciesResponse;
+import com.chess.cryptobot.util.CoinInfo;
 import com.chess.cryptobot.view.notification.NotificationBuilder;
+import com.chess.cryptobot.view.notification.NotificationID;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -27,11 +28,9 @@ import static com.chess.cryptobot.market.Market.BITTREX_MARKET;
 import static com.chess.cryptobot.market.Market.LIVECOIN_MARKET;
 
 public class BalanceSyncService extends IntentService {
-    private static final int NOTIFICATION_ID = 300500;
     private static final String CHANNEL_ID = "balance_sync_channel";
     private String resultInfo = "";
-    private final Map<String, Map<String, Boolean>> statuses = new HashMap<>();
-    private final Map<String, Map<String, Double>> fees = new HashMap<>();
+    private CoinInfo coinInfo;
     private final Map<String, Market> marketsMap = new HashMap<>();
 
     public BalanceSyncService() {
@@ -49,7 +48,7 @@ public class BalanceSyncService extends IntentService {
         markets.forEach(market -> marketsMap.put(market.getMarketName(), market));
 
         try {
-            initCoinInfo(markets);
+            coinInfo = new CoinInfo(markets);
         } catch (MarketException e) {
             updateInfo("BalanceSync", "Can't init coinInfo: " + e.getMessage());
             makeNotification();
@@ -67,21 +66,6 @@ public class BalanceSyncService extends IntentService {
         makeNotification();
     }
 
-    private void initCoinInfo(List<Market> markets) throws MarketException {
-        for (Market market : markets) {
-            List<CurrenciesResponse> currencies = market.getCurrencies();
-            Map<String, Boolean> statuses = new HashMap<>();
-            Map<String, Double> fees = new HashMap<>();
-            currencies.forEach(currency -> {
-                String currencyName = currency.getCurrencyName();
-                statuses.put(currencyName, currency.isActive());
-                fees.put(currencyName, currency.getFee());
-            });
-            this.statuses.put(market.getMarketName(), statuses);
-            this.fees.put(market.getMarketName(), fees);
-        }
-    }
-
     private void sync(String coinName, List<Market> markets) throws SyncServiceException {
         Double minBalance = new BalancePreferences(this).getMinBalance(coinName);
 
@@ -89,7 +73,7 @@ public class BalanceSyncService extends IntentService {
             throw new SyncServiceException("Min balance not set");
         }
 
-        if (!checkCoinStatus(coinName)) {
+        if (!coinInfo.checkCoinStatus(coinName)) {
             throw new SyncServiceException("Not active");
         }
 
@@ -119,19 +103,6 @@ public class BalanceSyncService extends IntentService {
         return marketAmounts;
     }
 
-    private boolean checkCoinStatus(String coinName) {
-        Map<String, Boolean> bittrexStatuses = statuses.get(BITTREX_MARKET);
-        if (bittrexStatuses == null) return false;
-        Map<String, Boolean> livecoinStatuses = statuses.get(LIVECOIN_MARKET);
-        if (livecoinStatuses == null) return false;
-
-        Boolean bittrexStatus = bittrexStatuses.get(coinName);
-        Boolean livecoinStatus = livecoinStatuses.get(coinName);
-
-        if (bittrexStatus == null || livecoinStatus == null) return false;
-        return (bittrexStatus && livecoinStatus);
-    }
-
     private void updateInfo(String coinName, String message) {
         resultInfo = resultInfo.concat(String.format("%s: %s%s", coinName, message, System.lineSeparator()));
     }
@@ -139,7 +110,7 @@ public class BalanceSyncService extends IntentService {
     private void makeNotification() {
         if (resultInfo.isEmpty()) return;
         new NotificationBuilder(this)
-                .setNotificationId(NOTIFICATION_ID)
+                .setNotificationId(NotificationID.getID())
                 .setChannelId(CHANNEL_ID)
                 .setNotificationText(resultInfo)
                 .setChannelName("Balance sync service")
@@ -162,7 +133,6 @@ public class BalanceSyncService extends IntentService {
             this.coinName = coinName;
         }
 
-
         void setAmounts(Map<String, Double> amounts) {
             this.amounts = amounts;
         }
@@ -175,7 +145,7 @@ public class BalanceSyncService extends IntentService {
         private boolean checkAndMove() throws SyncServiceException {
             Double fromAmount = getAmount(amounts, moveFrom);
             Double toAmount = getAmount(amounts, moveTo);
-            Double fee = getFee(moveFrom, coinName);
+            Double fee = coinInfo.getFee(moveFrom, coinName);
 
             Market moveFromMarket = Objects.requireNonNull(marketsMap.get(moveFrom));
             Market moveToMarket = Objects.requireNonNull(marketsMap.get(moveTo));
@@ -198,20 +168,6 @@ public class BalanceSyncService extends IntentService {
             Double amount = amounts.get(marketName);
             if (amount == null) throw new SyncServiceException("Can't get amount");
             return amount;
-        }
-
-        private Double getFee(String marketName, String coinName) throws SyncServiceException {
-            Map<String, Double> fees = BalanceSyncService.this.fees.get(marketName);
-            if (fees == null) {
-                throw new SyncServiceException("Can't get fees");
-            }
-
-            Double fee = fees.get(coinName);
-            if (fee == null) {
-                throw new SyncServiceException("Can't get fee from " + marketName);
-            }
-
-            return fee;
         }
 
         private Double recalculateDelta(Double fromAmount, Double toAmount, Double fee) {
@@ -237,9 +193,9 @@ public class BalanceSyncService extends IntentService {
 
         private void moveBalances(Market moveFrom, Market moveTo, String coinName, Double amount) throws MarketException {
             String address = moveTo.getAddress(coinName);
-            String paymentId = moveFrom.sendCoins(coinName, amount, address);
+            moveFrom.sendCoins(coinName, amount, address);
 
-            updateInfo(coinName, String.format("%s sent from %s, id=%s", amount.toString(), moveFrom.getMarketName(), paymentId));
+            updateInfo(coinName, String.format("%s sent from %s", amount.toString(), moveFrom.getMarketName()));
         }
     }
 }

@@ -7,10 +7,8 @@ import com.chess.cryptobot.model.response.CurrenciesListResponse;
 import com.chess.cryptobot.model.response.CurrenciesResponse;
 import com.chess.cryptobot.model.response.MarketResponse;
 import com.chess.cryptobot.model.response.OrderBookResponse;
-import com.chess.cryptobot.model.response.PaymentResponse;
 import com.chess.cryptobot.model.response.TickerResponse;
 import com.chess.cryptobot.model.response.TradeLimitResponse;
-import com.chess.cryptobot.model.response.TradeResponse;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,8 +19,6 @@ public class BittrexResponse implements MarketResponse,
         OrderBookResponse,
         CurrenciesListResponse,
         AddressResponse,
-        PaymentResponse,
-        TradeResponse,
         TradeLimitResponse {
 
     private Boolean success;
@@ -89,16 +85,6 @@ public class BittrexResponse implements MarketResponse,
     @Override
     public String getAddress() {
         return results[0].getAddress();
-    }
-
-    @Override
-    public String getPaymentId() {
-        return results[0].getUuid();
-    }
-
-    @Override
-    public String getTradeId() {
-        return results[0].getUuid();
     }
 
     @Override
