@@ -2,6 +2,7 @@ package com.chess.cryptobot.worker;
 
 import android.content.Context;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.room.Room;
@@ -31,6 +32,7 @@ public class MarketWorker extends Worker {
     private Float fee;
     private CoinInfo coinInfo;
     private CryptoBotDatabase database;
+    private static final String TAG = MarketWorker.class.getSimpleName();
 
     public MarketWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
@@ -60,10 +62,15 @@ public class MarketWorker extends Worker {
         }
 
         List<Pair> profitPairs = new ArrayList<>();
-        tickerPairs.forEach(pair -> {
-            pair = new PairResponseEnricher(pair).countPercent(fee).getPair();
-            if (pair.getPercent() > 0) profitPairs.add(pair);
-        });
+        try {
+            tickerPairs.forEach(pair -> {
+                pair = new PairResponseEnricher(pair).countPercent(fee).getPair();
+                if (pair.getPercent() > 0) profitPairs.add(pair);
+            });
+        }catch (Exception e) {
+            Log.d(TAG, e.getLocalizedMessage(), e);
+            return Result.failure();
+        }
 
         saveToDatabase(profitPairs);
         return Result.success();
@@ -104,6 +111,7 @@ public class MarketWorker extends Worker {
     }
 
     private void saveToDatabase(List<Pair> pairs) {
+        if (pairs.isEmpty()) return;
         database = getDbInstance();
         ProfitPairDao pairDao = database.getProfitPairDao();
 

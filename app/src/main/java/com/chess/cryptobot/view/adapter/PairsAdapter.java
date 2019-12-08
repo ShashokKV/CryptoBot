@@ -10,14 +10,14 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.chess.cryptobot.R;
-import com.chess.cryptobot.content.pairs.PairsHolder;
+import com.chess.cryptobot.content.ContextHolder;
 import com.chess.cryptobot.model.Pair;
 
 import java.util.Locale;
 
 public class PairsAdapter extends RecyclerViewAdapter<PairsAdapter.PairsViewHolder> {
 
-    public PairsAdapter(PairsHolder pairsHolder) {
+    public PairsAdapter(ContextHolder pairsHolder) {
         super(pairsHolder);
     }
 
@@ -35,22 +35,30 @@ public class PairsAdapter extends RecyclerViewAdapter<PairsAdapter.PairsViewHold
         Pair pair = (Pair) getItemByPosition(position);
 
         holder.pairNameView.setText(pair.getName());
-        holder.livecoinBidView.setText(String.format(Locale.getDefault(), "%.10f", pair.getLivecoinBid()));
-        holder.livecoinAskVeiw.setText(String.format(Locale.getDefault(), "%.10f", pair.getLivecoinAsk()));
+        holder.livecoinBidView.setText(String.format(Locale.getDefault(), "%.8f", pair.getLivecoinBid()));
+        holder.livecoinBidQuantityView.setText(String.format(Locale.getDefault(), "%.8f", pair.getLivecoinBidQuantity()));
+        holder.livecoinAskView.setText(String.format(Locale.getDefault(), "%.8f", pair.getLivecoinAsk()));
+        holder.livecoinAskQuantityView.setText(String.format(Locale.getDefault(), "%.8f", pair.getLivecoinAskQuantity()));
         holder.livecoinVolumeView.setText(String.format(Locale.getDefault(), "%.10f", pair.getLivecoinVolume()));
-        holder.bittrextBidView.setText(String.format(Locale.getDefault(), "%.10f", pair.getBittrexBid()));
-        holder.bittrexAskView.setText(String.format(Locale.getDefault(), "%.10f", pair.getBittrexAsk()));
-        holder.bittrexVolumeView.setText(String.format(Locale.getDefault(), "%.10f", pair.getBittrexVolume()));
+        holder.bittrextBidView.setText(String.format(Locale.getDefault(), "%.8f", pair.getBittrexBid()));
+        holder.bittrextBidQuantityView.setText(String.format(Locale.getDefault(), "%.8f", pair.getBittrexBidQuantity()));
+        holder.bittrexAskView.setText(String.format(Locale.getDefault(), "%.8f", pair.getBittrexAsk()));
+        holder.bittrexAskQuantityView.setText(String.format(Locale.getDefault(), "%.8f", pair.getBittrexAskQuantity()));
+        holder.bittrexVolumeView.setText(String.format(Locale.getDefault(), "%.8f", pair.getBittrexVolume()));
         holder.percent.setText(String.valueOf(pair.getPercent()));
     }
 
     class PairsViewHolder extends RecyclerView.ViewHolder {
         final TextView pairNameView;
         final TextView bittrexAskView;
+        final TextView bittrexAskQuantityView;
         final TextView bittrextBidView;
+        final TextView bittrextBidQuantityView;
         final TextView bittrexVolumeView;
-        final TextView livecoinAskVeiw;
+        final TextView livecoinAskView;
+        final TextView livecoinAskQuantityView;
         final TextView livecoinBidView;
+        final TextView livecoinBidQuantityView;
         final TextView livecoinVolumeView;
         final TextView percent;
 
@@ -58,10 +66,14 @@ public class PairsAdapter extends RecyclerViewAdapter<PairsAdapter.PairsViewHold
             super(itemView);
             pairNameView = itemView.findViewById(R.id.pair_name);
             bittrexAskView = itemView.findViewById(R.id.bittrex_ask);
+            bittrexAskQuantityView = itemView.findViewById(R.id.bittrex_ask_quantity);
             bittrextBidView = itemView.findViewById(R.id.bittrex_bid);
+            bittrextBidQuantityView = itemView.findViewById(R.id.bittrex_bid_quantity);
             bittrexVolumeView = itemView.findViewById(R.id.bittrex_volume);
-            livecoinAskVeiw = itemView.findViewById(R.id.livecoin_ask);
+            livecoinAskView = itemView.findViewById(R.id.livecoin_ask);
+            livecoinAskQuantityView = itemView.findViewById(R.id.livecoin_ask_quantity);
             livecoinBidView = itemView.findViewById(R.id.livecoin_bid);
+            livecoinBidQuantityView = itemView.findViewById(R.id.livecoin_bid_quantity);
             livecoinVolumeView = itemView.findViewById(R.id.livecoin_volume);
             percent = itemView.findViewById(R.id.pair_percent);
         }

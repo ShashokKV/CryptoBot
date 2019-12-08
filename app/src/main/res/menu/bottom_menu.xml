@@ -19,9 +19,9 @@
         android:title="@string/profit_graph"
         app:showAsAction="ifRoom" />
 
-<!--    <item-->
-<!--        android:id="@+id/activity_transactions"-->
-<!--        android:icon="@drawable/round_timeline_24"-->
-<!--        android:title="@string/transactions"-->
-<!--        app:showAsAction="ifRoom" />-->
+    <item
+        android:id="@+id/activity_transactions"
+        android:icon="@drawable/round_timeline_24"
+        android:title="@string/transactions"
+        app:showAsAction="ifRoom" />
 </menu>

@@ -107,7 +107,7 @@ public class BotService extends Service {
     private void runTimer(List<Pair> pairs, List<Market> markets) {
         long period = runPeriod * 1000 * 60;
         BotTimerTask botTimerTask = new BotTimerTask(pairs, markets);
-        botTimer.scheduleAtFixedRate(botTimerTask, 1000, period);
+        botTimer.scheduleAtFixedRate(botTimerTask, period, period);
         Log.d(TAG, "timer started");
     }
 
@@ -124,7 +124,10 @@ public class BotService extends Service {
     }
 
     public void update() {
-        if (botTimer != null) botTimer.cancel();
+        if (botTimer != null) {
+            botTimer.cancel();
+            botTimer.purge();
+        }
         initFields();
         startTimer();
     }

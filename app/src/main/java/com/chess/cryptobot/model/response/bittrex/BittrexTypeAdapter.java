@@ -43,7 +43,17 @@ public class BittrexTypeAdapter extends TypeAdapter<BittrexResponse> {
         response.setSuccess(success);
         response.setMessage(message);
 
-        jsonReader.endObject();
+        if (jsonReader.peek()==JsonToken.END_OBJECT) {
+            jsonReader.endObject();
+        }else if(jsonReader.peek()==JsonToken.NAME) {
+            jsonReader.nextName();
+            if (jsonReader.peek()==JsonToken.NULL) {
+                jsonReader.nextNull();
+            }else if(jsonReader.peek()==JsonToken.STRING) {
+                jsonReader.nextString();
+            }
+            jsonReader.endObject();
+        }
         return response;
     }
 }

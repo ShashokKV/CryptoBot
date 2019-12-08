@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import com.chess.cryptobot.R;
 import com.chess.cryptobot.content.Preferences;
 
+import java.util.Locale;
 import java.util.Objects;
 
 public class BalancePreferences extends Preferences {
@@ -24,7 +25,7 @@ public class BalancePreferences extends Preferences {
 
     void setMinBalance(String coinName, Double minBalance) {
         SharedPreferences.Editor editor = getSharedPreferences().edit();
-        editor.putString("min_".concat(coinName), minBalance.toString());
+        editor.putString("min_".concat(coinName), String.format(Locale.US, "%.8f", minBalance));
         editor.apply();
     }
 }

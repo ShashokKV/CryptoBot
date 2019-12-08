@@ -1,13 +1,15 @@
 package com.chess.cryptobot.model.response.bittrex;
 
 import com.chess.cryptobot.model.response.CurrenciesResponse;
+import com.chess.cryptobot.model.response.HistoryResponse;
 import com.chess.cryptobot.model.response.TickerResponse;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
-class BittrexGenericResponse implements TickerResponse, CurrenciesResponse {
+class BittrexGenericResponse implements TickerResponse, CurrenciesResponse, HistoryResponse {
     @SerializedName("Available")
     @Expose
     private Double available;
@@ -44,10 +46,37 @@ class BittrexGenericResponse implements TickerResponse, CurrenciesResponse {
     @SerializedName("MinTradeSize")
     @Expose
     private Double minTradeSize;
+    @SerializedName("Exchange")
+    @Expose
+    private String exchange;
+    @SerializedName("TimeStamp")
+    @Expose
+    private String timeStamp;
+    @SerializedName("OrderType")
+    @Expose
+    private String orderType;
+    @SerializedName("Quantity")
+    @Expose
+    private Double quantity;
+    @SerializedName("QuantityRemaining")
+    @Expose
+    private Double quantityRemaining;
+    @SerializedName("PricePerUnit")
+    @Expose
+    private Double pricePerUnit;
+    @SerializedName("Amount")
+    @Expose
+    private Double amount;
+    @SerializedName("Opened")
+    @Expose
+    private String opened;
+    @SerializedName("LastUpdated")
+    @Expose
+    private String lastUpdated;
 
 
     Double getAvailable() {
-        if (available==null) return 0.0d;
+        if (available == null) return 0.0d;
         return available;
     }
 
@@ -59,7 +88,9 @@ class BittrexGenericResponse implements TickerResponse, CurrenciesResponse {
         return sell;
     }
 
-    public String getMarketName() {return marketName.replace("-", "/");}
+    public String getMarketName() {
+        return marketName.replace("-", "/");
+    }
 
     public Double getTickerBid() {
         return tickerBid;
@@ -81,13 +112,13 @@ class BittrexGenericResponse implements TickerResponse, CurrenciesResponse {
 
     @Override
     public Boolean isActive() {
-        if (isActive==null) return false;
+        if (isActive == null) return false;
         return isActive;
     }
 
     @Override
     public Double getFee() {
-        if (txFee==null) return 0.0d;
+        if (txFee == null) return 0.0d;
         return txFee;
     }
 
@@ -101,5 +132,46 @@ class BittrexGenericResponse implements TickerResponse, CurrenciesResponse {
 
     Double getMinTradeSize() {
         return minTradeSize;
+    }
+
+    @Override
+    public LocalDateTime getHistoryTime() {
+        String timeString = this.timeStamp == null ? this.opened : this.timeStamp;
+        timeString = timeString == null ? lastUpdated : timeString;
+        return LocalDateTime.parse(timeString);
+    }
+
+    @Override
+    public String getHistoryName() {
+        return currency == null ? exchange.replace("-", "/") : currency;
+    }
+
+    @Override
+    public String getHistoryMarket() {
+        return "bittrex";
+    }
+
+    @Override
+    public Double getHistoryAmount() {
+        return quantity == null ? amount : quantity;
+    }
+
+    @Override
+    public Double getHistoryPrice() {
+        return pricePerUnit;
+    }
+
+    @Override
+    public String getHistoryAction() {
+        return orderType == null ?
+                (lastUpdated == null ? "withdraw" : "deposit")
+                : orderType.toLowerCase().replace("limit_", "");
+    }
+
+    @Override
+    public Integer getProgress() {
+        if (quantity == null || quantityRemaining == null) return 0;
+        if (quantity == 0d) return 0;
+        return Double.valueOf(((quantity-quantityRemaining) / quantity) * 100).intValue();
     }
 }

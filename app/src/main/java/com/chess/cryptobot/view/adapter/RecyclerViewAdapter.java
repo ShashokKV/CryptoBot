@@ -5,22 +5,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.chess.cryptobot.content.ContextHolder;
 import com.chess.cryptobot.model.ViewItem;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public abstract class RecyclerViewAdapter<T extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<T> {
-    private List<ViewItem> items;
     private final ContextHolder holder;
 
     RecyclerViewAdapter(ContextHolder holder) {
         this.setHasStableIds(true);
         this.holder = holder;
-        this.items = new ArrayList<>();
-        initViewItems();
-    }
-
-    private void initViewItems() {
-        this.items = holder.getViewItems();
     }
 
     public String itemNameByPosition(int position) {
@@ -28,7 +18,7 @@ public abstract class RecyclerViewAdapter<T extends RecyclerView.ViewHolder> ext
     }
 
     ViewItem getItemByPosition(int position) {
-        return this.items.get(position);
+        return this.holder.getViewItems().get(position);
     }
 
     public void notifyItemInserted() {
@@ -40,7 +30,7 @@ public abstract class RecyclerViewAdapter<T extends RecyclerView.ViewHolder> ext
     }
 
     public void updateItem(ViewItem item) {
-        int index = this.items.indexOf(item);
+        int index = this.holder.getViewItems().indexOf(item);
         if (index >= 0) {
             this.notifyItemChanged(index);
         }
@@ -48,12 +38,12 @@ public abstract class RecyclerViewAdapter<T extends RecyclerView.ViewHolder> ext
 
     @Override
     public int getItemCount() {
-        return items.size();
+        return holder.getViewItems().size();
     }
 
     @Override
     public long getItemId(int position) {
-        ViewItem viewItem = items.get(position);
+        ViewItem viewItem = holder.getViewItems().get(position);
         return viewItem.getName().hashCode();
     }
 

@@ -4,14 +4,12 @@
     <string-array name="strategy_entries">
         <item>Minimum pair</item>
         <item>Maximum pair</item>
-        <item>Minimum trade amount</item>
         <item>All amount</item>
     </string-array>
 
     <string-array name="strategy_values">
         <item>MIN_PAIR</item>
         <item>MAX_PAIR</item>
-        <item>MIN_TRADE</item>
         <item>ALL_BALANCE</item>
     </string-array>
 </resources>

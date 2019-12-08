@@ -3,6 +3,7 @@ package com.chess.cryptobot.market;
 import com.chess.cryptobot.api.BittrexMarketService;
 import com.chess.cryptobot.exceptions.BittrexException;
 import com.chess.cryptobot.exceptions.MarketException;
+import com.chess.cryptobot.model.History;
 import com.chess.cryptobot.model.response.CurrenciesResponse;
 import com.chess.cryptobot.model.response.OrderBookResponse;
 import com.chess.cryptobot.model.response.TickerResponse;
@@ -12,6 +13,7 @@ import com.chess.cryptobot.model.response.bittrex.BittrexTypeAdapter;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -235,5 +237,108 @@ public class BittrexMarket extends MarketRequest {
         } catch (MarketException e) {
             throw new BittrexException(e.getMessage());
         }
+    }
+
+    @Override
+    public List<History> getOpenOrders() throws MarketException {
+        this.path = this.url.concat("market/getopenorders?");
+        Map<String, String> params = new LinkedHashMap<>();
+        params.put("apikey", this.apiKey);
+        params.put("nonce", String.valueOf(System.currentTimeMillis()));
+
+        String hash = makeHash(params);
+
+        Map<String, String> headers = new HashMap<>();
+        headers.put("apisign", hash);
+
+        BittrexResponse response;
+        try {
+            Call<BittrexResponse> call = service.getOpenOrders(
+                    params.get("apikey"),
+                    params.get("nonce"),
+                    headers);
+            response = (BittrexResponse) execute(call);
+        } catch (MarketException e) {
+            throw new BittrexException(e.getMessage());
+        }
+        return response.getHistory();
+    }
+
+    @Override
+    public List<History> getHistory() throws MarketException {
+        this.path = this.url.concat("account/getorderhistory?");
+        Map<String, String> params = new LinkedHashMap<>();
+        params.put("apikey", this.apiKey);
+        params.put("nonce", String.valueOf(System.currentTimeMillis()));
+
+        String hash = makeHash(params);
+
+        Map<String, String> headers = new HashMap<>();
+        headers.put("apisign", hash);
+
+        List<History> historyList;
+        BittrexResponse response;
+        try {
+            Call<BittrexResponse> call = service.getOrderHistory(
+                    params.get("apikey"),
+                    params.get("nonce"),
+                    headers);
+            response = (BittrexResponse) execute(call);
+            historyList = new ArrayList<>(response.getHistory());
+            historyList.addAll(getWithdrawHistory());
+            historyList.addAll(getDepositHistory());
+        } catch (MarketException e) {
+            throw new BittrexException(e.getMessage());
+        }
+
+        return historyList;
+    }
+
+    private List<History> getWithdrawHistory() throws BittrexException {
+        this.path = this.url.concat("account/getwithdrawalhistory?");
+        Map<String, String> params = new LinkedHashMap<>();
+        params.put("apikey", this.apiKey);
+        params.put("nonce", String.valueOf(System.currentTimeMillis()));
+
+        String hash = makeHash(params);
+
+        Map<String, String> headers = new HashMap<>();
+        headers.put("apisign", hash);
+
+        BittrexResponse response;
+        try {
+            Call<BittrexResponse> call = service.getWithdrawHistory(
+                    params.get("apikey"),
+                    params.get("nonce"),
+                    headers);
+            response = (BittrexResponse) execute(call);
+        } catch (MarketException e) {
+            throw new BittrexException(e.getMessage());
+        }
+        return response.getHistory();
+    }
+
+    private List<History> getDepositHistory() throws BittrexException {
+        this.path = this.url.concat("account/getdeposithistory?");
+        Map<String, String> params = new LinkedHashMap<>();
+        params.put("apikey", this.apiKey);
+        params.put("nonce", String.valueOf(System.currentTimeMillis()));
+
+        String hash = makeHash(params);
+
+        Map<String, String> headers = new HashMap<>();
+        headers.put("apisign", hash);
+
+        BittrexResponse response;
+        try {
+            Call<BittrexResponse> call = service.getDepositHistory(
+                    params.get("apikey"),
+                    params.get("nonce"),
+                    headers);
+            response = (BittrexResponse) execute(call);
+        } catch (MarketException e) {
+            throw new BittrexException(e.getMessage());
+        }
+        return response.getHistory();
     }
 }

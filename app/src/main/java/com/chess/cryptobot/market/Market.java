@@ -1,6 +1,7 @@
 package com.chess.cryptobot.market;
 
 import com.chess.cryptobot.exceptions.MarketException;
+import com.chess.cryptobot.model.History;
 import com.chess.cryptobot.model.response.CurrenciesResponse;
 import com.chess.cryptobot.model.response.OrderBookResponse;
 import com.chess.cryptobot.model.response.TickerResponse;
@@ -33,4 +34,8 @@ public interface Market {
     void sell(String pairName, Double price, Double amount) throws MarketException;
 
     boolean keysIsEmpty();
+
+    List<History> getOpenOrders() throws MarketException;
+
+    List<History> getHistory() throws MarketException;
 }

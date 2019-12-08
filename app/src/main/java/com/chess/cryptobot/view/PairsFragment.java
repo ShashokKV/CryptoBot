@@ -32,7 +32,7 @@ public class PairsFragment extends MainFragment {
 
     @Override
     public RecyclerViewAdapter initAdapter(ContextHolder holder) {
-        return new PairsAdapter((PairsHolder) holder);
+        return new PairsAdapter(holder);
     }
 
     @Override

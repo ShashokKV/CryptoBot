@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity implements DialogListener {
     private final BalanceFragment balanceFragment = new BalanceFragment();
     private final PairsFragment pairFragment = new PairsFragment();
     private final GraphFragment graphFragment = new GraphFragment();
+    private final HistoryPagerFragment historyPagerFragment = new HistoryPagerFragment();
     private final FragmentManager fragmentManager = getSupportFragmentManager();
     private Fragment active;
     private boolean botIsActive;
@@ -70,6 +71,7 @@ public class MainActivity extends AppCompatActivity implements DialogListener {
             active = balanceFragment;
         }
         fragmentManager.beginTransaction().add(R.id.include, graphFragment, "3").hide(graphFragment).commit();
+        fragmentManager.beginTransaction().add(R.id.include, historyPagerFragment, "4").hide(historyPagerFragment).commit();
 
         botIsActive = BotService.isRunning;
         updateBot();
@@ -93,6 +95,9 @@ public class MainActivity extends AppCompatActivity implements DialogListener {
                 fragmentManager.beginTransaction().hide(active).show(graphFragment).commit();
                 active = graphFragment;
                 return true;
+            case R.id.activity_transactions:
+                fragmentManager.beginTransaction().hide(active).show(historyPagerFragment).commit();
+                active = historyPagerFragment;
         }
         return false;
     };

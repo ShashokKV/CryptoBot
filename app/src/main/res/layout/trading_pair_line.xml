@@ -40,6 +40,21 @@
             tools:text="0.00000000000" />
 
         <TextView
+            android:id="@+id/textView20"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/quantity"
+            android:textColor="@color/colorWhite" />
+
+        <TextView
+            android:id="@+id/bittrex_bid_quantity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLength="18"
+            android:textColor="@color/colorWhite"
+            tools:text="0.00000000000" />
+
+        <TextView
             android:id="@+id/textView10"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -48,6 +63,21 @@
 
         <TextView
             android:id="@+id/bittrex_ask"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLength="18"
+            android:textColor="@color/colorWhite"
+            tools:text="0.00000000000" />
+
+        <TextView
+            android:id="@+id/textView21"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/quantity"
+            android:textColor="@color/colorWhite" />
+
+        <TextView
+            android:id="@+id/bittrex_ask_quantity"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:maxLength="18"
@@ -93,6 +123,21 @@
             tools:text="0.000000000000" />
 
         <TextView
+            android:id="@+id/textView22"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/quantity"
+            android:textColor="@color/colorWhite" />
+
+        <TextView
+            android:id="@+id/livecoin_bid_quantity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLength="18"
+            android:textColor="@color/colorWhite"
+            tools:text="0.00000000000" />
+
+        <TextView
             android:id="@+id/textView4"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -106,6 +151,21 @@
             android:maxLength="18"
             android:textColor="@color/colorWhite"
             tools:text="0.000000000000" />
+
+        <TextView
+            android:id="@+id/textView23"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/quantity"
+            android:textColor="@color/colorWhite" />
+
+        <TextView
+            android:id="@+id/livecoin_ask_quantity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLength="18"
+            android:textColor="@color/colorWhite"
+            tools:text="0.00000000000" />
 
         <TextView
             android:id="@+id/textView6"

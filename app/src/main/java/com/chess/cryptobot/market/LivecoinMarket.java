@@ -3,14 +3,18 @@ package com.chess.cryptobot.market;
 import com.chess.cryptobot.api.LivecoinMarketService;
 import com.chess.cryptobot.exceptions.LivecoinException;
 import com.chess.cryptobot.exceptions.MarketException;
+import com.chess.cryptobot.model.History;
 import com.chess.cryptobot.model.response.CurrenciesResponse;
+import com.chess.cryptobot.model.response.HistoryResponseFactory;
 import com.chess.cryptobot.model.response.OrderBookResponse;
 import com.chess.cryptobot.model.response.TickerResponse;
 import com.chess.cryptobot.model.response.TradeLimitResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinAddressResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinBalanceResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinCurrenciesListResponse;
+import com.chess.cryptobot.model.response.livecoin.LivecoinHistoryResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinOrderBookResponse;
+import com.chess.cryptobot.model.response.livecoin.LivecoinOrdersResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinTickerResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinTradeLimitResponse;
@@ -18,6 +22,9 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -227,5 +234,53 @@ public class LivecoinMarket extends MarketRequest {
         } catch (MarketException e) {
             throw new LivecoinException(e.getMessage());
         }
+    }
+
+    @Override
+    public List<History> getOpenOrders() throws MarketException {
+        Map<String, String> params = new LinkedHashMap<>();
+        params.put("openClosed", "OPEN");
+
+        String hash = makeHash(params);
+
+        Map<String, String> headers = new HashMap<>();
+        headers.put("API-key", this.apiKey);
+        headers.put("Sign", hash);
+
+        LivecoinOrdersResponse response;
+        try {
+            Call<LivecoinOrdersResponse> call = service.getOpenOrders(params, headers);
+            response = (LivecoinOrdersResponse) execute(call);
+        } catch (MarketException e) {
+            throw new LivecoinException(e.getMessage());
+        }
+        return new HistoryResponseFactory(response.getData()).getHistory();
+    }
+
+    @Override
+    public List<History> getHistory() throws MarketException {
+        LocalDateTime startTime = LocalDateTime.now().minusDays(29);
+        LocalDateTime endTime = LocalDateTime.now();
+        Map<String, String> params = new LinkedHashMap<>();
+        params.put("end", String.valueOf(endTime.toEpochSecond(ZoneOffset.systemDefault().getRules().getOffset(Instant.now()))*1000));
+        params.put("start", String.valueOf(startTime.toEpochSecond(ZoneOffset.systemDefault().getRules().getOffset(Instant.now()))*1000));
+        String hash = makeHash(params);
+
+        Map<String, String> headers = new HashMap<>();
+        headers.put("API-key", this.apiKey);
+        headers.put("Sign", hash);
+
+        List<LivecoinHistoryResponse> responses;
+        try {
+            Call<List<LivecoinHistoryResponse>> call = service.getHistory(params, headers);
+            Response<List<LivecoinHistoryResponse>> result = call.execute();
+            responses = result.body();
+            if (responses == null) {
+                throw new LivecoinException("No response");
+            }
+        } catch (MarketException | IOException e) {
+            throw new LivecoinException(e.getMessage());
+        }
+        return new HistoryResponseFactory(responses).getHistory();
     }
 }

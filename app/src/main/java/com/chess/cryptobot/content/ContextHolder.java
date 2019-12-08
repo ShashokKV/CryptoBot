@@ -32,7 +32,7 @@ public abstract class ContextHolder {
 
     protected abstract Preferences initPrefs(Context context);
 
-    protected abstract void initViewItems(Set<String> itemsSet);
+    protected abstract void initViewItems(Set<String> itemNamesSet);
 
     public synchronized void add(ViewItem viewItem) {
         addItemToList(viewItem);

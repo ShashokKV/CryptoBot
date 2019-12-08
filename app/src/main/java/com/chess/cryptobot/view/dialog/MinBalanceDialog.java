@@ -7,6 +7,8 @@ import android.widget.TextView;
 import com.chess.cryptobot.R;
 import com.chess.cryptobot.content.balance.BalanceHolder;
 
+import java.util.Locale;
+
 public class MinBalanceDialog extends CryptoDialog {
     private final String coinName;
     private final Double minBalance;
@@ -22,7 +24,7 @@ public class MinBalanceDialog extends CryptoDialog {
     EditText enrichEditText(EditText editText) {
         editText.setId(R.id.min_balance_edit_text);
         editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL);
-        editText.setText(String.valueOf(minBalance));
+        editText.setText(String.format(Locale.US, "%.8f", minBalance));
         return editText;
     }
 

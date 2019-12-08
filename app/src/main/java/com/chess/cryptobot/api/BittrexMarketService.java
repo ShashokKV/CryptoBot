@@ -53,4 +53,25 @@ public interface BittrexMarketService {
                                @Query(value = "apikey", encoded = true) String apikey,
                                @Query(value = "nonce", encoded = true) String nonce,
                                @HeaderMap Map<String, String> headers);
+
+    @GET("account/getorderhistory")
+    Call <BittrexResponse> getOrderHistory(@Query(value = "apikey", encoded = true) String apikey,
+                                           @Query(value = "nonce", encoded = true)String nonce,
+                                           @HeaderMap Map<String, String> headers);
+
+    @GET("account/getwithdrawalhistory")
+    Call <BittrexResponse> getWithdrawHistory(@Query(value = "apikey", encoded = true) String apikey,
+                                              @Query(value = "nonce", encoded = true)String nonce,
+                                              @HeaderMap Map<String, String> headers);
+
+    @GET("account/getdeposithistory")
+    Call <BittrexResponse> getDepositHistory(@Query(value = "apikey", encoded = true) String apikey,
+                                              @Query(value = "nonce", encoded = true)String nonce,
+                                              @HeaderMap Map<String, String> headers);
+
+
+    @GET("market/getopenorders")
+    Call <BittrexResponse> getOpenOrders(@Query(value = "apikey", encoded = true) String apikey,
+                                              @Query(value = "nonce", encoded = true)String nonce,
+                                              @HeaderMap Map<String, String> headers);
 }

@@ -1,10 +1,12 @@
 package com.chess.cryptobot.model.response.bittrex;
 
+import com.chess.cryptobot.model.History;
 import com.chess.cryptobot.model.Price;
 import com.chess.cryptobot.model.response.AddressResponse;
 import com.chess.cryptobot.model.response.BalanceResponse;
 import com.chess.cryptobot.model.response.CurrenciesListResponse;
 import com.chess.cryptobot.model.response.CurrenciesResponse;
+import com.chess.cryptobot.model.response.HistoryResponseFactory;
 import com.chess.cryptobot.model.response.MarketResponse;
 import com.chess.cryptobot.model.response.OrderBookResponse;
 import com.chess.cryptobot.model.response.TickerResponse;
@@ -95,5 +97,9 @@ public class BittrexResponse implements MarketResponse,
             }
         }
         return null;
+    }
+
+    public List<History> getHistory() {
+        return new HistoryResponseFactory(Arrays.asList(this.results)).getHistory();
     }
 }

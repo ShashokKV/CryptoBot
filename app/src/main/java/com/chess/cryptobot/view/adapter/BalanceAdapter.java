@@ -16,6 +16,8 @@ import com.chess.cryptobot.content.balance.BalanceHolder;
 import com.chess.cryptobot.market.Market;
 import com.chess.cryptobot.model.Balance;
 
+import java.util.Locale;
+
 public class BalanceAdapter extends RecyclerViewAdapter<BalanceAdapter.BalanceViewHolder> {
     private final RecyclerViewOnClickListener mListener;
 
@@ -38,12 +40,12 @@ public class BalanceAdapter extends RecyclerViewAdapter<BalanceAdapter.BalanceVi
     public void onBindViewHolder(@NonNull BalanceViewHolder balanceViewHolder, int i) {
         Balance balance = (Balance) getItemByPosition(i);
 
-        balanceViewHolder.bittrexBalanceView.setText(String.valueOf(balance.getAmount(Market.BITTREX_MARKET)));
+        balanceViewHolder.bittrexBalanceView.setText(String.format(Locale.US, "%.8f", balance.getAmount(Market.BITTREX_MARKET)));
         Context context = balanceViewHolder.bittrexBalanceView.getContext();
         if (!balance.getStatus(Market.BITTREX_MARKET)) {
             balanceViewHolder.bittrexBalanceView.setTextColor(context.getResources().getColor(R.color.colorError, null));
         }
-        balanceViewHolder.livecoinBalanceView.setText(String.valueOf(balance.getAmount(Market.LIVECOIN_MARKET)));
+        balanceViewHolder.livecoinBalanceView.setText(String.format(Locale.US, "%.8f", balance.getAmount(Market.LIVECOIN_MARKET)));
         if (!balance.getStatus(Market.LIVECOIN_MARKET)) {
             balanceViewHolder.livecoinBalanceView.setTextColor(context.getResources().getColor(R.color.colorError, null));
         }

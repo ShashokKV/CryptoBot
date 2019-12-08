@@ -32,7 +32,7 @@ public abstract class Preferences {
         updateItemSet(items);
     }
 
-    void addItem(String itemName) {
+    public void addItem(String itemName) {
         Set<String> itemsSet = getItems();
         if (itemsSet.contains(itemName)) return;
         itemsSet.add(itemName);

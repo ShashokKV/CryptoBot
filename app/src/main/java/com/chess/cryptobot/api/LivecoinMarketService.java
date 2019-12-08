@@ -3,7 +3,9 @@ package com.chess.cryptobot.api;
 import com.chess.cryptobot.model.response.livecoin.LivecoinAddressResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinBalanceResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinCurrenciesListResponse;
+import com.chess.cryptobot.model.response.livecoin.LivecoinHistoryResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinOrderBookResponse;
+import com.chess.cryptobot.model.response.livecoin.LivecoinOrdersResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinTickerResponse;
 import com.chess.cryptobot.model.response.livecoin.LivecoinTradeLimitResponse;
@@ -59,4 +61,10 @@ public interface LivecoinMarketService {
                                      @Field(value = "price", encoded = true) String price,
                                      @Field(value = "quantity", encoded = true) String quantity,
                                      @HeaderMap Map<String, String> headers);
+
+    @GET("payment/history/transactions")
+    Call<List<LivecoinHistoryResponse>> getHistory(@QueryMap(encoded = true) Map<String, String> options, @HeaderMap Map<String, String> headers);
+
+    @GET("exchange/client_orders")
+    Call<LivecoinOrdersResponse> getOpenOrders(@QueryMap(encoded = true) Map<String, String> options, @HeaderMap Map<String, String> headers);
 }
