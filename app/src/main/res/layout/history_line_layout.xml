@@ -39,6 +39,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.2"
+                android:textAlignment="center"
                 tools:text="BTC/ETH" />
 
             <TextView
@@ -46,6 +47,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.2"
+                android:textAlignment="center"
                 tools:text="Withdraw" />
 
             <LinearLayout

@@ -38,7 +38,7 @@ public class HistoryFragment extends MainFragment {
 
     @Override
     protected RecyclerViewAdapter initAdapter(ContextHolder holder) {
-        return new HistoryAdapter(holder);
+        return new HistoryAdapter(holder, state);
     }
 
     @Override

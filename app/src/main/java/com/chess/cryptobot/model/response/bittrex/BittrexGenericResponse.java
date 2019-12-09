@@ -49,9 +49,9 @@ class BittrexGenericResponse implements TickerResponse, CurrenciesResponse, Hist
     @SerializedName("Exchange")
     @Expose
     private String exchange;
-    @SerializedName("TimeStamp")
+    @SerializedName("Closed")
     @Expose
-    private String timeStamp;
+    private String closed;
     @SerializedName("OrderType")
     @Expose
     private String orderType;
@@ -136,9 +136,9 @@ class BittrexGenericResponse implements TickerResponse, CurrenciesResponse, Hist
 
     @Override
     public LocalDateTime getHistoryTime() {
-        String timeString = this.timeStamp == null ? this.opened : this.timeStamp;
+        String timeString = this.closed == null ? this.opened : this.closed;
         timeString = timeString == null ? lastUpdated : timeString;
-        return LocalDateTime.parse(timeString);
+        return LocalDateTime.parse(timeString).plusHours(3);
     }
 
     @Override

@@ -5,6 +5,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.SimpleItemAnimator;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.chess.cryptobot.R;
@@ -27,7 +28,13 @@ public class PairsFragment extends MainFragment {
 
     @Override
     public RecyclerView initRecyclerView(View view) {
-        return view.findViewById(R.id.tradingPairsRecycleView);
+        RecyclerView recyclerView = view.findViewById(R.id.tradingPairsRecycleView);
+        SimpleItemAnimator  itemAnimator = (SimpleItemAnimator) recyclerView.getItemAnimator();
+        if (itemAnimator!=null) {
+            itemAnimator.setRemoveDuration(0);
+            itemAnimator.setSupportsChangeAnimations(false);
+        }
+        return recyclerView;
     }
 
     @Override

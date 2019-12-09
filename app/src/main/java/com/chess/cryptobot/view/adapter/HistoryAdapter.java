@@ -12,15 +12,20 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.chess.cryptobot.R;
 import com.chess.cryptobot.content.ContextHolder;
+import com.chess.cryptobot.content.history.HistoryHolder;
 import com.chess.cryptobot.model.History;
 
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
-public class HistoryAdapter extends RecyclerViewAdapter<HistoryAdapter.HistoryViewHolder> {
+import static android.view.View.GONE;
 
-    public HistoryAdapter(ContextHolder holder) {
+public class HistoryAdapter extends RecyclerViewAdapter<HistoryAdapter.HistoryViewHolder> {
+    private HistoryHolder.State state;
+
+    public HistoryAdapter(ContextHolder holder, HistoryHolder.State state) {
         super(holder);
+        this.state = state;
     }
 
     @NonNull
@@ -44,7 +49,11 @@ public class HistoryAdapter extends RecyclerViewAdapter<HistoryAdapter.HistoryVi
         holder.actionView.setText(history.getAction().toLowerCase());
         holder.amountView.setText(String.format(Locale.US, "%.8f", history.getAmount()));
         holder.priceView.setText(history.getPrice() == null ? "" : String.format(Locale.US, "%.8f", history.getPrice()));
-        holder.progressBar.setProgress(history.getProgress());
+        if (this.state == HistoryHolder.State.HISTORY) {
+            holder.progressBar.setVisibility(GONE);
+        } else {
+            holder.progressBar.setProgress(history.getProgress());
+        }
     }
 
     class HistoryViewHolder extends RecyclerView.ViewHolder {
