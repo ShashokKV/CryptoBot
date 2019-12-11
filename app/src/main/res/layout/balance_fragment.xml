@@ -2,7 +2,6 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/balance_fragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".view.BalanceFragment">
@@ -55,7 +54,6 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <TextView
-                android:id="@+id/textView"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.25"
@@ -65,7 +63,6 @@
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/textView2"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.375"
@@ -76,7 +73,6 @@
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/textView3"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.375"

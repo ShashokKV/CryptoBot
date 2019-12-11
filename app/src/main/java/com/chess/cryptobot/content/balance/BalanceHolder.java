@@ -64,13 +64,6 @@ public class BalanceHolder extends ContextHolder {
         balance.setStatuses(livecoinStatuses.get(balance.getName()), bittrexStatuses.get(balance.getName()));
         updateImage(balance);
         if (hasKeys) updateAmount(balance);
-        getMainActivity().updateBot();
-    }
-
-    @Override
-    public synchronized void remove(ViewItem item) {
-        super.remove(item);
-        getMainActivity().updateBot();
     }
 
     @Override

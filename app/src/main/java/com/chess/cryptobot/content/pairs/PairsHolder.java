@@ -4,7 +4,6 @@ import android.content.Context;
 
 import androidx.fragment.app.Fragment;
 
-import com.chess.cryptobot.R;
 import com.chess.cryptobot.content.ContextHolder;
 import com.chess.cryptobot.content.Preferences;
 import com.chess.cryptobot.content.balance.BalancePreferences;
@@ -27,14 +26,9 @@ public class PairsHolder extends ContextHolder {
     private Map<String, Double> livecoinVolumes;
     private List<String> negativePercentPairs;
     private AllPairsPreferences allPairsPrefs;
-    private float fee;
 
-    public PairsHolder(Fragment fragment) {
-        super(fragment);
-        Context context = fragment.getContext();
-        if (context != null) {
-            fee = initFee(context);
-        }
+    public PairsHolder(Fragment fr) {
+        super(fr);
     }
 
     @Override
@@ -51,10 +45,6 @@ public class PairsHolder extends ContextHolder {
     public void initAvailablePairs() {
         AvailablePairsTask availablePairsTask = new AvailablePairsTask(this);
         availablePairsTask.execute(0);
-    }
-
-    private float initFee(Context context) {
-        return Float.valueOf(context.getString(R.string.bittrex_fee)) + Float.valueOf(context.getString(R.string.livecoin_fee));
     }
 
     @Override
@@ -141,10 +131,6 @@ public class PairsHolder extends ContextHolder {
 
     public void resetNegativePercentPairs() {
         this.negativePercentPairs = new ArrayList<>();
-    }
-
-    public float getFee() {
-        return fee;
     }
 
     public void setAvailablePairs(List<String> pairs) {

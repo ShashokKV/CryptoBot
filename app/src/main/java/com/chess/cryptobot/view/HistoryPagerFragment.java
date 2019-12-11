@@ -37,7 +37,7 @@ public class HistoryPagerFragment extends Fragment {
         return view;
     }
 
-    public static class PagerAdapter extends FragmentPagerAdapter {
+    static class PagerAdapter extends FragmentPagerAdapter {
 
         PagerAdapter(@NonNull FragmentManager fm, int behavior) {
             super(fm, behavior);

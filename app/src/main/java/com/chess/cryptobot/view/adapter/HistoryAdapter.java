@@ -21,7 +21,7 @@ import java.util.Locale;
 import static android.view.View.GONE;
 
 public class HistoryAdapter extends RecyclerViewAdapter<HistoryAdapter.HistoryViewHolder> {
-    private HistoryHolder.State state;
+    private final HistoryHolder.State state;
 
     public HistoryAdapter(ContextHolder holder, HistoryHolder.State state) {
         super(holder);

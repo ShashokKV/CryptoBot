@@ -17,8 +17,6 @@
     <string name="livecoin_api_key">livecoin_api_key</string>
     <string name="livecoin_secret_key">livecoin_secret_key</string>
 
-    <string name="bittrex_fee">0.25</string>
-    <string name="livecoin_fee">0.18</string>
     <string name="ignored_pairs">BTC/LUNA#BTC/CPT#BTC/PLA</string>
 
     <string name="cripto_icon">cripto Icon</string>
@@ -48,12 +46,10 @@
     <string name="_0">0</string>
 
     <string name="channel_name">Profitable pairs notification</string>
-    <string name="channel_description">Notification about pairs that can make profit</string>
     <string name="foreground_channel_name">CryptoBot notifications</string>
 
     <string name="bot_toggle">Bot toggle</string>
 
-    <string name="crypto_bot_tag">crypto_bot_tag</string>
     <string name="service_run_period">run_period</string>
     <string name="statistic_run_period">statistic_period</string>
     <string name="min_profit_percent">min_profit_percent</string>
@@ -61,7 +57,6 @@
     <string name="sync_balances_title">Sync all balances?</string>
     <string name="volume">volume</string>
     <string name="auto_trade">auto_trade</string>
-    <string name="begin_trade">Begin trade?</string>
     <string name="trade_strategy">trade_strategy</string>
     <string name="History">History</string>
     <string name="action">Action</string>

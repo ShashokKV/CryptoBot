@@ -53,6 +53,7 @@ public class TradingService extends IntentService {
             initAmounts();
         } catch (MarketException e) {
             makeNotification("Init amounts exception", e.getMessage());
+            return;
         }
 
          Trader trader = new Trader(pair, getStrategy());
@@ -130,7 +131,7 @@ public class TradingService extends IntentService {
         private final Double marketAmount;
         private final String sellPairName;
         private final String buyPairName;
-        private Strategy strategy;
+        private final Strategy strategy;
 
         Trader(Pair pair, Strategy strategy) {
             this.strategy = strategy;

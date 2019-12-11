@@ -34,14 +34,14 @@ public abstract class ContextHolder {
 
     protected abstract void initViewItems(Set<String> itemNamesSet);
 
-    public synchronized void add(ViewItem viewItem) {
+    public void add(ViewItem viewItem) {
         addItemToList(viewItem);
         getMainFragment().addItem();
         Preferences preferences = getPrefs();
         preferences.addItem(viewItem.getName());
     }
 
-    protected synchronized void addItemToList(ViewItem viewItem) {
+    protected void addItemToList(ViewItem viewItem) {
         if (viewItems.contains(viewItem)) return;
         viewItems.add(viewItem);
     }
@@ -66,14 +66,14 @@ public abstract class ContextHolder {
         getPrefs().removeItem(viewItem.getName());
     }
 
-    public synchronized void remove(ViewItem item) {
+    public void remove(ViewItem item) {
         if (item == null) return;
         removeFromAdapter(item);
         viewItems.remove(item);
         removeFromPrefs(item);
     }
 
-    public synchronized void setItem(ViewItem updatedItem) {
+    public void setItem(ViewItem updatedItem) {
         for (ViewItem item : viewItems) {
             if (item.equals(updatedItem)) {
                 viewItems.set(viewItems.indexOf(item), updatedItem);

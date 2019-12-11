@@ -187,7 +187,7 @@ public class MainActivity extends AppCompatActivity implements DialogListener {
         }
     }
 
-    public void updateBot() {
+    private void updateBot() {
         if (!botIsActive) return;
         if (!isBound) {
             Intent intent = new Intent(this, BotService.class);
@@ -225,7 +225,7 @@ public class MainActivity extends AppCompatActivity implements DialogListener {
 
         PeriodicWorkRequest workRequest = new PeriodicWorkRequest.Builder(MarketWorker.class, workPeriod, TimeUnit.MINUTES)
                 .setConstraints(constraints)
-                .setInitialDelay(15, TimeUnit.MINUTES)
+                .setInitialDelay(5, TimeUnit.MINUTES)
                 .build();
 
         WorkManager.getInstance(this)

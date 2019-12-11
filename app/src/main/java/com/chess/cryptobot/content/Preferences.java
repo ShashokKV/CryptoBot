@@ -54,8 +54,4 @@ public abstract class Preferences {
     public SharedPreferences getSharedPreferences() {
         return sharedPreferences;
     }
-
-    public Context getContext() {
-        return context;
-    }
 }

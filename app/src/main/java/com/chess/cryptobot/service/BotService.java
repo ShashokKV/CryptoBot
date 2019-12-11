@@ -46,10 +46,8 @@ public class BotService extends Service {
     private final static String CHANNEL_ID = "profit_pairs_channel_id";
     private final static String FOREGROUND_CHANNEL_ID = "bot_channel_id";
     private Timer botTimer;
-    private List<Pair> pairs;
     private Integer runPeriod;
     private Float minPercent;
-    private Float fee;
     private final IBinder botBinder = new BotBinder();
     private static final String TAG = BotService.class.getSimpleName();
     private boolean autoTrade;
@@ -68,31 +66,14 @@ public class BotService extends Service {
     private void initFields() {
         this.botTimer = new Timer();
         initFieldsFromPrefs();
-        initPairsFromPrefs();
+
     }
 
-    private void initPairsFromPrefs() {
-        Set<String> coinNames = new BalancePreferences(this).getItems();
-        Set<String> allPairNames = new AllPairsPreferences(this).getItems();
 
-        pairs = new ArrayList<>();
-        for (String baseName : coinNames) {
-            for (String marketName : coinNames) {
-                if (!baseName.equals(marketName)) {
-                    Pair pair = new Pair(baseName, marketName);
-                    String pairName = pair.getName();
-                    if (allPairNames.contains(pairName)) {
-                        pairs.add(pair);
-                    }
-                }
-            }
-        }
-    }
 
     private void initFieldsFromPrefs() {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         minPercent = Float.valueOf(Objects.requireNonNull(preferences.getString(getString(R.string.min_profit_percent), "3")));
-        fee = Float.valueOf(getString(R.string.bittrex_fee)) + Float.valueOf(getString(R.string.livecoin_fee));
         runPeriod = Integer.valueOf(Objects.requireNonNull(preferences.getString(getString(R.string.service_run_period), "5")));
         autoTrade = preferences.getBoolean(getString(R.string.auto_trade), false);
     }
@@ -101,12 +82,12 @@ public class BotService extends Service {
         MarketFactory marketFactory = new MarketFactory();
 
         List<Market> markets = marketFactory.getMarkets(this, PreferenceManager.getDefaultSharedPreferences(this));
-        runTimer(pairs, markets);
+        runTimer(markets);
     }
 
-    private void runTimer(List<Pair> pairs, List<Market> markets) {
+    private void runTimer(List<Market> markets) {
         long period = runPeriod * 1000 * 60;
-        BotTimerTask botTimerTask = new BotTimerTask(pairs, markets);
+        BotTimerTask botTimerTask = new BotTimerTask(markets);
         botTimer.scheduleAtFixedRate(botTimerTask, period, period);
         Log.d(TAG, "timer started");
     }
@@ -135,7 +116,7 @@ public class BotService extends Service {
     @Override
     public void onDestroy() {
         Toast.makeText(this, "Bot stopping", Toast.LENGTH_SHORT).show();
-        botTimer.cancel();
+        if (botTimer!=null) botTimer.cancel();
         stopForeground(true);
         isRunning = false;
         Log.d(TAG, "timer stopped");
@@ -149,19 +130,20 @@ public class BotService extends Service {
     }
 
     private class BotTimerTask extends TimerTask {
-        private final List<Pair> pairs;
+        private List<Pair> pairs;
         private final List<Market> markets;
         private final Map<String, TradeLimitResponse> minQuantities = new HashMap<>();
         private CoinInfo coinInfo;
 
-        BotTimerTask(List<Pair> pairs, List<Market> markets) {
-            this.pairs = pairs;
+        BotTimerTask(List<Market> markets) {
             this.markets = markets;
         }
 
         @Override
         public void run() {
             Log.d(TAG, "timer running");
+
+            initPairsFromPrefs();
 
             if (!autoTrade && isNotificationShown()) {
                 Log.d(TAG, "notification shown, do nothing");
@@ -184,13 +166,31 @@ public class BotService extends Service {
             }
         }
 
-        private void initMinQuantities() throws MarketException {
+        private void initPairsFromPrefs() {
+            Set<String> coinNames = new BalancePreferences(BotService.this).getItems();
+            Set<String> allPairNames = new AllPairsPreferences(BotService.this).getItems();
+
+            pairs = new ArrayList<>();
+            for (String baseName : coinNames) {
+                for (String marketName : coinNames) {
+                    if (!baseName.equals(marketName)) {
+                        Pair pair = new Pair(baseName, marketName);
+                        String pairName = pair.getName();
+                        if (allPairNames.contains(pairName)) {
+                            pairs.add(pair);
+                        }
+                    }
+                }
+            }
+        }
+
+        private synchronized void initMinQuantities() throws MarketException {
             for (Market market : markets) {
                 minQuantities.put(market.getMarketName(), market.getMinQuantity());
             }
         }
 
-        private List<Pair> getProfitPairs(List<Pair> pairs, List<Market> markets) {
+        private synchronized List<Pair> getProfitPairs(List<Pair> pairs, List<Market> markets) {
 
             List<Pair> profitPairs = new ArrayList<>();
 
@@ -222,7 +222,7 @@ public class BotService extends Service {
                     enricher.enrichWithResponse(response);
                 }
             }
-            return enricher.countPercent(fee).getPair();
+            return enricher.countPercent().getPair();
         }
 
         private void beginTrade(Pair pair) {

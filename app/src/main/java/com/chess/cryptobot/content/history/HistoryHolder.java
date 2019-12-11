@@ -13,7 +13,7 @@ import com.chess.cryptobot.task.HistoryTask;
 import java.util.Set;
 
 public class HistoryHolder extends ContextHolder {
-    private State state;
+    private final State state;
 
     public HistoryHolder(Fragment fragment, State state) {
         super(fragment);

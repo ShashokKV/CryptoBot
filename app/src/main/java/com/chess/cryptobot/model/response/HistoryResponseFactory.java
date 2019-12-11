@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class HistoryResponseFactory {
-    private List<? extends HistoryResponse> historyResponseList;
+    private final List<? extends HistoryResponse> historyResponseList;
 
     public HistoryResponseFactory(List<? extends HistoryResponse> historyResponseList) {
         this.historyResponseList = historyResponseList;

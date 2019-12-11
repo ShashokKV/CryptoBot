@@ -26,6 +26,7 @@ abstract class MarketTask<S, T> extends AsyncTask<S, Integer, T> {
         publishProgress();
         preMarketProcess(param);
         MarketFactory factory = new MarketFactory();
+        if (holder==null) return null;
         List<Market> markets = factory.getMarkets(holder);
         for (Market market : markets) {
             try {
@@ -83,7 +84,7 @@ abstract class MarketTask<S, T> extends AsyncTask<S, Integer, T> {
         }
     }
 
-    ContextHolder getHolder() {
+    private ContextHolder getHolder() {
         ContextHolder holder = holderWeakReference.get();
         if (holder == null) {
             cancel(true);

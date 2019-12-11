@@ -11,7 +11,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class HistoryTask extends MarketTask<Integer, String> {
-    private HistoryHolder.State state;
+    private final HistoryHolder.State state;
     private List<History> historyList;
 
     public HistoryTask(ContextHolder holder, HistoryHolder.State state) {

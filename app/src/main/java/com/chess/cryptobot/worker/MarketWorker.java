@@ -9,7 +9,6 @@ import androidx.room.Room;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
-import com.chess.cryptobot.R;
 import com.chess.cryptobot.content.pairs.AllPairsPreferences;
 import com.chess.cryptobot.enricher.PairResponseEnricher;
 import com.chess.cryptobot.exceptions.MarketException;
@@ -29,7 +28,6 @@ import java.util.Set;
 
 public class MarketWorker extends Worker {
     private Set<String> allPairNames;
-    private Float fee;
     private CoinInfo coinInfo;
     private CryptoBotDatabase database;
     private static final String TAG = MarketWorker.class.getSimpleName();
@@ -40,9 +38,7 @@ public class MarketWorker extends Worker {
     }
 
     private void init() {
-        Context context = getApplicationContext();
         allPairNames = new AllPairsPreferences(getApplicationContext()).getItems();
-        fee = Float.valueOf(context.getString(R.string.bittrex_fee)) + Float.valueOf(context.getString(R.string.livecoin_fee));
     }
 
     @NonNull
@@ -64,7 +60,7 @@ public class MarketWorker extends Worker {
         List<Pair> profitPairs = new ArrayList<>();
         try {
             tickerPairs.forEach(pair -> {
-                pair = new PairResponseEnricher(pair).countPercent(fee).getPair();
+                pair = new PairResponseEnricher(pair).countPercent().getPair();
                 if (pair.getPercent() > 0) profitPairs.add(pair);
             });
         }catch (Exception e) {

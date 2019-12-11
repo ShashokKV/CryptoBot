@@ -13,7 +13,7 @@ public class LivecoinOrdersResponse extends LivecoinResponse {
 
     @SerializedName("data")
     @Expose
-    public List<Datum> data = null;
+    private List<Datum> data = null;
 
     public List<Datum> getData() {
         return data;

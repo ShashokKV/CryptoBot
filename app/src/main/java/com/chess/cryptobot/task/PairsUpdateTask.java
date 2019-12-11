@@ -29,8 +29,7 @@ public class PairsUpdateTask extends MarketTask<Pair, Pair> {
 
     @Override
     public Pair postMarketProcess(Pair pair) {
-        PairsHolder holder = (PairsHolder) getHolder();
-        return enricher.countPercent(holder.getFee()).getPair();
+        return enricher.countPercent().getPair();
     }
 
     @Override

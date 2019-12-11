@@ -7,6 +7,9 @@ import com.chess.cryptobot.model.response.livecoin.LivecoinOrderBookResponse;
 
 public class PairResponseEnricher {
     private final Pair pair;
+    private final static Double bittrexFee = 0.25;
+    private final static Double livecoinFee = 0.18;
+
 
     public PairResponseEnricher(Pair pair) {
         this.pair = pair;
@@ -26,15 +29,21 @@ public class PairResponseEnricher {
         }
     }
 
-    public PairResponseEnricher countPercent(Float fee) {
-        if (pair.getLivecoinAsk() == 0 || pair.getBittrexAsk() == 0) {
+    public PairResponseEnricher countPercent() {
+        if (pair.getLivecoinAsk() == null || pair.getLivecoinBid() == null
+                || pair.getBittrexAsk() == null || pair.getBittrexBid() == null
+                || pair.getLivecoinAsk() == 0 || pair.getBittrexAsk() == 0) {
             pair.setPercent(0.0f);
             return this;
         }
-        Float bittrexPercent = (Double.valueOf((pair.getBittrexBid() - pair.getLivecoinAsk())
-                / pair.getLivecoinAsk() * 100)).floatValue() - fee;
-        Float livecoinPercent = (Double.valueOf((pair.getLivecoinBid() - pair.getBittrexAsk())
-                / pair.getBittrexAsk() * 100)).floatValue() - fee;
+
+        Float bb = Double.valueOf(pair.getBittrexBid() - ((pair.getBittrexBid() / 100) * bittrexFee)).floatValue();
+        Float ba = Double.valueOf(pair.getBittrexAsk() + ((pair.getBittrexAsk() / 100) * bittrexFee)).floatValue();
+        Float lb = Double.valueOf(pair.getLivecoinBid() - ((pair.getLivecoinBid() / 100) * livecoinFee)).floatValue();
+        Float la = Double.valueOf(pair.getLivecoinAsk() + ((pair.getLivecoinAsk() / 100) * livecoinFee)).floatValue();
+
+        Float bittrexPercent = ((bb - la) / la) * 100;
+        Float livecoinPercent = ((lb - ba) / ba) * 100;
         if (bittrexPercent > livecoinPercent) {
             pair.setPercent(bittrexPercent);
         } else {

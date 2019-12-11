@@ -14,7 +14,11 @@ import com.chess.cryptobot.view.adapter.HistoryAdapter;
 import com.chess.cryptobot.view.adapter.RecyclerViewAdapter;
 
 public class HistoryFragment extends MainFragment {
-    private HistoryHolder.State state;
+    private final HistoryHolder.State state;
+
+    public HistoryFragment() {
+        this(HistoryHolder.State.HISTORY);
+    }
 
     HistoryFragment(HistoryHolder.State state) {
         super();

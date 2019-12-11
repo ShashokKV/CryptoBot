@@ -10,7 +10,7 @@ public class LivecoinTradeLimitResponse extends LivecoinResponse implements Trad
 
     @SerializedName("restrictions")
     @Expose
-    public List<Restriction> restrictions = null;
+    private List<Restriction> restrictions = null;
 
     @Override
     public Double getTradeLimitByName(String pairName) {
@@ -22,7 +22,7 @@ public class LivecoinTradeLimitResponse extends LivecoinResponse implements Trad
         return null;
     }
 
-    public class Restriction {
+    class Restriction {
 
         @SerializedName("currencyPair")
         @Expose
