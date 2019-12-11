@@ -64,6 +64,9 @@ class BittrexGenericResponse implements TickerResponse, CurrenciesResponse, Hist
     @SerializedName("PricePerUnit")
     @Expose
     private Double pricePerUnit;
+    @SerializedName("Limit")
+    @Expose
+    private Double limit;
     @SerializedName("Amount")
     @Expose
     private Double amount;
@@ -158,7 +161,7 @@ class BittrexGenericResponse implements TickerResponse, CurrenciesResponse, Hist
 
     @Override
     public Double getHistoryPrice() {
-        return pricePerUnit;
+        return pricePerUnit == null ? limit : pricePerUnit;
     }
 
     @Override

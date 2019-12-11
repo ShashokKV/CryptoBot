@@ -20,8 +20,8 @@
         app:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/activity_transactions"
+        android:id="@+id/activity_history"
         android:icon="@drawable/round_timeline_24"
-        android:title="@string/transactions"
+        android:title="@string/History"
         app:showAsAction="ifRoom" />
 </menu>

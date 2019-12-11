@@ -1,6 +1,7 @@
 package com.chess.cryptobot.view;
 
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
@@ -36,7 +37,7 @@ public class GraphFragment extends Fragment {
         super.onHiddenChanged(hidden);
         if (!hidden) {
             GraphTask task = new GraphTask(this, 30, getMinPercent());
-            task.execute();
+            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
     }
 

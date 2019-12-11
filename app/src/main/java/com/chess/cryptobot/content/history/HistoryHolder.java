@@ -1,6 +1,7 @@
 package com.chess.cryptobot.content.history;
 
 import android.content.Context;
+import android.os.AsyncTask;
 
 import androidx.fragment.app.Fragment;
 
@@ -18,7 +19,7 @@ public class HistoryHolder extends ContextHolder {
         super(fragment);
         this.state = state;
         HistoryTask task = new HistoryTask(this, state);
-        task.execute(0);
+        task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, 0);
     }
 
     @Override
@@ -35,7 +36,7 @@ public class HistoryHolder extends ContextHolder {
     public void updateAllItems() {
         initFields();
         HistoryTask task = new HistoryTask(this, state);
-        task.execute(0);
+        task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, 0);
     }
 
     @Override

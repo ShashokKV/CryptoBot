@@ -95,9 +95,10 @@ public class MainActivity extends AppCompatActivity implements DialogListener {
                 fragmentManager.beginTransaction().hide(active).show(graphFragment).commit();
                 active = graphFragment;
                 return true;
-            case R.id.activity_transactions:
+            case R.id.activity_history:
                 fragmentManager.beginTransaction().hide(active).show(historyPagerFragment).commit();
                 active = historyPagerFragment;
+                return true;
         }
         return false;
     };

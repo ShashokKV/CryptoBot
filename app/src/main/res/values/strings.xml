@@ -63,7 +63,7 @@
     <string name="auto_trade">auto_trade</string>
     <string name="begin_trade">Begin trade?</string>
     <string name="trade_strategy">trade_strategy</string>
-    <string name="transactions">Transactions</string>
+    <string name="History">History</string>
     <string name="action">Action</string>
     <string name="name">Name</string>
     <string name="amount">Amount</string>
