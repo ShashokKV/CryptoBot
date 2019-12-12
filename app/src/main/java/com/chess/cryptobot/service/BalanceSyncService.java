@@ -152,8 +152,8 @@ public class BalanceSyncService extends IntentService {
 
             Double delta = getDelta(toAmount, minBalance);
             if (needSync(delta)) {
+                checkAmount(fromAmount, fee);
                 delta = formatAmount(recalculateDelta(fromAmount, toAmount, fee));
-                checkDelta(delta, fromAmount);
                 try {
                     moveBalances(moveFromMarket, moveToMarket, coinName, delta);
                     return true;
@@ -164,6 +164,14 @@ public class BalanceSyncService extends IntentService {
             return false;
         }
 
+        private boolean needSync(Double delta) {
+            return delta > 0;
+        }
+
+        private Double getDelta(Double amount, Double minBalance) {
+            return minBalance - amount;
+        }
+
         private Double getAmount(Map<String, Double> amounts, String marketName) throws SyncServiceException {
             Double amount = amounts.get(marketName);
             if (amount == null) throw new SyncServiceException("Can't get amount");
@@ -171,7 +179,7 @@ public class BalanceSyncService extends IntentService {
         }
 
         private Double recalculateDelta(Double fromAmount, Double toAmount, Double fee) {
-            return (((fromAmount + toAmount) / 2) - toAmount) + fee;
+            return (((fromAmount - fee) + toAmount) / 2) - toAmount;
         }
 
         private Double formatAmount(Double amount) {
@@ -179,16 +187,8 @@ public class BalanceSyncService extends IntentService {
             return bd.doubleValue();
         }
 
-        private Double getDelta(Double amount, Double minBalance) {
-            return minBalance - amount;
-        }
-
-        private boolean needSync(Double delta) {
-            return delta > 0;
-        }
-
-        private void checkDelta(Double delta, Double fromAmount) throws SyncServiceException {
-            if (fromAmount < delta) throw new SyncServiceException("Not enough coins");
+        private void checkAmount(Double fromAmount, Double fee) throws SyncServiceException {
+            if (fromAmount < fee) throw new SyncServiceException("Not enough coins");
         }
 
         private void moveBalances(Market moveFrom, Market moveTo, String coinName, Double amount) throws MarketException {

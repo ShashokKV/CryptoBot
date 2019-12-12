@@ -13,6 +13,7 @@ import com.chess.cryptobot.model.Balance;
 import com.chess.cryptobot.model.ViewItem;
 import com.chess.cryptobot.task.BalanceUpdateTask;
 import com.chess.cryptobot.task.CoinImageTask;
+import com.chess.cryptobot.task.SerialExecutor;
 import com.chess.cryptobot.view.MainFragment;
 
 import java.util.HashMap;
@@ -23,11 +24,13 @@ public class BalanceHolder extends ContextHolder {
     private boolean hasKeys;
     private Map<String, Boolean> bittrexStatuses;
     private Map<String, Boolean> livecoinStatuses;
+    private SerialExecutor serialExecutor;
 
     public BalanceHolder(Fragment fragment) {
         super(fragment);
         bittrexStatuses = new HashMap<>();
         livecoinStatuses = new HashMap<>();
+        serialExecutor = new SerialExecutor();
         checkIfHasKeys();
     }
 
@@ -78,13 +81,13 @@ public class BalanceHolder extends ContextHolder {
         MainFragment fragment = getMainFragment();
         if (fragment != null) {
             CoinImageTask task = new CoinImageTask(this);
-            task.execute(balance);
+            task.executeOnExecutor(serialExecutor, balance);
         }
     }
 
     private void updateAmount(Balance balance) {
         BalanceUpdateTask task = new BalanceUpdateTask(this);
-        task.execute(balance);
+        task.executeOnExecutor(serialExecutor, balance);
     }
 
     public Balance getBalanceByPosition(int position) throws ItemNotFoundException {

@@ -18,8 +18,7 @@ public class HistoryHolder extends ContextHolder {
     public HistoryHolder(Fragment fragment, State state) {
         super(fragment);
         this.state = state;
-        HistoryTask task = new HistoryTask(this, state);
-        task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, 0);
+        updateAllItems();
     }
 
     @Override

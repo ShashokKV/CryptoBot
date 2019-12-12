@@ -30,51 +30,62 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GraphTask extends AsyncTask<Void, Integer, HorizontalBarChart> {
+public class GraphTask extends AsyncTask<Void, Integer, Void> {
     private final WeakReference<GraphFragment> graphFragmentWeakReference;
     private List<String> allPairNames;
+    private List<IBarDataSet> dataSets;
+    private List<String> xAxisNames;
     private final int daysToShow;
+    private final String pairName;
     private final float minPercent;
     private float maxPercent;
 
-    public GraphTask(GraphFragment graphFragment, int daysToShow, float minPercent) {
+    public GraphTask(GraphFragment graphFragment, int daysToShow, String pairName, float minPercent) {
         this.graphFragmentWeakReference = new WeakReference<>(graphFragment);
         this.daysToShow = daysToShow;
         this.minPercent = minPercent;
+        this.pairName = pairName;
     }
 
     @Override
-    protected HorizontalBarChart doInBackground(Void... voids) {
+    protected Void doInBackground(Void... voids) {
         LocalDateTime date = LocalDateTime.now();
         CryptoBotDatabase database = getDatabase();
         if (database == null) return null;
         ProfitPairDao dao = getDatabase().getProfitPairDao();
         LocalDateTime searchDate = date.minusDays(daysToShow);
 
-        allPairNames = dao.getPairNamesByDateAndMinPercent(searchDate, minPercent);
+        if (pairName!=null) {
+            allPairNames = new ArrayList<>();
+            allPairNames.add(pairName);
+        }else {
+            allPairNames = dao.getPairNamesByDateAndMinPercent(searchDate, minPercent);
+        }
         if (allPairNames.isEmpty()) return null;
         List<List<BarEntry>> entriesGroups = initEntriesGroup();
-        List<String> daysForXAxis = new ArrayList<>();
+        xAxisNames = new ArrayList<>();
 
         for (int i = 0; i <= daysToShow; i++) {
             List<ProfitPair> pairs = getProfitPairsByDayAndMinPercent(dao, date, minPercent);
             countApproximatePercent(pairs);
             addToEntriesGroup(entriesGroups, pairs, i);
-            addToXAxisNames(daysForXAxis, date);
+            addToXAxisNames(date);
             date = date.minusDays(1);
         }
 
-        List<IBarDataSet> dataSets = createDataSets(entriesGroups, allPairNames);
-        return updateChart(dataSets, daysForXAxis);
+        dataSets = createDataSets(entriesGroups, allPairNames);
+        return null;
     }
 
     @Override
-    protected void onPostExecute(HorizontalBarChart barChart) {
+    protected void onPostExecute(Void param) {
+        HorizontalBarChart barChart = createChart();
         if (barChart == null) return;
         barChart.invalidate();
         GraphFragment graphFragment = graphFragmentWeakReference.get();
         if (graphFragment != null) {
             graphFragment.hideSpinner();
+            graphFragment.setSpinnerItems(allPairNames);
         }
     }
 
@@ -89,7 +100,7 @@ public class GraphTask extends AsyncTask<Void, Integer, HorizontalBarChart> {
     private List<ProfitPair> getProfitPairsByDayAndMinPercent(ProfitPairDao dao, LocalDateTime date, Float minPercent) {
         LocalDateTime dateStart = date.toLocalDate().atStartOfDay();
         LocalDateTime dateEnd = date.toLocalDate().atTime(LocalTime.MAX);
-        return dao.getPairsByDayAndMinPercent(dateStart, dateEnd, minPercent);
+        return dao.getPairsByDayAndMinPercent(pairName, dateStart, dateEnd, minPercent);
     }
 
     private void countApproximatePercent(List<ProfitPair> pairs) {
@@ -134,17 +145,18 @@ public class GraphTask extends AsyncTask<Void, Integer, HorizontalBarChart> {
         return 0.0f;
     }
 
-    private void addToXAxisNames(List<String> daysForXAxis, LocalDateTime date) {
-        daysForXAxis.add(String.format("%s.%s", date.getDayOfMonth(), date.getMonthValue()));
+    private void addToXAxisNames(LocalDateTime date) {
+        xAxisNames.add(String.format("%s.%s", date.getDayOfMonth(), date.getMonthValue()));
     }
 
-    private HorizontalBarChart updateChart(List<IBarDataSet> dataSets, List<String> xAxisNames) {
+    private HorizontalBarChart createChart() {
         GraphFragment graphFragment = graphFragmentWeakReference.get();
         if (graphFragment == null) return null;
+        if (dataSets == null) return null;
 
         float groupSpace = 0.00f;
         float barSpace = 0.00f;
-        float barWidth = calculateBarWidth(dataSets.size(), groupSpace, barSpace);
+        float barWidth = calculateBarWidth(dataSets.size());
 
         HorizontalBarChart barChart = graphFragment.getChart();
 
@@ -175,10 +187,9 @@ public class GraphTask extends AsyncTask<Void, Integer, HorizontalBarChart> {
         barChart.enableScroll();
     }
 
-    private float calculateBarWidth(int elementsCount, float groupSpace, float barSpace) {
-        // (barSpace + barWidth) * elementsCount + groupSpace = 1
-        if (elementsCount == 0) return 1f - barSpace;
-        return ((1f - barSpace) / elementsCount - groupSpace);
+    private float calculateBarWidth(int elementsCount) {
+        if (elementsCount == 0) return 1f;
+        return 1f / elementsCount;
     }
 
     private void customizeXAxis(XAxis xAxis, int textColor, List<String> axisNames) {

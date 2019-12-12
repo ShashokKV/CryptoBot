@@ -11,6 +11,7 @@ import com.chess.cryptobot.model.Pair;
 import com.chess.cryptobot.model.ViewItem;
 import com.chess.cryptobot.task.AvailablePairsTask;
 import com.chess.cryptobot.task.PairsUpdateTask;
+import com.chess.cryptobot.task.SerialExecutor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,9 +27,11 @@ public class PairsHolder extends ContextHolder {
     private Map<String, Double> livecoinVolumes;
     private List<String> negativePercentPairs;
     private AllPairsPreferences allPairsPrefs;
+    private SerialExecutor serialExecutor;
 
     public PairsHolder(Fragment fr) {
         super(fr);
+        serialExecutor = new SerialExecutor();
     }
 
     @Override
@@ -44,7 +47,7 @@ public class PairsHolder extends ContextHolder {
 
     public void initAvailablePairs() {
         AvailablePairsTask availablePairsTask = new AvailablePairsTask(this);
-        availablePairsTask.execute(0);
+        availablePairsTask.executeOnExecutor(serialExecutor,0);
     }
 
     @Override
@@ -116,7 +119,7 @@ public class PairsHolder extends ContextHolder {
         pair.setLivecoinVolume(livecoinVolumes.get(pair.getName()));
         pair.setBittrexVolume(bittrexVolumes.get(pair.getName()));
         PairsUpdateTask task = new PairsUpdateTask(this);
-        task.execute(pair);
+        task.executeOnExecutor(serialExecutor, pair);
     }
 
     public void addToInvalidPairs(Pair pair) {
