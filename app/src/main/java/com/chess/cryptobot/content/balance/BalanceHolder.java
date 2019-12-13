@@ -24,6 +24,7 @@ public class BalanceHolder extends ContextHolder {
     private boolean hasKeys;
     private Map<String, Boolean> bittrexStatuses;
     private Map<String, Boolean> livecoinStatuses;
+    private Map<String, String> iconUrls;
     private SerialExecutor serialExecutor;
 
     public BalanceHolder(Fragment fragment) {
@@ -65,6 +66,7 @@ public class BalanceHolder extends ContextHolder {
         super.add(viewItem);
         Balance balance = (Balance) viewItem;
         balance.setStatuses(livecoinStatuses.get(balance.getName()), bittrexStatuses.get(balance.getName()));
+        balance.setCoinUrl(iconUrls.get(balance.getName()));
         updateImage(balance);
         if (hasKeys) updateAmount(balance);
     }
@@ -73,6 +75,7 @@ public class BalanceHolder extends ContextHolder {
     public void updateItem(ViewItem item) {
         Balance balance = (Balance) item;
         balance.setStatuses(livecoinStatuses.get(balance.getName()), bittrexStatuses.get(balance.getName()));
+        balance.setCoinUrl(iconUrls.get(balance.getName()));
         updateImage(balance);
         if (hasKeys) updateAmount(balance);
     }
@@ -107,5 +110,9 @@ public class BalanceHolder extends ContextHolder {
     public void setCurrencyStatus(Map<String, Boolean> bittrexStatuses, Map<String, Boolean> livecoinStatuses) {
         this.bittrexStatuses = bittrexStatuses;
         this.livecoinStatuses = livecoinStatuses;
+    }
+
+    public void setIconUrls(Map<String ,String> urls) {
+        this.iconUrls = urls;
     }
 }

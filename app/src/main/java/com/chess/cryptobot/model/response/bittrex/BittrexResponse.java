@@ -102,4 +102,8 @@ public class BittrexResponse implements MarketResponse,
     public List<History> getHistory() {
         return new HistoryResponseFactory(Arrays.asList(this.results)).getHistory();
     }
+
+    public BittrexGenericResponse[] getResults() {
+        return results;
+    }
 }

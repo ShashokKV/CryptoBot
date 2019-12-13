@@ -74,8 +74,8 @@ public class LivecoinMarket extends MarketRequest {
         headers.put("Sign", hash);
 
         LivecoinBalanceResponse response;
+        Call<LivecoinBalanceResponse> call = service.getBalance(params, headers);
         try {
-            Call<LivecoinBalanceResponse> call = service.getBalance(params, headers);
             response = (LivecoinBalanceResponse) execute(call);
         } catch (MarketException e) {
             throw new LivecoinException(e.getMessage());
@@ -91,8 +91,8 @@ public class LivecoinMarket extends MarketRequest {
         params.put("groupByPrice", "true");
         params.put("depth", "10");
 
+        Call<LivecoinOrderBookResponse> call = service.getOrderBook(params);
         try {
-            Call<LivecoinOrderBookResponse> call = service.getOrderBook(params);
             response = (LivecoinOrderBookResponse) execute(call);
         } catch (MarketException e) {
             throw new LivecoinException(e.getMessage());
@@ -152,8 +152,8 @@ public class LivecoinMarket extends MarketRequest {
         headers.put("Sign", hash);
 
         LivecoinAddressResponse response;
+        Call<LivecoinAddressResponse> call = service.getAddress(params, headers);
         try {
-            Call<LivecoinAddressResponse> call = service.getAddress(params, headers);
             response = (LivecoinAddressResponse) execute(call);
         } catch (MarketException e) {
             throw new LivecoinException(e.getMessage());
@@ -174,12 +174,12 @@ public class LivecoinMarket extends MarketRequest {
         headers.put("API-key", this.apiKey);
         headers.put("Sign", hash);
 
+        Call<LivecoinResponse> call = service.payment(
+                params.get("amount"),
+                params.get("currency"),
+                params.get("wallet"),
+                headers);
         try {
-            Call<LivecoinResponse> call = service.payment(
-                    params.get("amount"),
-                    params.get("currency"),
-                    params.get("wallet"),
-                    headers);
             execute(call);
         } catch (MarketException e) {
             throw new LivecoinException(e.getMessage());
@@ -199,12 +199,12 @@ public class LivecoinMarket extends MarketRequest {
         headers.put("API-key", this.apiKey);
         headers.put("Sign", hash);
 
+        Call<LivecoinResponse> call = service.buy(
+                params.get("currencyPair"),
+                params.get("price"),
+                params.get("quantity"),
+                headers);
         try {
-            Call<LivecoinResponse> call = service.buy(
-                    params.get("currencyPair"),
-                    params.get("price"),
-                    params.get("quantity"),
-                    headers);
             execute(call);
         } catch (MarketException e) {
             throw new LivecoinException(e.getMessage());
@@ -224,12 +224,12 @@ public class LivecoinMarket extends MarketRequest {
         headers.put("API-key", this.apiKey);
         headers.put("Sign", hash);
 
+        Call<LivecoinResponse> call = service.sell(
+                params.get("currencyPair"),
+                params.get("price"),
+                params.get("quantity"),
+                headers);
         try {
-            Call<LivecoinResponse> call = service.sell(
-                    params.get("currencyPair"),
-                    params.get("price"),
-                    params.get("quantity"),
-                    headers);
             execute(call);
         } catch (MarketException e) {
             throw new LivecoinException(e.getMessage());
@@ -248,8 +248,8 @@ public class LivecoinMarket extends MarketRequest {
         headers.put("Sign", hash);
 
         LivecoinOrdersResponse response;
+        Call<LivecoinOrdersResponse> call = service.getOpenOrders(params, headers);
         try {
-            Call<LivecoinOrdersResponse> call = service.getOpenOrders(params, headers);
             response = (LivecoinOrdersResponse) execute(call);
         } catch (MarketException e) {
             throw new LivecoinException(e.getMessage());
@@ -271,8 +271,8 @@ public class LivecoinMarket extends MarketRequest {
         headers.put("Sign", hash);
 
         List<LivecoinHistoryResponse> responses;
+        Call<List<LivecoinHistoryResponse>> call = service.getHistory(params, headers);
         try {
-            Call<List<LivecoinHistoryResponse>> call = service.getHistory(params, headers);
             Response<List<LivecoinHistoryResponse>> result = call.execute();
             responses = result.body();
             if (responses == null) {

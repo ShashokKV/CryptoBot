@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Locale;
 
 public class TradingService extends IntentService {
+    public static String workingOnPair;
     private static final String CHANNEL_ID = "trading_chanel";
     private static final Double minBtcAmount = 0.0005;
     private static final Double minEthAmount = 0.025;
@@ -78,8 +79,15 @@ public class TradingService extends IntentService {
         trader.syncBalance();
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        workingOnPair = null;
+    }
+
     private void initFromIntent(Intent intent) {
         this.pair = (Pair) intent.getSerializableExtra(Pair.class.getName());
+        workingOnPair = pair.getName();
         minMarketQuantity = intent.getDoubleExtra("minQuantity", 0.0d);
     }
 

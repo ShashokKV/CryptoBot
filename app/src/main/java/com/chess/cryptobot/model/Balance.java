@@ -11,6 +11,7 @@ import java.util.Map;
 
 public class Balance implements ViewItem {
     private final String coinName;
+    private String coinUrl;
     private Bitmap coinIcon;
     private final Map<String, Double> amounts;
     private String message;
@@ -80,5 +81,13 @@ public class Balance implements ViewItem {
         Boolean status = this.statuses.get(marketName);
         if (status == null) return true;
         return status;
+    }
+
+    public void setCoinUrl(String coinUrl) {
+        this.coinUrl = coinUrl;
+    }
+
+    public String getCoinUrl() {
+        return coinUrl;
     }
 }

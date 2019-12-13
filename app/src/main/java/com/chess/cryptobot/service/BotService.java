@@ -70,7 +70,6 @@ public class BotService extends Service {
     }
 
 
-
     private void initFieldsFromPrefs() {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         minPercent = Float.valueOf(Objects.requireNonNull(preferences.getString(getString(R.string.min_profit_percent), "3")));
@@ -116,7 +115,7 @@ public class BotService extends Service {
     @Override
     public void onDestroy() {
         Toast.makeText(this, "Bot stopping", Toast.LENGTH_SHORT).show();
-        if (botTimer!=null) botTimer.cancel();
+        if (botTimer != null) botTimer.cancel();
         stopForeground(true);
         isRunning = false;
         Log.d(TAG, "timer stopped");
@@ -156,7 +155,8 @@ public class BotService extends Service {
                     initMinQuantities();
                 }
             } catch (MarketException e) {
-                if (!isNotificationShown()) makeNotification("Init min quantities exception", e.getMessage());
+                if (!isNotificationShown())
+                    makeNotification("Init min quantities exception", e.getMessage());
                 return;
             }
             List<Pair> profitPairs = getProfitPairs(pairs, markets);
@@ -194,11 +194,11 @@ public class BotService extends Service {
 
             List<Pair> profitPairs = new ArrayList<>();
 
-            for (Pair pair: pairs) {
+            for (Pair pair : pairs) {
                 if (coinInfo.checkCoinStatus(pair.getBaseName()) &&
                         coinInfo.checkCoinStatus(pair.getMarketName())) {
                     Pair profitPair = profitPercentForPair(pair, markets);
-                    if (profitPair!=null && profitPair.getPercent() > minPercent) {
+                    if (profitPair != null && profitPair.getPercent() > minPercent) {
                         if (autoTrade) beginTrade(profitPair);
                         profitPairs.add(profitPair);
                     }
@@ -210,12 +210,16 @@ public class BotService extends Service {
 
         private Pair profitPercentForPair(Pair pair, List<Market> markets) {
             PairResponseEnricher enricher = new PairResponseEnricher(pair);
+
+            if (isTradingNow(pair.getName())) return null;
+
             for (Market market : markets) {
                 OrderBookResponse response;
                 try {
                     response = market.getOrderBook(pair.getPairNameForMarket(market.getMarketName()));
                 } catch (MarketException e) {
-                    if (!isNotificationShown()) makeNotification("Get order book exception", e.getMessage());
+                    if (!isNotificationShown())
+                        makeNotification("Get order book exception", e.getMessage());
                     return null;
                 }
                 if (response != null) {
@@ -223,6 +227,21 @@ public class BotService extends Service {
                 }
             }
             return enricher.countPercent().getPair();
+        }
+
+        private boolean isTradingNow(String pairName) {
+            for (int i = 0; i < 10; i++) {
+                if (TradingService.workingOnPair != null && TradingService.workingOnPair.equals(pairName)) {
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException ignored) {
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
+            }
+            return true;
         }
 
         private void beginTrade(Pair pair) {

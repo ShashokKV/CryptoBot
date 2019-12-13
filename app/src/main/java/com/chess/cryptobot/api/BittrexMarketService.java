@@ -25,7 +25,7 @@ public interface BittrexMarketService {
     Call<BittrexResponse> getCurrencies();
 
     @GET("public/getmarkets")
-    Call<BittrexResponse> getMinTradeSize();
+    Call<BittrexResponse> getMarkets();
 
     @GET("account/getdepositaddress")
     Call<BittrexResponse> getAddress(@QueryMap(encoded = true) Map<String, String> options, @HeaderMap Map<String, String> headers);

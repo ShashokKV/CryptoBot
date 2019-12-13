@@ -142,8 +142,12 @@ public class BittrexMarket extends MarketRequest {
 
     @Override
     public TradeLimitResponse getMinQuantity() throws MarketException {
+        return getMarkets();
+    }
+
+    public BittrexResponse getMarkets() throws BittrexException {
         BittrexResponse response;
-        Call<BittrexResponse> call = service.getMinTradeSize();
+        Call<BittrexResponse> call = service.getMarkets();
         try {
             response = (BittrexResponse) execute(call);
         } catch (MarketException e) {
@@ -167,14 +171,14 @@ public class BittrexMarket extends MarketRequest {
         Map<String, String> headers = new HashMap<>();
         headers.put("apisign", hash);
 
+        Call<BittrexResponse> call = service.payment(
+                params.get("currency"),
+                params.get("quantity"),
+                params.get("address"),
+                params.get("apikey"),
+                params.get("nonce"),
+                headers);
         try {
-            Call<BittrexResponse> call = service.payment(
-                    params.get("currency"),
-                    params.get("quantity"),
-                    params.get("address"),
-                    params.get("apikey"),
-                    params.get("nonce"),
-                    headers);
             execute(call);
         } catch (MarketException e) {
             throw new BittrexException(e.getMessage());
@@ -196,14 +200,14 @@ public class BittrexMarket extends MarketRequest {
         Map<String, String> headers = new HashMap<>();
         headers.put("apisign", hash);
 
+        Call<BittrexResponse> call = service.buy(
+                params.get("market"),
+                params.get("quantity"),
+                params.get("rate"),
+                params.get("apikey"),
+                params.get("nonce"),
+                headers);
         try {
-            Call<BittrexResponse> call = service.buy(
-                    params.get("market"),
-                    params.get("quantity"),
-                    params.get("rate"),
-                    params.get("apikey"),
-                    params.get("nonce"),
-                    headers);
             execute(call);
         } catch (MarketException e) {
             throw new BittrexException(e.getMessage());
@@ -225,14 +229,14 @@ public class BittrexMarket extends MarketRequest {
         Map<String, String> headers = new HashMap<>();
         headers.put("apisign", hash);
 
+        Call<BittrexResponse> call = service.sell(
+                params.get("market"),
+                params.get("quantity"),
+                params.get("rate"),
+                params.get("apikey"),
+                params.get("nonce"),
+                headers);
         try {
-            Call<BittrexResponse> call = service.sell(
-                    params.get("market"),
-                    params.get("quantity"),
-                    params.get("rate"),
-                    params.get("apikey"),
-                    params.get("nonce"),
-                    headers);
             execute(call);
         } catch (MarketException e) {
             throw new BittrexException(e.getMessage());
@@ -252,11 +256,11 @@ public class BittrexMarket extends MarketRequest {
         headers.put("apisign", hash);
 
         BittrexResponse response;
+        Call<BittrexResponse> call = service.getOpenOrders(
+                params.get("apikey"),
+                params.get("nonce"),
+                headers);
         try {
-            Call<BittrexResponse> call = service.getOpenOrders(
-                    params.get("apikey"),
-                    params.get("nonce"),
-                    headers);
             response = (BittrexResponse) execute(call);
         } catch (MarketException e) {
             throw new BittrexException(e.getMessage());
@@ -278,11 +282,11 @@ public class BittrexMarket extends MarketRequest {
 
         List<History> historyList;
         BittrexResponse response;
+        Call<BittrexResponse> call = service.getOrderHistory(
+                params.get("apikey"),
+                params.get("nonce"),
+                headers);
         try {
-            Call<BittrexResponse> call = service.getOrderHistory(
-                    params.get("apikey"),
-                    params.get("nonce"),
-                    headers);
             response = (BittrexResponse) execute(call);
             historyList = new ArrayList<>(response.getHistory());
             historyList.addAll(getWithdrawHistory());
@@ -306,11 +310,11 @@ public class BittrexMarket extends MarketRequest {
         headers.put("apisign", hash);
 
         BittrexResponse response;
+        Call<BittrexResponse> call = service.getWithdrawHistory(
+                params.get("apikey"),
+                params.get("nonce"),
+                headers);
         try {
-            Call<BittrexResponse> call = service.getWithdrawHistory(
-                    params.get("apikey"),
-                    params.get("nonce"),
-                    headers);
             response = (BittrexResponse) execute(call);
         } catch (MarketException e) {
             throw new BittrexException(e.getMessage());
@@ -330,11 +334,11 @@ public class BittrexMarket extends MarketRequest {
         headers.put("apisign", hash);
 
         BittrexResponse response;
+        Call<BittrexResponse> call = service.getDepositHistory(
+                params.get("apikey"),
+                params.get("nonce"),
+                headers);
         try {
-            Call<BittrexResponse> call = service.getDepositHistory(
-                    params.get("apikey"),
-                    params.get("nonce"),
-                    headers);
             response = (BittrexResponse) execute(call);
         } catch (MarketException e) {
             throw new BittrexException(e.getMessage());

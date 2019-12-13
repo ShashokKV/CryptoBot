@@ -9,7 +9,7 @@ import com.google.gson.annotations.SerializedName;
 import java.time.LocalDateTime;
 import java.util.List;
 
-class BittrexGenericResponse implements TickerResponse, CurrenciesResponse, HistoryResponse {
+public class BittrexGenericResponse implements TickerResponse, CurrenciesResponse, HistoryResponse {
     @SerializedName("Available")
     @Expose
     private Double available;
@@ -76,6 +76,12 @@ class BittrexGenericResponse implements TickerResponse, CurrenciesResponse, Hist
     @SerializedName("LastUpdated")
     @Expose
     private String lastUpdated;
+    @SerializedName("MarketCurrency")
+    @Expose
+    private String marketCurrency;
+    @SerializedName("LogoUrl")
+    @Expose
+    private String logoUrl;
 
 
     Double getAvailable() {
@@ -176,5 +182,13 @@ class BittrexGenericResponse implements TickerResponse, CurrenciesResponse, Hist
         if (quantity == null || quantityRemaining == null) return 0;
         if (quantity == 0d) return 0;
         return Double.valueOf(((quantity-quantityRemaining) / quantity) * 100).intValue();
+    }
+
+    public String getMarketCurrency() {
+        return marketCurrency;
+    }
+
+    public String getLogoUrl() {
+        return logoUrl;
     }
 }
