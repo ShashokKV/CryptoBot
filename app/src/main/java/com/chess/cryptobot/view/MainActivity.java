@@ -29,6 +29,7 @@ import com.chess.cryptobot.view.dialog.CryptoDialog;
 import com.chess.cryptobot.view.dialog.CryptoNameDialog;
 import com.chess.cryptobot.view.dialog.DialogListener;
 import com.chess.cryptobot.view.dialog.MinBalanceDialog;
+import com.chess.cryptobot.worker.BalanceWorker;
 import com.chess.cryptobot.worker.MarketWorker;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -39,7 +40,7 @@ public class MainActivity extends AppCompatActivity implements DialogListener {
 
     private final BalanceFragment balanceFragment = new BalanceFragment();
     private final PairsFragment pairFragment = new PairsFragment();
-    private final GraphFragment graphFragment = new GraphFragment();
+    private final GraphPagerFragment graphFragment = new GraphPagerFragment();
     private final HistoryPagerFragment historyPagerFragment = new HistoryPagerFragment();
     private final FragmentManager fragmentManager = getSupportFragmentManager();
     private Fragment active;
@@ -65,10 +66,12 @@ public class MainActivity extends AppCompatActivity implements DialogListener {
             fragmentManager.beginTransaction().add(R.id.include, pairFragment, "2").hide(pairFragment).show(pairFragment).commit();
             fragmentManager.beginTransaction().add(R.id.include, balanceFragment, "1").hide(balanceFragment).commit();
             active = pairFragment;
+            navigation.setSelectedItemId(R.id.activity_pairs);
         } else {
             fragmentManager.beginTransaction().add(R.id.include, pairFragment, "2").hide(pairFragment).commit();
             fragmentManager.beginTransaction().add(R.id.include, balanceFragment, "1").show(balanceFragment).commit();
             active = balanceFragment;
+            navigation.setSelectedItemId(R.id.activity_balance);
         }
         fragmentManager.beginTransaction().add(R.id.include, graphFragment, "3").hide(graphFragment).commit();
         fragmentManager.beginTransaction().add(R.id.include, historyPagerFragment, "4").hide(historyPagerFragment).commit();
@@ -223,13 +226,19 @@ public class MainActivity extends AppCompatActivity implements DialogListener {
                 .setRequiresBatteryNotLow(true)
                 .build();
 
-        PeriodicWorkRequest workRequest = new PeriodicWorkRequest.Builder(MarketWorker.class, workPeriod, TimeUnit.MINUTES)
+        PeriodicWorkRequest marketWorkRequest = new PeriodicWorkRequest.Builder(MarketWorker.class, workPeriod, TimeUnit.MINUTES)
                 .setConstraints(constraints)
                 .setInitialDelay(5, TimeUnit.MINUTES)
                 .build();
 
-        WorkManager.getInstance(this)
-                .enqueueUniquePeriodicWork("market_work", ExistingPeriodicWorkPolicy.REPLACE, workRequest);
+        PeriodicWorkRequest balanceWorkRequest = new PeriodicWorkRequest.Builder(BalanceWorker.class, workPeriod, TimeUnit.MINUTES)
+                .setConstraints(constraints)
+                .setInitialDelay(5, TimeUnit.MINUTES)
+                .build();
+
+        WorkManager manager = WorkManager.getInstance(this);
+        manager.enqueueUniquePeriodicWork("market_work", ExistingPeriodicWorkPolicy.REPLACE, marketWorkRequest);
+        manager.enqueueUniquePeriodicWork("balance_work", ExistingPeriodicWorkPolicy.REPLACE, balanceWorkRequest);
     }
 
 

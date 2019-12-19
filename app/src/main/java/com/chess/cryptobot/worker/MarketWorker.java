@@ -5,7 +5,6 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.room.Room;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
@@ -29,7 +28,6 @@ import java.util.Set;
 public class MarketWorker extends Worker {
     private Set<String> allPairNames;
     private CoinInfo coinInfo;
-    private CryptoBotDatabase database;
     private static final String TAG = MarketWorker.class.getSimpleName();
 
     public MarketWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
@@ -108,7 +106,7 @@ public class MarketWorker extends Worker {
 
     private void saveToDatabase(List<Pair> pairs) {
         if (pairs.isEmpty()) return;
-        database = getDbInstance();
+        CryptoBotDatabase database = CryptoBotDatabase.getInstance(getApplicationContext());
         ProfitPairDao pairDao = database.getProfitPairDao();
 
         List<ProfitPair> profitPairs = new ArrayList<>();
@@ -122,14 +120,5 @@ public class MarketWorker extends Worker {
         });
 
         pairDao.insertAll(profitPairs);
-    }
-
-    private CryptoBotDatabase getDbInstance() {
-        if (database == null) {
-            database = Room.databaseBuilder(getApplicationContext(), CryptoBotDatabase.class, "cryptobotDB")
-                    .enableMultiInstanceInvalidation()
-                    .build();
-        }
-        return database;
     }
 }

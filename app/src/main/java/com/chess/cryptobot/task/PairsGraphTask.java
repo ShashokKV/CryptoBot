@@ -4,13 +4,11 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.AsyncTask;
 
-import androidx.room.Room;
-
 import com.chess.cryptobot.R;
 import com.chess.cryptobot.model.room.CryptoBotDatabase;
 import com.chess.cryptobot.model.room.ProfitPair;
 import com.chess.cryptobot.model.room.ProfitPairDao;
-import com.chess.cryptobot.view.GraphFragment;
+import com.chess.cryptobot.view.PairsGraphFragment;
 import com.github.mikephil.charting.charts.HorizontalBarChart;
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.Description;
@@ -30,8 +28,8 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GraphTask extends AsyncTask<Void, Integer, Void> {
-    private final WeakReference<GraphFragment> graphFragmentWeakReference;
+public class PairsGraphTask extends AsyncTask<Void, Integer, Void> {
+    private final WeakReference<PairsGraphFragment> graphFragmentWeakReference;
     private List<String> allPairNames;
     private List<IBarDataSet> dataSets;
     private List<String> xAxisNames;
@@ -40,8 +38,8 @@ public class GraphTask extends AsyncTask<Void, Integer, Void> {
     private final float minPercent;
     private float maxPercent;
 
-    public GraphTask(GraphFragment graphFragment, int daysToShow, String pairName, float minPercent) {
-        this.graphFragmentWeakReference = new WeakReference<>(graphFragment);
+    public PairsGraphTask(PairsGraphFragment pairsGraphFragment, int daysToShow, String pairName, float minPercent) {
+        this.graphFragmentWeakReference = new WeakReference<>(pairsGraphFragment);
         this.daysToShow = daysToShow;
         this.minPercent = minPercent;
         this.pairName = pairName;
@@ -49,10 +47,11 @@ public class GraphTask extends AsyncTask<Void, Integer, Void> {
 
     @Override
     protected Void doInBackground(Void... voids) {
+        Context context = graphFragmentWeakReference.get().getContext();
+        CryptoBotDatabase database = CryptoBotDatabase.getInstance(context);
+        ProfitPairDao dao = database.getProfitPairDao();
+
         LocalDateTime date = LocalDateTime.now();
-        CryptoBotDatabase database = getDatabase();
-        if (database == null) return null;
-        ProfitPairDao dao = getDatabase().getProfitPairDao();
         LocalDateTime searchDate = date.minusDays(daysToShow);
 
         if (pairName!=null) {
@@ -82,18 +81,18 @@ public class GraphTask extends AsyncTask<Void, Integer, Void> {
         HorizontalBarChart barChart = createChart();
         if (barChart == null) return;
         barChart.invalidate();
-        GraphFragment graphFragment = graphFragmentWeakReference.get();
-        if (graphFragment != null) {
-            graphFragment.hideSpinner();
-            graphFragment.setSpinnerItems(allPairNames);
+        PairsGraphFragment pairsGraphFragment = graphFragmentWeakReference.get();
+        if (pairsGraphFragment != null) {
+            pairsGraphFragment.hideSpinner();
+            pairsGraphFragment.setSpinnerItems(allPairNames);
         }
     }
 
     @Override
     protected void onProgressUpdate(Integer... values) {
-        GraphFragment graphFragment = graphFragmentWeakReference.get();
-        if (graphFragment != null) {
-            graphFragment.showSpinner();
+        PairsGraphFragment pairsGraphFragment = graphFragmentWeakReference.get();
+        if (pairsGraphFragment != null) {
+            pairsGraphFragment.showSpinner();
         }
     }
 
@@ -150,22 +149,22 @@ public class GraphTask extends AsyncTask<Void, Integer, Void> {
     }
 
     private HorizontalBarChart createChart() {
-        GraphFragment graphFragment = graphFragmentWeakReference.get();
-        if (graphFragment == null) return null;
+        PairsGraphFragment pairsGraphFragment = graphFragmentWeakReference.get();
+        if (pairsGraphFragment == null) return null;
         if (dataSets == null) return null;
 
         float groupSpace = 0.00f;
         float barSpace = 0.00f;
         float barWidth = calculateBarWidth(dataSets.size());
 
-        HorizontalBarChart barChart = graphFragment.getChart();
+        HorizontalBarChart barChart = pairsGraphFragment.getChart();
 
         BarData data = new BarData(dataSets);
         data.setBarWidth(barWidth);
         data.setDrawValues(false);
         barChart.setData(data);
 
-        int textColor = graphFragment.getResources().getColor(R.color.colorWhite, null);
+        int textColor = pairsGraphFragment.getResources().getColor(R.color.colorWhite, null);
 
         customizeXAxis(barChart.getXAxis(), textColor, xAxisNames);
         customizeYAxis(barChart.getAxis(YAxis.AxisDependency.LEFT), textColor);
@@ -229,17 +228,5 @@ public class GraphTask extends AsyncTask<Void, Integer, Void> {
     private void customizeLegend(Legend legend, int textColor) {
         legend.setTextColor(textColor);
         legend.setWordWrapEnabled(true);
-    }
-
-    private CryptoBotDatabase getDatabase() {
-
-        GraphFragment graphFragment = graphFragmentWeakReference.get();
-        if (graphFragment == null) return null;
-        Context context = graphFragment.getContext();
-        if (context == null) return null;
-
-        return Room.databaseBuilder(context, CryptoBotDatabase.class, "cryptobotDB")
-                .enableMultiInstanceInvalidation()
-                .build();
     }
 }

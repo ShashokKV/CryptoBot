@@ -8,12 +8,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 public abstract class Preferences {
-    private final Context context;
     private final SharedPreferences sharedPreferences;
     private final String preferenceKey;
 
     protected Preferences(Context context) {
-        this.context = context;
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         this.preferenceKey = initPrefKey(context);
     }

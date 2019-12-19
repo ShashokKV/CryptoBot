@@ -20,7 +20,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.chess.cryptobot.R;
-import com.chess.cryptobot.task.GraphTask;
+import com.chess.cryptobot.task.PairsGraphTask;
 import com.chess.cryptobot.task.SerialExecutor;
 import com.github.mikephil.charting.charts.HorizontalBarChart;
 
@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class GraphFragment extends Fragment {
+public class PairsGraphFragment extends Fragment {
     private HorizontalBarChart chart;
     private Spinner spinner;
     private ArrayAdapter<String> adapter;
@@ -40,7 +40,7 @@ public class GraphFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.graph_fragment, container, false);
+        View view = inflater.inflate(R.layout.pairs_graph_fragment, container, false);
 
         chart = view.findViewById(R.id.chart);
         spinner = view.findViewById(R.id.spinner);
@@ -53,15 +53,13 @@ public class GraphFragment extends Fragment {
     }
 
     @Override
-    public void onHiddenChanged(boolean hidden) {
-        super.onHiddenChanged(hidden);
-        if (!hidden) {
-            updateGraph(daysToShow, null);
-        }
+    public void onResume() {
+        super.onResume();
+        updateGraph(daysToShow, pairName);
     }
 
     private void updateGraph(int daysToShow, String pairName) {
-        GraphTask task = new GraphTask(this, daysToShow, pairName, getMinPercent());
+        PairsGraphTask task = new PairsGraphTask(this, daysToShow, pairName, getMinPercent());
         task.executeOnExecutor(serialExecutor);
     }
 
@@ -88,11 +86,13 @@ public class GraphFragment extends Fragment {
     }
 
     private void initSeekBar() {
+        seekBar.setMax(30);
+        seekBar.setProgress(30);
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                GraphFragment.this.daysToShow = progress;
-                updateGraph(progress, GraphFragment.this.pairName);
+                PairsGraphFragment.this.daysToShow = progress;
+                updateGraph(progress, PairsGraphFragment.this.pairName);
             }
 
             @Override
@@ -137,11 +137,11 @@ public class GraphFragment extends Fragment {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (position > 0) {
                     String pairName = parent.getItemAtPosition(position).toString();
-                    GraphFragment.this.pairName = pairName;
-                    updateGraph(GraphFragment.this.daysToShow, pairName);
+                    PairsGraphFragment.this.pairName = pairName;
+                    updateGraph(PairsGraphFragment.this.daysToShow, pairName);
                 } else {
-                    GraphFragment.this.pairName = null;
-                    updateGraph(GraphFragment.this.daysToShow, null);
+                    PairsGraphFragment.this.pairName = null;
+                    updateGraph(PairsGraphFragment.this.daysToShow, null);
                 }
             }
 

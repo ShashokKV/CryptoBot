@@ -13,32 +13,32 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.chess.cryptobot.R;
-import com.chess.cryptobot.content.history.HistoryHolder;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
 import java.util.Objects;
 
-public class HistoryPagerFragment extends Fragment {
-
+public class GraphPagerFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.history_pager_fragment, container, false);
+        View view = inflater.inflate(R.layout.graph_pager_layout, container, false);
 
-        ViewPager2 viewPager = view.findViewById(R.id.pager);
-        FragmentStateAdapter pagerAdapter = new PagerAdapter(Objects.requireNonNull(this.getActivity()));
+        ViewPager2 viewPager = view.findViewById(R.id.graph_pager);
+        FragmentStateAdapter pagerAdapter = new GraphPagerFragment.PagerAdapter(Objects.requireNonNull(this.getActivity()));
         viewPager.setAdapter(pagerAdapter);
+        viewPager.setUserInputEnabled(false);
 
-        TabLayout tabs = view.findViewById(R.id.pager_header);
+        TabLayout tabs = view.findViewById(R.id.graph_pager_header);
         new TabLayoutMediator(tabs, viewPager,
-                (tab, position) -> tab.setText(position == 0 ? "History" : "Orders")
+                (tab, position) -> tab.setText(position == 0 ? "Balance" : "Pairs")
         ).attach();
 
         return view;
     }
 
     static class PagerAdapter extends FragmentStateAdapter {
+
 
         PagerAdapter(@NonNull FragmentActivity fragmentActivity) {
             super(fragmentActivity);
@@ -49,9 +49,9 @@ public class HistoryPagerFragment extends Fragment {
         public Fragment createFragment(int position) {
             switch (position) {
                 case 0:
-                    return new HistoryFragment(HistoryHolder.State.HISTORY);
+                    return new BalanceGraphFragment();
                 case 1:
-                    return new HistoryFragment(HistoryHolder.State.ORDERS);
+                    return new PairsGraphFragment();
                 default:
                     throw new IllegalArgumentException("Unknown viewPager Position");
             }
