@@ -66,7 +66,7 @@ public class BalanceHolder extends ContextHolder {
         super.add(viewItem);
         Balance balance = (Balance) viewItem;
         balance.setStatuses(livecoinStatuses.get(balance.getName()), bittrexStatuses.get(balance.getName()));
-        balance.setCoinUrl(iconUrls.get(balance.getName()));
+        if (iconUrls!=null) balance.setCoinUrl(iconUrls.get(balance.getName()));
         updateImage(balance);
         if (hasKeys) updateAmount(balance);
     }
@@ -75,7 +75,7 @@ public class BalanceHolder extends ContextHolder {
     public void updateItem(ViewItem item) {
         Balance balance = (Balance) item;
         balance.setStatuses(livecoinStatuses.get(balance.getName()), bittrexStatuses.get(balance.getName()));
-        balance.setCoinUrl(iconUrls.get(balance.getName()));
+        if (iconUrls!=null) balance.setCoinUrl(iconUrls.get(balance.getName()));
         updateImage(balance);
         if (hasKeys) updateAmount(balance);
     }

@@ -81,6 +81,7 @@ public class BalanceGraphTask extends AsyncTask<Void, Integer, Void> {
         LineDataSet dataSet = new LineDataSet(entries, "BTC");
         dataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
         dataSet.setColor(Color.rgb(250, 87, 136));
+        dataSet.setDrawCircles(false);
 
         List<ILineDataSet> dataSets = new ArrayList<>();
         dataSets.add(dataSet);
@@ -100,8 +101,7 @@ public class BalanceGraphTask extends AsyncTask<Void, Integer, Void> {
         LineChart lineChart = balanceGraphFragment.getChart();
 
         LineData data = new LineData(dataSets);
-        data.setValueTextSize(14f);
-        data.setValueTextColor(-1);
+        data.setDrawValues(false);
         lineChart.setData(data);
 
         int textColor = balanceGraphFragment.getResources().getColor(R.color.colorWhite, null);
@@ -128,6 +128,7 @@ public class BalanceGraphTask extends AsyncTask<Void, Integer, Void> {
         xAxis.calculate(minTime, maxTime);
         xAxis.setGranularity(1800f);
         xAxis.setGranularityEnabled(true);
+        xAxis.setLabelCount(5);
 
         xAxis.setCenterAxisLabels(true);
         ValueFormatter formatter = new ValueFormatter() {

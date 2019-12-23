@@ -38,6 +38,8 @@ public class BalanceWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
+        cleanDatabase();
+
         MarketFactory marketFactory = new MarketFactory();
         Context context = getApplicationContext();
 
@@ -45,22 +47,24 @@ public class BalanceWorker extends Worker {
         List<Market> markets = marketFactory.getMarkets(context, PreferenceManager.getDefaultSharedPreferences(context));
         for (String coinName: allCoinNames) {
             for (Market market: markets) {
-                Double amount = 0.0d;
+                Double amount;
                 try {
                     amount = market.getAmount(coinName);
                 } catch (MarketException e) {
                     Log.d(TAG, e.getLocalizedMessage(), e);
+                    return Result.failure();
                 }
                 if (amount>0) {
                     if (coinName.equals("BTC")) {
                         btcSum+=amount;
                     }else {
-                        Double price = 0.0d;
+                        Double price;
                         try {
                             OrderBookResponse orderBook = market.getOrderBook(new Pair("BTC", coinName).getPairNameForMarket(market.getMarketName()));
                             price = orderBook.asks().get(0).getValue();
                         } catch (MarketException e) {
                             Log.d(TAG, e.getLocalizedMessage(), e);
+                            return Result.failure();
                         }
                         if (price>0) {
                             btcSum+=amount*price;
@@ -73,6 +77,15 @@ public class BalanceWorker extends Worker {
         if (btcSum>0) saveToDatabase(btcSum);
 
         return Result.success();
+    }
+
+    private void cleanDatabase() {
+        CryptoBotDatabase database = CryptoBotDatabase.getInstance(getApplicationContext());
+        BtcBalanceDao dao = database.getBtcBalanceDao();
+
+        LocalDateTime filterDate = LocalDateTime.now().minusDays(31);
+        List<BtcBalance> balances = dao.getLowerThanDate(filterDate);
+        dao.deleteAll(balances);
     }
 
     private void saveToDatabase(Double btcSum) {

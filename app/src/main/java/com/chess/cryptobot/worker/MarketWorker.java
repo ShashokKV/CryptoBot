@@ -42,6 +42,8 @@ public class MarketWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
+        cleanDatabase();
+
         MarketFactory marketFactory = new MarketFactory();
         Context context = getApplicationContext();
 
@@ -102,6 +104,15 @@ public class MarketWorker extends Worker {
             pair.setLivecoinAsk(ticker.getTickerAsk());
             pair.setLivecoinBid(ticker.getTickerBid());
         }
+    }
+
+    private void cleanDatabase() {
+        CryptoBotDatabase database = CryptoBotDatabase.getInstance(getApplicationContext());
+        ProfitPairDao dao = database.getProfitPairDao();
+
+        LocalDateTime filterDate = LocalDateTime.now().minusDays(31);
+        List<ProfitPair> profitPairs = dao.getLowerThanDate(filterDate);
+        dao.deleteAll(profitPairs);
     }
 
     private void saveToDatabase(List<Pair> pairs) {

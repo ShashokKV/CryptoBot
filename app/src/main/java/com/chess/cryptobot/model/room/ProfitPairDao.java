@@ -1,6 +1,7 @@
 package com.chess.cryptobot.model.room;
 
 import androidx.room.Dao;
+import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
 
@@ -23,4 +24,12 @@ public interface ProfitPairDao {
             "WHERE (dateCreated > :date) AND percent > :minPercent " +
             "GROUP BY pairName")
     List<String> getPairNamesByDateAndMinPercent(LocalDateTime date, Float minPercent);
+
+    @Query("SELECT * " +
+            "FROM ProfitPair " +
+            "WHERE dateCreated < :dateTime")
+    List<ProfitPair> getLowerThanDate(LocalDateTime dateTime);
+
+    @Delete
+    void deleteAll(List<ProfitPair> profitPairs);
 }

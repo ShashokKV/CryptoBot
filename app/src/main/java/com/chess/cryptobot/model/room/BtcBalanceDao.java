@@ -1,6 +1,7 @@
 package com.chess.cryptobot.model.room;
 
 import androidx.room.Dao;
+import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
 
@@ -16,4 +17,12 @@ public interface BtcBalanceDao {
             "FROM BtcBalance " +
             "WHERE dateCreated BETWEEN :dateStart AND :dateEnd")
     List<BtcBalance> getByDate(LocalDateTime dateStart, LocalDateTime dateEnd);
+
+    @Query("SELECT * " +
+            "FROM BtcBalance " +
+            "WHERE dateCreated < :dateTime")
+    List<BtcBalance> getLowerThanDate(LocalDateTime dateTime);
+
+    @Delete
+    void deleteAll(List<BtcBalance> balances);
 }
