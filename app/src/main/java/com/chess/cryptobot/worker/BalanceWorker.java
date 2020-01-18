@@ -61,7 +61,7 @@ public class BalanceWorker extends Worker {
                         Double price;
                         try {
                             OrderBookResponse orderBook = market.getOrderBook(new Pair("BTC", coinName).getPairNameForMarket(market.getMarketName()));
-                            price = orderBook.asks().get(0).getValue();
+                            price = orderBook.bids().get(0).getValue();
                         } catch (MarketException e) {
                             Log.d(TAG, e.getLocalizedMessage(), e);
                             return Result.failure();

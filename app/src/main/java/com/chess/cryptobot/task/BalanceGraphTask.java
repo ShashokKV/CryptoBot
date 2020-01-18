@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BalanceGraphTask extends AsyncTask<Void, Integer, Void> {
+    private static final float MAX_X_RANGE = 450000f;
     private final WeakReference<BalanceGraphFragment> graphFragmentWeakReference;
     private List<ILineDataSet> dataSets;
     private float minTime = 0.0f;
@@ -59,7 +60,12 @@ public class BalanceGraphTask extends AsyncTask<Void, Integer, Void> {
     protected void onPostExecute(Void param) {
         LineChart lineChart = createChart();
         if (lineChart == null) return;
-        lineChart.invalidate();
+        float startPosition = lineChart.getXChartMax()-MAX_X_RANGE;
+        if (startPosition>0) {
+            lineChart.moveViewToX(startPosition);
+        }else {
+            lineChart.invalidate();
+        }
     }
 
     private List<ILineDataSet> createDataSets(List<BtcBalance> balances) {
@@ -120,7 +126,7 @@ public class BalanceGraphTask extends AsyncTask<Void, Integer, Void> {
         description.setText("");
         lineChart.setDescription(description);
         lineChart.setExtraBottomOffset(20f);
-        lineChart.setVisibleXRangeMaximum(450000f);
+        lineChart.setVisibleXRangeMaximum(MAX_X_RANGE);
         lineChart.enableScroll();
     }
 

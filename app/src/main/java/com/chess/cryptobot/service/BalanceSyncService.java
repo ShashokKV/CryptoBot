@@ -183,7 +183,12 @@ public class BalanceSyncService extends IntentService {
         }
 
         private Double formatAmount(Double amount) {
-            BigDecimal bd = new BigDecimal(amount).setScale(8, RoundingMode.HALF_UP);
+            BigDecimal bd;
+            if (amount>10.0d) {
+                bd = new BigDecimal(amount).setScale(0, RoundingMode.UP);
+            }else {
+                bd = new BigDecimal(amount).setScale(8, RoundingMode.HALF_UP);
+            }
             return bd.doubleValue();
         }
 

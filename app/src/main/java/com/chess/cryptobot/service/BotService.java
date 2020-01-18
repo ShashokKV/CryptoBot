@@ -226,7 +226,7 @@ public class BotService extends Service {
                     enricher.enrichWithResponse(response);
                 }
             }
-            return enricher.countPercent().getPair();
+            return enricher.enrichWithMinPercent(minPercent).getPair();
         }
 
         private boolean isTradingNow(String pairName) {
