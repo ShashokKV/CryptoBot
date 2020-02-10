@@ -3,12 +3,10 @@ package com.chess.cryptobot.service;
 import android.app.IntentService;
 import android.app.NotificationManager;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 import androidx.annotation.Nullable;
 
-import com.chess.cryptobot.R;
 import com.chess.cryptobot.exceptions.MarketException;
 import com.chess.cryptobot.market.BittrexMarket;
 import com.chess.cryptobot.market.LivecoinMarket;
@@ -49,6 +47,10 @@ public class TradingService extends IntentService {
 
         initFromIntent(intent);
         initMarkets();
+        if (isApiKeysEmpty()) {
+            makeNotification("Api keys are empty", "Please fill api keys in settings or turn AutoTrade off");
+            return;
+        }
 
         try {
             initAmounts();
@@ -57,7 +59,7 @@ public class TradingService extends IntentService {
             return;
         }
 
-         Trader trader = new Trader(pair, getStrategy());
+         Trader trader = new Trader(pair);
         if (trader.quantity <= minMarketQuantity) return;
 
         try {
@@ -102,16 +104,15 @@ public class TradingService extends IntentService {
         });
     }
 
+    private boolean isApiKeysEmpty() {
+        return (bittrexMarket.keysIsEmpty() || livecoinMarket.keysIsEmpty());
+    }
+
     private void initAmounts() throws MarketException {
         livecoinBaseAmount = livecoinMarket.getAmount(pair.getBaseName());
         bittrexBaseAmount = bittrexMarket.getAmount(pair.getBaseName());
         livecoinMarketAmount = livecoinMarket.getAmount(pair.getMarketName());
         bittrexMarketAmount = bittrexMarket.getAmount(pair.getMarketName());
-    }
-
-    private Strategy getStrategy() {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        return Strategy.valueOf(preferences.getString(getResources().getString(R.string.trade_strategy), "MIN_PAIR"));
     }
 
     private void makeNotification(String title, String message) {
@@ -139,10 +140,8 @@ public class TradingService extends IntentService {
         private final Double marketAmount;
         private final String sellPairName;
         private final String buyPairName;
-        private final Strategy strategy;
 
-        Trader(Pair pair, Strategy strategy) {
-            this.strategy = strategy;
+        Trader(Pair pair) {
             if ((pair.getBittrexBid() - pair.getLivecoinAsk()) > (pair.getLivecoinBid() - pair.getBittrexAsk())) {
                 bidPrice = pair.getBittrexBid();
                 askPrice = pair.getLivecoinAsk();
@@ -168,19 +167,7 @@ public class TradingService extends IntentService {
 
         private Double countMinQuantity(Double bidQuantity, Double askQuantity) {
             Double minAvailableAmount = baseAmount<marketAmount ? baseAmount : marketAmount;
-
-            switch (strategy) {
-                case MIN_PAIR:
-                    quantity = bidQuantity<askQuantity ? bidQuantity : askQuantity;
-                    break;
-
-                case MAX_PAIR:
-                    quantity = bidQuantity>askQuantity ? bidQuantity : askQuantity;
-                    break;
-                case ALL_BALANCE:
-                    quantity = minAvailableAmount;
-                    break;
-            }
+            quantity = bidQuantity<askQuantity ? bidQuantity : askQuantity;
 
             if (quantity>minAvailableAmount) quantity = minAvailableAmount;
 
@@ -227,11 +214,5 @@ public class TradingService extends IntentService {
             intent.putExtra("coinNames", coinNames);
             TradingService.this.startService(intent);
         }
-    }
-
-    public enum Strategy {
-        MIN_PAIR,
-        MAX_PAIR,
-        ALL_BALANCE
     }
 }

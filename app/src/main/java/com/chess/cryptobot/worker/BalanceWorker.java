@@ -45,6 +45,8 @@ public class BalanceWorker extends Worker {
 
         double btcSum = 0.0d;
         List<Market> markets = marketFactory.getMarkets(context, PreferenceManager.getDefaultSharedPreferences(context));
+        if (isApiKeysEmpty(markets)) return Result.success();
+
         for (String coinName: allCoinNames) {
             for (Market market: markets) {
                 Double amount;
@@ -77,6 +79,13 @@ public class BalanceWorker extends Worker {
         if (btcSum>0) saveToDatabase(btcSum);
 
         return Result.success();
+    }
+
+    private boolean isApiKeysEmpty(List<Market> markets) {
+        for (Market market: markets) {
+            if (market.keysIsEmpty()) return true;
+        }
+        return false;
     }
 
     private void cleanDatabase() {

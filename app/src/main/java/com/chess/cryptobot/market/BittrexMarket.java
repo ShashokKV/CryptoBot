@@ -158,6 +158,7 @@ public class BittrexMarket extends MarketRequest {
 
     @Override
     public void sendCoins(String coinName, Double amount, String address) throws MarketException {
+        if (keysIsEmpty()) return;
         this.path = this.url.concat("account/withdraw?");
         Map<String, String> params = new LinkedHashMap<>();
         params.put("currency", coinName);
@@ -187,6 +188,7 @@ public class BittrexMarket extends MarketRequest {
 
     @Override
     public void buy(String pairName, Double price, Double amount) throws MarketException {
+        if (keysIsEmpty()) return;
         this.path = this.url.concat("market/buylimit?");
         Map<String, String> params = new LinkedHashMap<>();
         params.put("market", pairName);
@@ -216,6 +218,7 @@ public class BittrexMarket extends MarketRequest {
 
     @Override
     public void sell(String pairName, Double price, Double amount) throws MarketException {
+        if (keysIsEmpty()) return;
         this.path = this.url.concat("market/selllimit?");
         Map<String, String> params = new LinkedHashMap<>();
         params.put("market", pairName);
@@ -245,6 +248,7 @@ public class BittrexMarket extends MarketRequest {
 
     @Override
     public List<History> getOpenOrders() throws MarketException {
+        if (keysIsEmpty()) return null;
         this.path = this.url.concat("market/getopenorders?");
         Map<String, String> params = new LinkedHashMap<>();
         params.put("apikey", this.apiKey);
@@ -270,6 +274,7 @@ public class BittrexMarket extends MarketRequest {
 
     @Override
     public List<History> getHistory() throws MarketException {
+        if (keysIsEmpty()) return null;
         this.path = this.url.concat("account/getorderhistory?");
         Map<String, String> params = new LinkedHashMap<>();
         params.put("apikey", this.apiKey);
@@ -299,6 +304,7 @@ public class BittrexMarket extends MarketRequest {
     }
 
     private List<History> getWithdrawHistory() throws BittrexException {
+        if (keysIsEmpty()) return new ArrayList<>();
         this.path = this.url.concat("account/getwithdrawalhistory?");
         Map<String, String> params = new LinkedHashMap<>();
         params.put("apikey", this.apiKey);
@@ -323,6 +329,7 @@ public class BittrexMarket extends MarketRequest {
     }
 
     private List<History> getDepositHistory() throws BittrexException {
+        if (keysIsEmpty()) return new ArrayList<>();
         this.path = this.url.concat("account/getdeposithistory?");
         Map<String, String> params = new LinkedHashMap<>();
         params.put("apikey", this.apiKey);

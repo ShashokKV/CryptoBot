@@ -6,7 +6,6 @@ import com.chess.cryptobot.model.response.MarketResponse;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.InvalidKeyException;
@@ -96,6 +95,7 @@ abstract class MarketRequest implements Market {
                         .append("=").append(URLEncoder.encode(args.get(param), DEFAULT_ENCODING));
             } catch (Exception ex) {
                 ex.printStackTrace();
+                result.append(param).append("=").append(param);
             }
         }
         return result.toString();
@@ -122,7 +122,7 @@ abstract class MarketRequest implements Market {
             } else if (!response.success()) {
                 throw new MarketException(response.message());
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new MarketException(e.getMessage());
         }
         return response;

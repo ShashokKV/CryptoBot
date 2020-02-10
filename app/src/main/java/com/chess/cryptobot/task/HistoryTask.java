@@ -26,6 +26,7 @@ public class HistoryTask extends MarketTask<Integer, String> {
 
     @Override
     protected String marketProcess(Market market, Integer param) throws MarketException {
+        if (market.keysIsEmpty()) return "";
         if (state== HistoryHolder.State.HISTORY) {
             historyList.addAll(market.getHistory());
         } else {

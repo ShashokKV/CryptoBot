@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <androidx.preference.PreferenceCategory
         android:key="bittrex_keys"
         android:title="@string/bittrex_api_keys">
@@ -29,11 +28,6 @@
         <CheckBoxPreference
             android:key="@string/auto_trade"
             android:title="AutoTrade" />
-        <ListPreference
-            android:entries="@array/strategy_entries"
-            android:key="@string/trade_strategy"
-            android:title="Trade Strategy"
-            app:entryValues="@array/strategy_values" />
         <androidx.preference.EditTextPreference
             android:defaultValue="3"
             android:dialogLayout="@layout/number_dialog"

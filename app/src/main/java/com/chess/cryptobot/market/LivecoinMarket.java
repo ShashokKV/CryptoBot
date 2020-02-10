@@ -142,6 +142,7 @@ public class LivecoinMarket extends MarketRequest {
 
     @Override
     public String getAddress(String coinName) throws MarketException {
+        if (keysIsEmpty()) return null;
         Map<String, String> params = new LinkedHashMap<>();
         params.put("currency", coinName);
 
@@ -163,6 +164,7 @@ public class LivecoinMarket extends MarketRequest {
 
     @Override
     public void sendCoins(String coinName, Double amount, String address) throws MarketException {
+        if (keysIsEmpty()) return;
         Map<String, String> params = new LinkedHashMap<>();
         params.put("amount", String.format(Locale.US, "%.8f", amount));
         params.put("currency", coinName);
@@ -188,6 +190,7 @@ public class LivecoinMarket extends MarketRequest {
 
     @Override
     public void buy(String pairName, Double price, Double amount) throws MarketException {
+        if (keysIsEmpty()) return;
         Map<String, String> params = new LinkedHashMap<>();
         params.put("currencyPair", pairName);
         params.put("price", String.format(Locale.US, "%.8f", price));
@@ -213,6 +216,7 @@ public class LivecoinMarket extends MarketRequest {
 
     @Override
     public void sell(String pairName, Double price, Double amount) throws MarketException {
+        if (keysIsEmpty()) return;
         Map<String, String> params = new LinkedHashMap<>();
         params.put("currencyPair", pairName);
         params.put("price", String.format(Locale.US, "%.8f", price));
@@ -238,6 +242,7 @@ public class LivecoinMarket extends MarketRequest {
 
     @Override
     public List<History> getOpenOrders() throws MarketException {
+        if (keysIsEmpty()) return null;
         Map<String, String> params = new LinkedHashMap<>();
         params.put("openClosed", "OPEN");
 
@@ -259,6 +264,7 @@ public class LivecoinMarket extends MarketRequest {
 
     @Override
     public List<History> getHistory() throws MarketException {
+        if (keysIsEmpty()) return null;
         LocalDateTime startTime = LocalDateTime.now().minusDays(29);
         LocalDateTime endTime = LocalDateTime.now();
         Map<String, String> params = new LinkedHashMap<>();

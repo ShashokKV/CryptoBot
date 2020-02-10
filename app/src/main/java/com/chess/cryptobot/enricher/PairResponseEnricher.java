@@ -65,9 +65,6 @@ public class PairResponseEnricher {
             bidFromLivecoin = false;
         }
 
-        Pair tmpPair = pair;
-        tmpPair.setPercent(0.0f);
-
         bidQuantity = bids.get(0).getQuantity();
         askQuantity = asks.get(0).getQuantity();
 
@@ -75,18 +72,18 @@ public class PairResponseEnricher {
         int maxPriceSize = bids.size() > asks.size() ? asks.size() : bids.size();
 
         for (int i = 1; i < maxPriceSize; i++) {
-            if (!enrichedFromStack(tmpPair, i, increaseAsks)) {
+            if (!enrichedFromStack(i, increaseAsks)) {
                 return this;
             }
         }
         return this;
     }
 
-    private boolean enrichedFromStack(Pair tmpPair, int i, boolean increaseAsks) {
+    private boolean enrichedFromStack(int i, boolean increaseAsks) {
         Float percent = countPercent(bid, ask, bidFromLivecoin);
         if (percent > minPercent) {
-            updateTempPair(tmpPair);
-            tmpPair.setPercent(percent);
+            updatePair();
+            pair.setPercent(percent);
 
             if (increaseAsks) {
                 askQuantity = askQuantity + asks.get(i).getQuantity();
@@ -97,22 +94,21 @@ public class PairResponseEnricher {
             }
             return true;
         } else {
-            pair = tmpPair;
             return false;
         }
     }
 
-    private void updateTempPair(Pair tmpPair) {
+    private void updatePair() {
         if (bidFromLivecoin) {
-            tmpPair.setLivecoinBidQuantity(bidQuantity);
-            tmpPair.setBittrexAskQuantity(askQuantity);
-            tmpPair.setLivecoinBid(bid);
-            tmpPair.setBittrexAsk(ask);
+            pair.setLivecoinBidQuantity(bidQuantity);
+            pair.setBittrexAskQuantity(askQuantity);
+            pair.setLivecoinBid(bid);
+            pair.setBittrexAsk(ask);
         } else {
-            tmpPair.setBittrexBid(bidQuantity);
-            tmpPair.setLivecoinAskQuantity(askQuantity);
-            tmpPair.setBittrexBid(bid);
-            tmpPair.setLivecoinAsk(ask);
+            pair.setBittrexBid(bidQuantity);
+            pair.setLivecoinAskQuantity(askQuantity);
+            pair.setBittrexBid(bid);
+            pair.setLivecoinAsk(ask);
         }
     }
 
