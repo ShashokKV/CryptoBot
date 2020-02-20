@@ -42,7 +42,7 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="0.3"
-                android:text="@string/livecoin"
+                android:text="@string/binance"
                 android:textColor="@color/colorSecondary"
                 android:textSize="18sp"
                 android:textStyle="bold" />

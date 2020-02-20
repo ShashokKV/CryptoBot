@@ -109,7 +109,7 @@
             android:textColor="@color/colorWhite" />
 
         <TextView
-            android:id="@+id/livecoin_bid"
+            android:id="@+id/binance_bid"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:maxLength="18"
@@ -123,7 +123,7 @@
             android:textColor="@color/colorWhite" />
 
         <TextView
-            android:id="@+id/livecoin_bid_quantity"
+            android:id="@+id/binance_bid_quantity"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:maxLength="18"
@@ -137,7 +137,7 @@
             android:textColor="@color/colorWhite" />
 
         <TextView
-            android:id="@+id/livecoin_ask"
+            android:id="@+id/binance_ask"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:maxLength="18"
@@ -151,7 +151,7 @@
             android:textColor="@color/colorWhite" />
 
         <TextView
-            android:id="@+id/livecoin_ask_quantity"
+            android:id="@+id/binance_ask_quantity"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:maxLength="18"
@@ -165,7 +165,7 @@
             android:textColor="@color/colorWhite" />
 
         <TextView
-            android:id="@+id/livecoin_volume"
+            android:id="@+id/binance_volume"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:maxLength="10"

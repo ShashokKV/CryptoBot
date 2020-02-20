@@ -13,15 +13,15 @@
             android:title="@string/secret_key" />
     </androidx.preference.PreferenceCategory>
     <androidx.preference.PreferenceCategory
-        android:key="livecoin_keys"
-        android:title="@string/livecoin_api_keys">
+        android:key="binance_keys"
+        android:title="@string/binance_api_keys">
         <androidx.preference.EditTextPreference
             android:dialogLayout="@layout/keys_dialog"
-            android:key="@string/livecoin_api_key"
+            android:key="@string/binance_api_key"
             android:title="@string/api_key" />
         <androidx.preference.EditTextPreference
             android:dialogLayout="@layout/keys_dialog"
-            android:key="@string/livecoin_secret_key"
+            android:key="@string/binance_secret_key"
             android:title="@string/secret_key" />
     </androidx.preference.PreferenceCategory>
     <androidx.preference.PreferenceCategory android:title="Trading preferences">

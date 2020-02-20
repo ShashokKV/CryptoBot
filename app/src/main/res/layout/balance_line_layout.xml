@@ -45,7 +45,7 @@
         tools:text="0.0000004" />
 
     <TextView
-        android:id="@+id/LivecoinBalanceView"
+        android:id="@+id/BinanceBalanceView"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="0.4"
