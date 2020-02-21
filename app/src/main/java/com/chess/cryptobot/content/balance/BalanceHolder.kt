@@ -14,7 +14,7 @@ import com.chess.cryptobot.task.SerialExecutor
 import java.util.*
 
 class BalanceHolder(fragment: Fragment) : ContextHolder(fragment) {
-    private var hasKeys: Boolean = checkIfHasKeys()
+    private var hasKeys: Boolean = false
     private var bittrexStatuses: Map<String, Boolean> = HashMap()
     private var binanceStatuses: Map<String, Boolean> = HashMap()
     private var iconUrls: Map<String, String>? = null
@@ -37,6 +37,12 @@ class BalanceHolder(fragment: Fragment) : ContextHolder(fragment) {
     public override fun initViewItems(itemNamesSet: Set<String>):MutableList<ViewItem> {
         itemNamesSet.forEach { coinName -> addItemToList(Balance(coinName)) }
         return viewItems
+    }
+
+    override fun init(): ContextHolder {
+        super.init()
+        hasKeys = checkIfHasKeys()
+        return this
     }
 
     fun add(coinName: String) {

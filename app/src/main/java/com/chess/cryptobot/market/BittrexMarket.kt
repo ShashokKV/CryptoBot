@@ -91,7 +91,7 @@ class BittrexMarket internal constructor(url: String, apiKey: String?, secretKey
     @Throws(MarketException::class)
     override fun getTicker(): List<TickerResponse> {
         val response: BittrexResponse
-        val call = service.ticker
+        val call = service.getTicker()
         response = try {
             execute(call) as BittrexResponse
         } catch (e: MarketException) {
@@ -103,7 +103,7 @@ class BittrexMarket internal constructor(url: String, apiKey: String?, secretKey
     @Throws(MarketException::class)
     override fun getCurrencies(): List<CurrenciesResponse> {
         val response: BittrexResponse
-        val call = service.currencies
+        val call = service.getCurrencies()
         response = try {
             execute(call) as BittrexResponse
         } catch (e: MarketException) {
@@ -121,7 +121,7 @@ class BittrexMarket internal constructor(url: String, apiKey: String?, secretKey
     val markets: BittrexResponse
         get() {
             val response: BittrexResponse
-            val call = service.markets
+            val call = service.getMarkets()
             response = try {
                 execute(call) as BittrexResponse
             } catch (e: MarketException) {

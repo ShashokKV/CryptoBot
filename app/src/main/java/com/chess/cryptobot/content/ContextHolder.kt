@@ -8,15 +8,20 @@ import com.chess.cryptobot.view.MainFragment
 import java.util.*
 
 abstract class ContextHolder protected constructor(private val fr: Fragment) {
-    val viewItems: MutableList<ViewItem> by lazy { initViewItems(prefs.items) }
+    var viewItems: MutableList<ViewItem> = ArrayList()
 
-    val prefs: Preferences by lazy { initPrefs(fr.context) }
+    lateinit var prefs: Preferences
 
     val context: Context?
         get() = this.fr.context
 
     protected val mainFragment: MainFragment<*>
         get() = this.fr as MainFragment<*>
+
+    open fun init(): ContextHolder {
+        initViewItems(initPrefs(fr.context).items)
+        return this
+    }
 
     protected abstract fun initPrefs(context: Context?): Preferences
 

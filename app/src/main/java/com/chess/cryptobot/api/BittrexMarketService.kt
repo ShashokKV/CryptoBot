@@ -9,22 +9,22 @@ import retrofit2.http.QueryMap
 
 interface BittrexMarketService {
     @GET("account/getbalance")
-    fun getBalance(@QueryMap options: Map<String, String>?, @HeaderMap headers: Map<String?, String?>?): Call<out BittrexResponse>
+    fun getBalance(@QueryMap options: Map<String, String>?, @HeaderMap headers: Map<String?, String?>?): Call<BittrexResponse>
 
     @GET("public/getorderbook")
-    fun getOrderBook(@QueryMap options: Map<String?, String?>?): Call<out BittrexResponse>
+    fun getOrderBook(@QueryMap options: Map<String?, String?>?): Call<BittrexResponse>
 
-    @get:GET("public/getmarketsummaries")
-    val ticker: Call<out BittrexResponse>
+    @GET("public/getmarketsummaries")
+    fun getTicker(): Call<BittrexResponse>
 
-    @get:GET("public/getcurrencies")
-    val currencies: Call<out BittrexResponse>
+    @GET("public/getcurrencies")
+    fun getCurrencies(): Call<BittrexResponse>
 
-    @get:GET("public/getmarkets")
-    val markets: Call<out BittrexResponse>
+    @GET("public/getmarkets")
+    fun getMarkets(): Call<BittrexResponse>
 
     @GET("account/getdepositaddress")
-    fun getAddress(@QueryMap(encoded = true) options: Map<String, String>?, @HeaderMap headers: Map<String?, String?>?): Call<out BittrexResponse>
+    fun getAddress(@QueryMap(encoded = true) options: Map<String, String>?, @HeaderMap headers: Map<String?, String?>?): Call<BittrexResponse>
 
     @GET("account/withdraw")
     fun payment(@Query(value = "currency", encoded = true) marketName: String?,
@@ -32,7 +32,7 @@ interface BittrexMarketService {
                 @Query(value = "address", encoded = true) rate: String?,
                 @Query(value = "apikey", encoded = true) apikey: String?,
                 @Query(value = "nonce", encoded = true) nonce: String?,
-                @HeaderMap headers: Map<String?, String?>?): Call<out BittrexResponse>
+                @HeaderMap headers: Map<String?, String?>?): Call<BittrexResponse>
 
     @GET("market/buylimit")
     fun buy(@Query(value = "market", encoded = true) marketName: String?,
@@ -40,7 +40,7 @@ interface BittrexMarketService {
             @Query(value = "rate", encoded = true) rate: String?,
             @Query(value = "apikey", encoded = true) apikey: String?,
             @Query(value = "nonce", encoded = true) nonce: String?,
-            @HeaderMap headers: Map<String?, String?>?): Call<out BittrexResponse>
+            @HeaderMap headers: Map<String?, String?>?): Call<BittrexResponse>
 
     @GET("market/selllimit")
     fun sell(@Query(value = "market", encoded = true) marketName: String?,
@@ -48,25 +48,25 @@ interface BittrexMarketService {
              @Query(value = "rate", encoded = true) rate: String?,
              @Query(value = "apikey", encoded = true) apikey: String?,
              @Query(value = "nonce", encoded = true) nonce: String?,
-             @HeaderMap headers: Map<String?, String?>?): Call<out BittrexResponse>
+             @HeaderMap headers: Map<String?, String?>?): Call<BittrexResponse>
 
     @GET("account/getorderhistory")
     fun getOrderHistory(@Query(value = "apikey", encoded = true) apikey: String?,
                         @Query(value = "nonce", encoded = true) nonce: String?,
-                        @HeaderMap headers: Map<String?, String?>?): Call<out BittrexResponse>
+                        @HeaderMap headers: Map<String?, String?>?): Call<BittrexResponse>
 
     @GET("account/getwithdrawalhistory")
     fun getWithdrawHistory(@Query(value = "apikey", encoded = true) apikey: String?,
                            @Query(value = "nonce", encoded = true) nonce: String?,
-                           @HeaderMap headers: Map<String?, String?>?): Call<out BittrexResponse>
+                           @HeaderMap headers: Map<String?, String?>?): Call<BittrexResponse>
 
     @GET("account/getdeposithistory")
     fun getDepositHistory(@Query(value = "apikey", encoded = true) apikey: String?,
                           @Query(value = "nonce", encoded = true) nonce: String?,
-                          @HeaderMap headers: Map<String?, String?>?): Call<out BittrexResponse>
+                          @HeaderMap headers: Map<String?, String?>?): Call<BittrexResponse>
 
     @GET("market/getopenorders")
     fun getOpenOrders(@Query(value = "apikey", encoded = true) apikey: String?,
                       @Query(value = "nonce", encoded = true) nonce: String?,
-                      @HeaderMap headers: Map<String?, String?>?): Call<out BittrexResponse>
+                      @HeaderMap headers: Map<String?, String?>?): Call<BittrexResponse>
 }

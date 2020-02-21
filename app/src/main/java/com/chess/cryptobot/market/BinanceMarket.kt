@@ -67,7 +67,7 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
     @Throws(MarketException::class)
     override fun getTicker(): List<TickerResponse> {
         val responses: List<BinanceTickerResponse?>?
-        val call = service.ticker
+        val call = service.getTicker()
         try {
             val result = call.execute()
             responses = result.body()
@@ -83,7 +83,7 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
     @Throws(MarketException::class)
     override fun getCurrencies(): List<CurrenciesResponse> {
         val response: BinanceCurrenciesListResponse
-        val call = service.currencies
+        val call = service.getCurrencies()
         response = try {
             execute(call) as BinanceCurrenciesListResponse
         } catch (e: MarketException) {
@@ -95,7 +95,7 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
     @Throws(MarketException::class)
     override fun getMinQuantity(): TradeLimitResponse {
         val response: BinanceTradeLimitResponse
-        val call = service.minTradeSize
+        val call = service.getMinTradeSize()
         response = try {
             execute(call) as BinanceTradeLimitResponse
         } catch (e: MarketException) {
