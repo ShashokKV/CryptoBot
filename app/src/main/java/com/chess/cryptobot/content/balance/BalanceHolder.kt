@@ -31,7 +31,8 @@ class BalanceHolder(fragment: Fragment) : ContextHolder(fragment) {
     }
 
     public override fun initPrefs(context: Context?): Preferences {
-        return BalancePreferences(context)
+        prefs = BalancePreferences(context)
+        return prefs
     }
 
     public override fun initViewItems(itemNamesSet: Set<String>):MutableList<ViewItem> {

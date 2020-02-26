@@ -17,7 +17,8 @@ class HistoryHolder(fragment: Fragment, private val state: State) : ContextHolde
     }
 
     override fun initPrefs(context: Context?): Preferences {
-        return HistoryPreferences(context)
+        prefs = HistoryPreferences(context)
+        return prefs
     }
 
     override fun initViewItems(itemNamesSet: Set<String>):MutableList<ViewItem> {

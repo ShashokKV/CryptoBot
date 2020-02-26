@@ -19,7 +19,7 @@ import com.chess.cryptobot.view.adapter.RecyclerViewAdapter
 
 abstract class MainFragment<T : RecyclerView.ViewHolder> : Fragment(), OnRefreshListener {
     private var adapter: RecyclerViewAdapter<T>? = null
-    var holder: ContextHolder? = null
+    lateinit var holder: ContextHolder
         private set
 
     private var swipeRefreshLayout: SwipeRefreshLayout? = null
@@ -46,7 +46,7 @@ abstract class MainFragment<T : RecyclerView.ViewHolder> : Fragment(), OnRefresh
     override fun onRefresh() {
         beforeRefresh()
         swipeRefreshLayout!!.isRefreshing = false
-        holder!!.updateAllItems()
+        holder.updateAllItems()
     }
 
     protected abstract fun beforeRefresh()

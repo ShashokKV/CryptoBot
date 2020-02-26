@@ -13,6 +13,7 @@ import android.view.MenuItem
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.commit
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequest
@@ -52,18 +53,37 @@ class MainActivity : AppCompatActivity(), DialogListener {
             openPairs = intent.getBooleanExtra("openPairs", false)
         }
         if (openPairs) {
-            fragmentManager.beginTransaction().add(R.id.include, pairFragment, "2").hide(pairFragment).show(pairFragment).commit()
-            fragmentManager.beginTransaction().add(R.id.include, balanceFragment, "1").hide(balanceFragment).commit()
+            fragmentManager.commit {
+                add(R.id.include, pairFragment, "2")
+                hide(pairFragment)
+                show(pairFragment)
+            }
+            fragmentManager.commit {
+                add(R.id.include, balanceFragment, "1")
+                hide(balanceFragment)
+            }
             active = pairFragment
             navigation.selectedItemId = R.id.activity_pairs
         } else {
-            fragmentManager.beginTransaction().add(R.id.include, pairFragment, "2").hide(pairFragment).commit()
-            fragmentManager.beginTransaction().add(R.id.include, balanceFragment, "1").show(balanceFragment).commit()
+            fragmentManager.commit {
+                add(R.id.include, pairFragment, "2")
+                hide(pairFragment)
+            }
+            fragmentManager.commit {
+                add(R.id.include, balanceFragment, "1")
+                show(balanceFragment)
+            }
             active = balanceFragment
             navigation.selectedItemId = R.id.activity_balance
         }
-        fragmentManager.beginTransaction().add(R.id.include, graphFragment, "3").hide(graphFragment).commit()
-        fragmentManager.beginTransaction().add(R.id.include, historyPagerFragment, "4").hide(historyPagerFragment).commit()
+        fragmentManager.commit {
+            add(R.id.include, graphFragment, "3")
+            hide(graphFragment)
+        }
+        fragmentManager.commit {
+            add(R.id.include, historyPagerFragment, "4")
+            hide(historyPagerFragment)
+        }
         botIsActive = BotService.isRunning
         updateBot()
         runWork()
@@ -72,22 +92,34 @@ class MainActivity : AppCompatActivity(), DialogListener {
     private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item: MenuItem ->
         when (item.itemId) {
             R.id.activity_balance -> {
-                fragmentManager.beginTransaction().hide(active!!).show(balanceFragment).commit()
+                fragmentManager.commit {
+                    hide(active!!)
+                    show(balanceFragment)
+                }
                 active = balanceFragment
                 return@OnNavigationItemSelectedListener true
             }
             R.id.activity_pairs -> {
-                fragmentManager.beginTransaction().hide(active!!).show(pairFragment).commit()
+                fragmentManager.commit {
+                    hide(active!!)
+                    show(pairFragment)
+                }
                 active = pairFragment
                 return@OnNavigationItemSelectedListener true
             }
             R.id.activity_graph -> {
-                fragmentManager.beginTransaction().hide(active!!).show(graphFragment).commit()
+                fragmentManager.commit {
+                    hide(active!!)
+                    show(graphFragment)
+                }
                 active = graphFragment
                 return@OnNavigationItemSelectedListener true
             }
             R.id.activity_history -> {
-                fragmentManager.beginTransaction().hide(active!!).show(historyPagerFragment).commit()
+                fragmentManager.commit {
+                    hide(active!!)
+                    show(historyPagerFragment)
+                }
                 active = historyPagerFragment
                 return@OnNavigationItemSelectedListener true
             }
@@ -114,7 +146,8 @@ class MainActivity : AppCompatActivity(), DialogListener {
                 onMinBalancePositiveClick(dialog)
             }
             else -> {
-                throw IllegalArgumentException("Unknown type of " + (dialog?.javaClass?.canonicalName ?: dialog.toString()))
+                throw IllegalArgumentException("Unknown type of " + (dialog?.javaClass?.canonicalName
+                        ?: dialog.toString()))
             }
         }
     }
@@ -204,7 +237,8 @@ class MainActivity : AppCompatActivity(), DialogListener {
 
     private fun runWork() {
         val preferences = PreferenceManager.getDefaultSharedPreferences(this)
-        val workPeriod = preferences.getString(getString(R.string.statistic_run_period), "30")?.toLong() ?: 30
+        val workPeriod = preferences.getString(getString(R.string.statistic_run_period), "30")?.toLong()
+                ?: 30
         val constraints = Constraints.Builder()
                 .setRequiresBatteryNotLow(true)
                 .build()

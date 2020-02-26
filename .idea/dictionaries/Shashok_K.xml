@@ -1,9 +1,28 @@
 <component name="ProjectDictionaryState">
   <dictionary name="Shashok.K">
     <words>
+      <w>apikey</w>
+      <w>apisign</w>
       <w>binance</w>
       <w>bittrex</w>
+      <w>buylimit</w>
+      <w>enricher</w>
+      <w>getbalance</w>
+      <w>getcurrencies</w>
+      <w>getdepositaddress</w>
+      <w>getdeposithistory</w>
+      <w>getmarkets</w>
+      <w>getmarketsummaries</w>
+      <w>getopenorders</w>
+      <w>getorderbook</w>
+      <w>getorderhistory</w>
+      <w>getwithdrawalhistory</w>
+      <w>gson</w>
+      <w>hmac</w>
       <w>livecoin</w>
+      <w>scalex</w>
+      <w>scaley</w>
+      <w>selllimit</w>
     </words>
   </dictionary>
 </component>

@@ -26,17 +26,15 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.util.*
 
 class BalanceFragment : MainFragment<BalanceAdapter.BalanceViewHolder>() {
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = super.onCreateView(inflater, container, savedInstanceState)
-        val balanceHolder = holder as BalanceHolder
-        initAddButton(view, balanceHolder)
-        initSyncButton(view, balanceHolder)
-        initBalanceStatus(balanceHolder)
-        return view
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        initAddButton()
+        initSyncButton()
+        initBalanceStatus()
     }
 
-    private fun initAddButton(view: View?, balanceHolder: BalanceHolder) {
-        val addBalanceButton: FloatingActionButton = Objects.requireNonNull(view)!!.findViewById(R.id.add_fab)
+    private fun initAddButton() {
+        val addBalanceButton: FloatingActionButton = requireView().findViewById(R.id.add_fab)
         addBalanceButton.setOnClickListener {
             val scalex = PropertyValuesHolder.ofFloat(View.SCALE_X, 1.2f)
             val scaley = PropertyValuesHolder.ofFloat(View.SCALE_Y, 1.2f)
@@ -45,14 +43,13 @@ class BalanceFragment : MainFragment<BalanceAdapter.BalanceViewHolder>() {
             anim.repeatMode = ValueAnimator.REVERSE
             anim.duration = 300
             anim.start()
-            val nameDialog = CryptoNameDialog(balanceHolder)
-            val fragmentManager = fragmentManager
-            if (fragmentManager != null) nameDialog.show(getFragmentManager()!!, "coinName")
+            CryptoNameDialog(holder as BalanceHolder).show(parentFragmentManager, "coinName")
+
         }
     }
 
-    private fun initSyncButton(view: View?, balanceHolder: BalanceHolder) {
-        val syncBalanceButton: FloatingActionButton = view!!.findViewById(R.id.sync_fab)
+    private fun initSyncButton() {
+        val syncBalanceButton: FloatingActionButton = requireView().findViewById(R.id.sync_fab)
         syncBalanceButton.setOnClickListener {
             val angle = PropertyValuesHolder.ofFloat(View.ROTATION, 360f)
             val anim = ObjectAnimator.ofPropertyValuesHolder(syncBalanceButton, angle)
@@ -71,14 +68,14 @@ class BalanceFragment : MainFragment<BalanceAdapter.BalanceViewHolder>() {
             titleView.textSize = 20f
             titleView.gravity = Gravity.CENTER
             titleView.text = this.getString(R.string.sync_balances_title)
-            val alertDialog = AlertDialog.Builder(Objects.requireNonNull(context)!!)
+            val alertDialog = AlertDialog.Builder(requireContext())
                     .setCustomTitle(titleView)
                     .setPositiveButton("Yes") { _: DialogInterface?, _: Int ->
                         val activity = this.activity
                         if (activity != null) {
                             val intent = Intent(activity, BalanceSyncService::class.java)
                             intent.putStringArrayListExtra("coinNames",
-                                    ArrayList(balanceHolder.prefs.items))
+                                    ArrayList(holder.prefs.items))
                             activity.startService(intent)
                         }
                     }
@@ -88,8 +85,8 @@ class BalanceFragment : MainFragment<BalanceAdapter.BalanceViewHolder>() {
         }
     }
 
-    private fun initBalanceStatus(balanceHolder: BalanceHolder) {
-        val coinStatusTask = CoinStatusTask(balanceHolder)
+    private fun initBalanceStatus() {
+        val coinStatusTask = CoinStatusTask(holder)
         coinStatusTask.execute(0)
     }
 

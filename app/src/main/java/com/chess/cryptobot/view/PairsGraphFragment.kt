@@ -53,12 +53,12 @@ class PairsGraphFragment : Fragment() {
         }
 
     fun showSpinner() {
-        val spinner = Objects.requireNonNull(activity)!!.findViewById<ProgressBar>(R.id.progressBar)
+        val spinner = requireActivity().findViewById<ProgressBar>(R.id.progressBar)
         spinner.visibility = View.VISIBLE
     }
 
     fun hideSpinner() {
-        val spinner = Objects.requireNonNull(activity)!!.findViewById<ProgressBar>(R.id.progressBar)
+        val spinner = requireActivity().findViewById<ProgressBar>(R.id.progressBar)
         spinner.visibility = View.GONE
     }
 
@@ -80,7 +80,7 @@ class PairsGraphFragment : Fragment() {
         val context = this.context ?: return
 
         adapter = object : ArrayAdapter<String?>(context, R.layout.spinner) {
-            override fun getDropDownView(position: Int, convertView: View, parent: ViewGroup): View {
+            override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
                 val view = super.getDropDownView(position, convertView, parent)
                 val tv = view as TextView
                 if (position == 0) {

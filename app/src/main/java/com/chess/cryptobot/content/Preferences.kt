@@ -3,6 +3,7 @@ package com.chess.cryptobot.content
 import android.content.Context
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
+import androidx.core.content.edit
 import java.util.*
 
 abstract class Preferences protected constructor(context: Context?) {
@@ -29,6 +30,7 @@ abstract class Preferences protected constructor(context: Context?) {
     }
 
     private fun updateItemSet(itemsSet: Set<String>) {
+        sharedPreferences.edit { putStringSet(preferenceKey, itemsSet) }
         val editor = sharedPreferences.edit()
         editor.putStringSet(preferenceKey, itemsSet)
         editor.apply()

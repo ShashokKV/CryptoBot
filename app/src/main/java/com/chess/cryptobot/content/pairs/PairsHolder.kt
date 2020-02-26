@@ -28,7 +28,8 @@ class PairsHolder(fr: Fragment) : ContextHolder(fr) {
 
     public override fun initPrefs(context: Context?): Preferences {
         allPairsPrefs = AllPairsPreferences(context)
-        return PairsPreferences(context)
+        prefs = PairsPreferences(context)
+        return prefs
     }
 
     public override fun initViewItems(itemNamesSet: Set<String>):MutableList<ViewItem> {

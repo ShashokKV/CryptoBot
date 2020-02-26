@@ -18,7 +18,7 @@
             android:layout_width="match_parent"
             android:layout_height="64dp"
             android:layout_marginStart="10dp"
-            android:contentDescription="@string/cripto_icon"
+            android:contentDescription="@string/crypto_icon"
             app:srcCompat="@drawable/generic_crypto" />
 
         <TextView
