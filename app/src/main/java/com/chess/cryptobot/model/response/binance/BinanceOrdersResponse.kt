@@ -3,55 +3,42 @@ package com.chess.cryptobot.model.response.binance
 import com.chess.cryptobot.model.response.HistoryResponse
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
-import java.time.Instant
 import java.time.LocalDateTime
-import java.time.ZoneOffset
-import kotlin.math.roundToLong
 
-class BinanceOrdersResponse : BinanceResponse() {
-    @SerializedName("data")
-    @Expose
-    val data: List<Datum>? = null
-
-    inner class Datum : HistoryResponse {
-        @SerializedName("currencyPair")
+class BinanceOrdersResponse : BinanceResponse(), HistoryResponse {
+        @SerializedName("symbol")
         @Expose
-        var currencyPair: String? = null
-        @SerializedName("type")
+        var symbol: String? = null
+        @SerializedName("side")
         @Expose
         override var historyAction: String? = null
-        @SerializedName("issueTime")
+        @SerializedName("time")
         @Expose
-        var issueTime: Long? = null
+        var time: Long = 0
         @SerializedName("price")
         @Expose
-        override var historyPrice: Double? = null
-        @SerializedName("quantity")
+        override var historyPrice: Double = 0.0
+        @SerializedName("origQty")
         @Expose
-        override var historyAmount: Double? = null
-        @SerializedName("remainingQuantity")
+        override var historyAmount: Double = 0.0
+        @SerializedName("executedQty")
         @Expose
-        var remainingQuantity: Double? = null
+        var executedQuantity: Double = 0.0
 
         override val historyTime: LocalDateTime
-            get() = LocalDateTime.ofEpochSecond((issueTime!! / 1000.toFloat()).roundToLong(), 0,
-                    ZoneOffset.systemDefault().rules.getOffset(Instant.now()))
+            get() =longToTime(time)
 
         override val historyName: String
             get() {
-                val currencies: Array<String> = currencyPair!!.split("/").toTypedArray()
-                return currencies[1] + "/" + currencies[0]
+                return symbolToPairName(symbol)
             }
 
-        override val historyMarket: String
-            get() {
-                return "binance"
-            }
+        override val historyMarket = "binance"
 
         override val progress: Int
             get() {
                 if (historyAmount == 0.0) return 0
-                return java.lang.Double.valueOf(((historyAmount!! - (remainingQuantity)!!) / (historyAmount)!!) * 100).toInt()
+                return (((historyAmount - executedQuantity) / (historyAmount)) * 100).toInt()
             }
-    }
+
 }

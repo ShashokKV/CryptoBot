@@ -26,7 +26,7 @@ class TradingService : IntentService("TradingService") {
     private var binanceMarketAmount: Double? = null
     private var bittrexBaseAmount: Double? = null
     private var bittrexMarketAmount: Double? = null
-    private var minMarketQuantity: Double? = null
+    private var minMarketQuantity: Double = 0.0
     override fun onHandleIntent(intent: Intent?) {
         if (intent == null) return
         initFromIntent(intent)
@@ -42,7 +42,7 @@ class TradingService : IntentService("TradingService") {
             return
         }
         val trader = Trader(pair)
-        if (trader.quantity!! <= minMarketQuantity!!) return
+        if (trader.quantity!! <= minMarketQuantity) return
         try {
             trader.buy()
             trader.sell()

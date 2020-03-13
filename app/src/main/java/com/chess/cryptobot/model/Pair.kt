@@ -46,7 +46,7 @@ class Pair(val baseName: String, val marketName: String) : ViewItem, Serializabl
         get() = "$baseName-$marketName"
 
     private val binancePairName: String
-        get() = "$marketName/$baseName"
+        get() = "$marketName$baseName"
 
     companion object {
         fun fromPairName(pairName: String): Pair {

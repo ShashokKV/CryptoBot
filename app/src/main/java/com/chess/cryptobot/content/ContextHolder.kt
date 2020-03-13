@@ -3,6 +3,8 @@ package com.chess.cryptobot.content
 import android.content.Context
 import androidx.fragment.app.Fragment
 import com.chess.cryptobot.exceptions.ItemNotFoundException
+import com.chess.cryptobot.market.Market
+import com.chess.cryptobot.market.MarketFactory
 import com.chess.cryptobot.model.ViewItem
 import com.chess.cryptobot.view.MainFragment
 import java.util.*
@@ -15,11 +17,14 @@ abstract class ContextHolder protected constructor(private val fr: Fragment) {
     val context: Context?
         get() = this.fr.context
 
+    lateinit var markets: List<Market?>
+
     protected val mainFragment: MainFragment<*>
         get() = this.fr as MainFragment<*>
 
     open fun init(): ContextHolder {
         initViewItems(initPrefs(fr.context).items)
+        markets = MarketFactory().getMarkets(context, prefs.sharedPreferences)
         return this
     }
 

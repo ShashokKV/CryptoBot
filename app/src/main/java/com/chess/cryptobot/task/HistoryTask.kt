@@ -7,7 +7,7 @@ import com.chess.cryptobot.market.Market
 import com.chess.cryptobot.model.History
 import java.util.function.Consumer
 
-class HistoryTask(holder: ContextHolder, private val state: HistoryHolder.State) : MarketTask<Int, String?>(holder) {
+class HistoryTask(private val holder: ContextHolder, private val state: HistoryHolder.State) : MarketTask<Int, String?>(holder) {
     private var historyList: MutableList<History> = ArrayList()
 
     override fun preMarketProcess(param: Int) {
@@ -17,7 +17,7 @@ class HistoryTask(holder: ContextHolder, private val state: HistoryHolder.State)
     override fun marketProcess(market: Market, param: Int): String? {
         if (market.keysIsEmpty()) return ""
         if (state === HistoryHolder.State.HISTORY) {
-            historyList.addAll(market.getHistory())
+            historyList.addAll(market.getHistory(holder.context))
         } else {
             historyList.addAll(market.getOpenOrders())
         }

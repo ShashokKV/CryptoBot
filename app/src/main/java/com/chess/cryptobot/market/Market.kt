@@ -1,5 +1,6 @@
 package com.chess.cryptobot.market
 
+import android.content.Context
 import com.chess.cryptobot.exceptions.MarketException
 import com.chess.cryptobot.model.History
 import com.chess.cryptobot.model.response.CurrenciesResponse
@@ -20,7 +21,7 @@ interface Market {
     fun getTicker(): List<TickerResponse>
 
     @Throws(MarketException::class)
-    fun getCurrencies(): List<CurrenciesResponse?>
+    fun getCurrencies(): List<CurrenciesResponse>
 
     @Throws(MarketException::class)
     fun getMinQuantity(): TradeLimitResponse?
@@ -42,7 +43,7 @@ interface Market {
     fun getOpenOrders(): List<History>
 
     @Throws(MarketException::class)
-    fun getHistory(): List<History>
+    fun getHistory(context: Context?): List<History>
 
     companion object {
         const val BITTREX_MARKET = "bittrex"

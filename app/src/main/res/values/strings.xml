@@ -64,4 +64,8 @@
     <string name="market">Market</string>
     <string name="time">Time</string>
     <string name="quantity">quantity</string>
+    <string name="proxy_url">proxy_url</string>
+    <string name="proxy_username">proxy_username</string>
+    <string name="proxy_password">proxy_password</string>
+    <string name="proxy_port">proxy_port</string>
 </resources>

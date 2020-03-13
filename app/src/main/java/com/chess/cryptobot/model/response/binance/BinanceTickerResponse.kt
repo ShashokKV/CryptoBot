@@ -8,10 +8,10 @@ class BinanceTickerResponse : BinanceResponse(), TickerResponse {
     @SerializedName("symbol")
     @Expose
     private val symbol: String? = null
-    @SerializedName("best_bid")
+    @SerializedName("bidPrice")
     @Expose
     override val tickerBid: Double? = null
-    @SerializedName("best_ask")
+    @SerializedName("askPrice")
     @Expose
     override val tickerAsk: Double? = null
     @SerializedName("volume")
@@ -20,8 +20,6 @@ class BinanceTickerResponse : BinanceResponse(), TickerResponse {
 
     override val marketName: String
         get() {
-            val split = symbol!!.split("/").toTypedArray()
-            return split[1] + "/" + split[0]
+            return symbolToPairName(symbol)
         }
-
 }

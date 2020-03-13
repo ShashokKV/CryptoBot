@@ -30,8 +30,8 @@ class CoinStatusTask(holder: ContextHolder?) : MarketTask<Int, Int>(holder!!) {
         return 0
     }
 
-    private fun updateStatuses(statusMap: MutableMap<String, Boolean>, currencies: List<CurrenciesResponse?>) {
-        currencies.forEach{ currency: CurrenciesResponse? -> statusMap[currency!!.currencyName!!] = currency.isActive!!}
+    private fun updateStatuses(statusMap: MutableMap<String, Boolean>, currencies: List<CurrenciesResponse>) {
+        currencies.forEach{ currency: CurrenciesResponse -> statusMap[currency.currencyName!!] = currency.isActive!!}
     }
 
     private fun updateIcons(response: BittrexResponse) {

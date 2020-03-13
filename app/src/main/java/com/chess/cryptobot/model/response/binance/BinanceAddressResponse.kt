@@ -5,7 +5,7 @@ import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 
 class BinanceAddressResponse : BinanceResponse(), AddressResponse {
-    @SerializedName("wallet")
+    @SerializedName("address")
     @Expose
     override val address: String? = null
 

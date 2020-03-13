@@ -4,7 +4,6 @@ import android.os.AsyncTask
 import com.chess.cryptobot.content.ContextHolder
 import com.chess.cryptobot.exceptions.MarketException
 import com.chess.cryptobot.market.Market
-import com.chess.cryptobot.market.MarketFactory
 import java.lang.ref.WeakReference
 
 abstract class MarketTask<S, T>(holder: ContextHolder) : AsyncTask<S, Int?, T?>() {
@@ -17,9 +16,8 @@ abstract class MarketTask<S, T>(holder: ContextHolder) : AsyncTask<S, Int?, T?>(
         val holder = holder
         publishProgress()
         preMarketProcess(param)
-        val factory = MarketFactory()
         if (holder == null) return null
-        val markets = factory.getMarkets(holder)
+        val markets = holder.markets
         for (market in markets) {
             result = try {
                 if (market == null) {

@@ -28,7 +28,7 @@ class BittrexTypeAdapter : TypeAdapter<BittrexResponse?>() {
             jsonReader.nextName()
             when {
                 jsonReader.peek() == JsonToken.BEGIN_ARRAY -> {
-                    response = BittrexResponse((gson.fromJson<Array<BittrexGenericResponse?>>(jsonReader, Array<BittrexGenericResponse>::class.java) as Array<BittrexGenericResponse?>))
+                    response = BittrexResponse((gson.fromJson(jsonReader, Array<BittrexGenericResponse>::class.java) as Array<BittrexGenericResponse?>))
                 }
                 jsonReader.peek() == JsonToken.BEGIN_OBJECT -> {
                     response = BittrexResponse(gson.fromJson<Any>(jsonReader, BittrexGenericResponse::class.java) as BittrexGenericResponse)

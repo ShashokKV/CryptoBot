@@ -5,48 +5,52 @@ import retrofit2.Call
 import retrofit2.http.*
 
 interface BinanceMarketService {
-    @GET("payment/balance")
+    @GET("sapi/v1/capital/config/getall")
     fun getBalance(@QueryMap(encoded = true) options: Map<String, String>, @HeaderMap headers: Map<String, String>): Call<BinanceBalanceResponse>
 
-    @GET("exchange/order_book")
+    @GET("api/v3/depth")
     fun getOrderBook(@QueryMap(encoded = true) options: Map<String, String>): Call<BinanceOrderBookResponse>
 
-    @GET("exchange/ticker")
-    fun getTicker(): Call<List<BinanceTickerResponse>>
+    @GET("api/v3/ticker/24hr")
+    fun getTicker(): Call<BinanceResponse>
 
-    @GET("info/coinInfo")
-    fun getCurrencies(): Call<BinanceCurrenciesListResponse>
+    @GET("wapi/v3/assetDetail.html")
+    fun getAssetDetails(@QueryMap(encoded = true) options: Map<String, String>, @HeaderMap headers: Map<String, String>): Call<BinanceCurrenciesListResponse>
 
-    @GET("exchange/restrictions")
-    fun getMinTradeSize(): Call<BinanceTradeLimitResponse>
+    @GET("api/v3/exchangeInfo")
+    fun getExchangeInfo(): Call<BinanceTradeLimitResponse>
 
-    @GET("payment/get/address")
+    @GET("wapi/v3/depositAddress.html")
     fun getAddress(@QueryMap(encoded = true) options: Map<String, String>, @HeaderMap headers: Map<String, String>): Call<BinanceAddressResponse>
 
     @FormUrlEncoded
-    @POST("payment/out/coin")
+    @POST("wapi/v3/withdraw.html")
     fun payment(@Field(value = "amount", encoded = true) amount: String,
-                @Field(value = "currency", encoded = true) currency: String,
-                @Field(value = "wallet", encoded = true) wallet: String,
+                @Field(value = "asset", encoded = true) asset: String,
+                @Field(value = "address", encoded = true) address: String,
+                @Field(value = "timestamp", encoded = true) timestamp: String,
                 @HeaderMap headers: Map<String, String>): Call<BinanceResponse>
 
     @FormUrlEncoded
-    @POST("exchange/buylimit")
-    fun buy(@Field(value = "currencyPair", encoded = true) currencyPair: String,
-            @Field(value = "price", encoded = true) price: String,
-            @Field(value = "quantity", encoded = true) quantity: String,
-            @HeaderMap headers: Map<String, String>): Call<BinanceResponse>
+    @POST("api/v3/order")
+    fun newOrder(@Field(value = "symbol", encoded = true) symbol: String,
+                 @Field(value = "side", encoded = true) side: String,
+                 @Field(value = "type", encoded = true) type: String,
+                 @Field(value = "timeInForce", encoded = true) timeInForce: String,
+                 @Field(value = "quantity", encoded = true) quantity: String,
+                 @Field(value = "price", encoded = true) price: String,
+                 @Field(value = "timestamp", encoded = true) timestamp: String,
+                 @HeaderMap headers: Map<String, String>): Call<BinanceResponse>
 
-    @FormUrlEncoded
-    @POST("exchange/selllimit")
-    fun sell(@Field(value = "currencyPair", encoded = true) currencyPair: String,
-             @Field(value = "price", encoded = true) price: String,
-             @Field(value = "quantity", encoded = true) quantity: String,
-             @HeaderMap headers: Map<String, String>): Call<BinanceResponse>
+    @GET("wapi/v3/depositHistory.html")
+    fun getDepositHistory(@QueryMap(encoded = true) options: Map<String, String>, @HeaderMap headers: Map<String, String>): Call<BinanceDepositHistoryResponse>
 
-    @GET("payment/history/transactions")
-    fun getHistory(@QueryMap(encoded = true) options: Map<String, String>, @HeaderMap headers: Map<String, String>): Call<List<BinanceHistoryResponse>>
+    @GET("wapi/v3/withdrawHistory.html")
+    fun getWithdrawHistory(@QueryMap(encoded = true) options: Map<String, String>, @HeaderMap headers: Map<String, String>): Call<BinanceWithdrawHistoryResponse>
 
-    @GET("exchange/client_orders")
-    fun getOpenOrders(@QueryMap(encoded = true) options: Map<String, String>, @HeaderMap headers: Map<String, String>): Call<BinanceOrdersResponse>
+    @GET("api/v3/allOrders")
+    fun getAllOrders(@QueryMap(encoded = true) options: Map<String, String>, @HeaderMap headers: Map<String, String>): Call<BinanceResponse>
+
+    @GET("api/v3/openOrders")
+    fun getOpenOrders(@QueryMap(encoded = true) options: Map<String, String>, @HeaderMap headers: Map<String, String>): Call<BinanceResponse>
 }

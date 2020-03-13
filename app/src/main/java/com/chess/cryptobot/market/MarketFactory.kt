@@ -29,9 +29,15 @@ class MarketFactory {
                         preferences.getString(context.getString(R.string.bittrex_secret_key), null))
             }
             "binance" -> {
+                val proxySelector = BinanceProxySelector(preferences.getString(context.getString(R.string.proxy_url), null),
+                        preferences.getString(context.getString(R.string.proxy_port), null),
+                        preferences.getString(context.getString(R.string.proxy_username), null),
+                        preferences.getString(context.getString(R.string.proxy_password), null))
                 BinanceMarket(context.getString(R.string.binance_url),
                         preferences.getString(context.getString(R.string.binance_api_key), null),
-                        preferences.getString(context.getString(R.string.binance_secret_key), null))
+                        preferences.getString(context.getString(R.string.binance_secret_key), null),
+                        proxySelector)
+
             }
             else -> {
                 throw IllegalArgumentException("Unknown market: $marketName")

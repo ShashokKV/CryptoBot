@@ -28,18 +28,24 @@ abstract class MarketRequest(val url: String, apiKey: String?, secretKey: String
     private val secretKey: String = secretKey ?: ""
 
     abstract fun initGson(): Gson
-    fun initRetrofit(gson: Gson): Retrofit {
-        val okHttpClient = OkHttpClient.Builder()
+
+    open fun initHttpClient(): OkHttpClient {
+        return OkHttpClient.Builder()
                 .connectTimeout(2, TimeUnit.MINUTES)
                 .readTimeout(45, TimeUnit.SECONDS)
                 .writeTimeout(20, TimeUnit.SECONDS)
                 .build()
+    }
+
+    fun initRetrofit(gson: Gson): Retrofit {
         return Retrofit.Builder()
                 .baseUrl(url)
-                .client(okHttpClient)
+                .client(initHttpClient())
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build()
     }
+
+
 
     abstract fun initService(retrofit: Retrofit): Any
     override fun keysIsEmpty(): Boolean {

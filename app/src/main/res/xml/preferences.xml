@@ -24,6 +24,26 @@
             android:key="@string/binance_secret_key"
             android:title="@string/secret_key" />
     </androidx.preference.PreferenceCategory>
+    <androidx.preference.PreferenceCategory
+        android:key="proxy_settings"
+        android:title="Proxy Settings">
+        <androidx.preference.EditTextPreference
+            android:dialogLayout="@layout/keys_dialog"
+            android:key="@string/proxy_url"
+            android:title="Proxy URL" />
+        <androidx.preference.EditTextPreference
+            android:dialogLayout="@layout/keys_dialog"
+            android:key="@string/proxy_port"
+            android:title="Proxy Port" />
+        <androidx.preference.EditTextPreference
+            android:dialogLayout="@layout/keys_dialog"
+            android:key="@string/proxy_username"
+            android:title="Proxy username" />
+        <androidx.preference.EditTextPreference
+            android:dialogLayout="@layout/keys_dialog"
+            android:key="@string/proxy_password"
+            android:title="Proxy password" />
+    </androidx.preference.PreferenceCategory>
     <androidx.preference.PreferenceCategory android:title="Trading preferences">
         <CheckBoxPreference
             android:key="@string/auto_trade"

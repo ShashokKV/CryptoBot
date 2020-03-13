@@ -7,30 +7,25 @@ import com.google.gson.annotations.SerializedName
 import java.util.*
 
 class BinanceCurrenciesListResponse : BinanceResponse(), CurrenciesListResponse {
-
-    @SerializedName("info")
-    @Expose
-    var info: Array<Info>? = null
+    var assetDetails: MutableList<AssetDetail>? = null
 
     override fun getCurrencies(): List<CurrenciesResponse> {
-        return if (info == null) ArrayList() else listOf(*info!!)
+        return assetDetails ?: ArrayList()
     }
 
-    class Info : CurrenciesResponse {
-        @SerializedName("symbol")
+    inner class AssetDetail: CurrenciesResponse {
+        override var currencyName: String? = null
         @Expose
-        override val currencyName: String? = null
-        @SerializedName("walletStatus")
+        @SerializedName("depositStatus")
+        val depositStatus: Boolean = false
         @Expose
-        private val walletStatus: String? = null
-        @SerializedName("withdrawFee")
-        @Expose
-        private val withdrawFee: Double? = null
+        @SerializedName("withdrawStatus")
+        val withdrawStatus: Boolean = false
 
         override val isActive: Boolean
-            get() = if (walletStatus == null) false else walletStatus == "normal"
-
-        override val fee: Double?
-            get() = withdrawFee ?: withdrawFee
+            get() = depositStatus && withdrawStatus
+        @Expose
+        @SerializedName("withdrawFee")
+        override val fee: Double = 0.0
     }
 }

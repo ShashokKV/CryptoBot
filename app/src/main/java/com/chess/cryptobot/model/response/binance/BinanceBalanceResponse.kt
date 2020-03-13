@@ -1,12 +1,14 @@
 package com.chess.cryptobot.model.response.binance
 
-import com.chess.cryptobot.model.response.BalanceResponse
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 
-class BinanceBalanceResponse : BinanceResponse(), BalanceResponse {
-    @SerializedName("value")
+class BinanceBalanceResponse : BinanceResponse() {
     @Expose
-    override val amount: Double = 0.0
+    val coinName: String? = null
+
+    @SerializedName("free")
+    @Expose
+    val amount: Double = 0.0
 
 }

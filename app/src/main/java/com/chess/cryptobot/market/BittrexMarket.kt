@@ -1,5 +1,6 @@
 package com.chess.cryptobot.market
 
+import android.content.Context
 import com.chess.cryptobot.api.BittrexMarketService
 import com.chess.cryptobot.exceptions.BittrexException
 import com.chess.cryptobot.exceptions.MarketException
@@ -17,6 +18,12 @@ import java.util.*
 
 class BittrexMarket internal constructor(url: String, apiKey: String?, secretKey: String?) : MarketRequest(url, apiKey, secretKey) {
     private val service: BittrexMarketService
+
+    init {
+        algorithm = "HmacSHA512"
+        service = initService(initRetrofit(initGson())) as BittrexMarketService
+    }
+
     override fun getMarketName(): String {
         return Market.BITTREX_MARKET
     }
@@ -235,7 +242,7 @@ class BittrexMarket internal constructor(url: String, apiKey: String?, secretKey
     }
 
     @Throws(MarketException::class)
-    override fun getHistory(): List<History> {
+    override fun getHistory(context: Context?): List<History> {
         if (keysIsEmpty()) return listOf(History())
         path = url + "account/getorderhistory?"
         val params: MutableMap<String, String> = LinkedHashMap()
@@ -308,9 +315,4 @@ class BittrexMarket internal constructor(url: String, apiKey: String?, secretKey
             }
             return response.history
         }
-
-    init {
-        algorithm = "HmacSHA512"
-        service = initService(initRetrofit(initGson())) as BittrexMarketService
-    }
 }

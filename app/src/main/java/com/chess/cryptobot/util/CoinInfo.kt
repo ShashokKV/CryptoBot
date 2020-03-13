@@ -2,9 +2,8 @@ package com.chess.cryptobot.util
 
 import com.chess.cryptobot.exceptions.SyncServiceException
 import com.chess.cryptobot.market.Market
-import com.chess.cryptobot.model.response.CurrenciesResponse
+import com.chess.cryptobot.model.response.bittrex.BittrexGenericResponse
 import java.util.*
-import java.util.function.Consumer
 
 class CoinInfo(markets: List<Market?>) {
     private val statuses: MutableMap<String, Map<String?, Boolean?>> = HashMap()
@@ -28,13 +27,14 @@ class CoinInfo(markets: List<Market?>) {
         for (market in markets) {
             if (market==null) break
             val currencies = market.getCurrencies()
-            val statuses: MutableMap<String?, Boolean?> = HashMap()
             val fees: MutableMap<String?, Double?> = HashMap()
-            currencies.forEach(Consumer { currency: CurrenciesResponse? ->
-                val currencyName = currency!!.currencyName
+            val statuses: MutableMap<String?, Boolean?> = HashMap()
+            for (currency in currencies) {
+                val currencyName = currency.currencyName
                 statuses[currencyName] = currency.isActive
-                fees[currencyName] = currency.fee
-            })
+                fees[currencyName] = (currency as BittrexGenericResponse).fee
+            }
+
             this.statuses[market.getMarketName()] = statuses
             this.fees[market.getMarketName()] = fees
         }
