@@ -33,7 +33,7 @@ class BinanceProxySelector(proxyUrl: String?,
             secureProxy.add(Proxy.NO_PROXY)
         }else {
             val port = proxyPort ?: "80"
-            secureProxy.add(Proxy(Proxy.Type.HTTP, InetSocketAddress(
+            secureProxy.add(Proxy(Proxy.Type.HTTP, InetSocketAddress.createUnresolved(
                     proxyUrl, port.toInt())))
         }
     }

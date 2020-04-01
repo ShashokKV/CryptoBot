@@ -39,7 +39,7 @@ class HistoryTask(private val holder: ContextHolder, private val state: HistoryH
             historyHolder.makeToast(result)
             return
         }
-        historyList.forEach(Consumer { viewItem: History? -> historyHolder.add(viewItem!!) })
+        historyList.forEach { viewItem: History? -> historyHolder.add(viewItem!!) }
     }
 
     override fun doInOnCanceled(result: String?, holder: ContextHolder?) {}

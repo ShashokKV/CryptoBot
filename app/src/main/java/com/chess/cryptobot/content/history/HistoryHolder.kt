@@ -13,6 +13,7 @@ import com.chess.cryptobot.task.HistoryTask
 class HistoryHolder(fragment: Fragment, private val state: State) : ContextHolder(fragment) {
 
     init {
+        init()
         updateAllItems()
     }
 

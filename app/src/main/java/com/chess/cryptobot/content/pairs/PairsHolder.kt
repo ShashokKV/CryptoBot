@@ -21,6 +21,10 @@ class PairsHolder(fr: Fragment) : ContextHolder(fr) {
     private var allPairsPrefs: AllPairsPreferences? = null
     private val serialExecutor: SerialExecutor = SerialExecutor()
 
+    init {
+        init()
+    }
+
     fun initAvailablePairs() {
         val availablePairsTask = AvailablePairsTask(this)
         availablePairsTask.executeOnExecutor(serialExecutor, 0)

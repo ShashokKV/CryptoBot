@@ -18,7 +18,7 @@ class PairsFragment : MainFragment<PairsAdapter.PairsViewHolder>() {
     }
 
     public override fun initHolder(): ContextHolder {
-        return PairsHolder(this).init()
+        return PairsHolder(this)
     }
 
     public override fun initRecyclerView(view: View): RecyclerView {

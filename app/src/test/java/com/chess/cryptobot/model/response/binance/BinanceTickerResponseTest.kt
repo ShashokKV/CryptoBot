@@ -27,7 +27,7 @@ class BinanceTickerResponseTest {
                 "  \"firstId\": 28385,   // First tradeId\n" +
                 "  \"lastId\": 28460,    // Last tradeId\n" +
                 "  \"count\": 76         // Trade count\n" +
-                "}", BinanceTickerResponse::class.java)
+                "}", BinanceResponse::class.java)
         assert(binanceTickerResponse.marketName == "BNB/BTC")
     }
 }

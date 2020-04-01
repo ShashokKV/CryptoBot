@@ -1,6 +1,5 @@
 package com.chess.cryptobot.task
 
-import com.chess.cryptobot.R
 import com.chess.cryptobot.content.ContextHolder
 import com.chess.cryptobot.content.pairs.PairsHolder
 import com.chess.cryptobot.exceptions.MarketException
@@ -59,7 +58,7 @@ class AvailablePairsTask(pairsHolder: PairsHolder) : MarketTask<Int, MutableList
 
     override fun doInPostExecute(result: MutableList<String>?, holder: ContextHolder) {
         val pairsHolder = holder as PairsHolder
-        pairsHolder.setAvailablePairs(excludePairs(result, holder))
+        pairsHolder.setAvailablePairs(excludePairs(result))
         pairsHolder.setVolumes(bittrexVolumes, binanceVolumes)
         pairsHolder.removeInvalidPairs()
         pairsHolder.updateAllItems()
@@ -67,10 +66,7 @@ class AvailablePairsTask(pairsHolder: PairsHolder) : MarketTask<Int, MutableList
 
     override fun doInOnCanceled(result: MutableList<String>?, holder: ContextHolder?) {}
 
-    private fun excludePairs(allPairNames: MutableList<String>?, holder: ContextHolder?): MutableList<String>? {
-        val context = holder!!.context
-        val invalidPairs = listOf(*context!!.getString(R.string.ignored_pairs).split("#").toTypedArray())
-        allPairNames?.removeAll(invalidPairs)
+    private fun excludePairs(allPairNames: MutableList<String>?): MutableList<String>? {
         val usdPairs: MutableList<String> = ArrayList()
         allPairNames?.forEach { marketName: String? -> if (marketName?.startsWith("USD/") == true) usdPairs.add(marketName) }
         allPairNames?.removeAll(usdPairs)

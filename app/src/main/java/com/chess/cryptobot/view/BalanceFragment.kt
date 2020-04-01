@@ -95,7 +95,7 @@ class BalanceFragment : MainFragment<BalanceAdapter.BalanceViewHolder>() {
     }
 
     public override fun initHolder(): ContextHolder {
-        return BalanceHolder(this).init()
+        return BalanceHolder(this)
     }
 
     public override fun initRecyclerView(view: View): RecyclerView {

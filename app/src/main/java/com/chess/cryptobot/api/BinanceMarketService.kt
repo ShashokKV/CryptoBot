@@ -6,22 +6,22 @@ import retrofit2.http.*
 
 interface BinanceMarketService {
     @GET("sapi/v1/capital/config/getall")
-    fun getBalance(@QueryMap(encoded = true) options: Map<String, String>, @HeaderMap headers: Map<String, String>): Call<BinanceBalanceResponse>
+    fun getBalance(@QueryMap(encoded = true) options: Map<String, String>, @HeaderMap headers: Map<String, String>): Call<BinanceResponse>
 
     @GET("api/v3/depth")
-    fun getOrderBook(@QueryMap(encoded = true) options: Map<String, String>): Call<BinanceOrderBookResponse>
+    fun getOrderBook(@QueryMap(encoded = true) options: Map<String, String>): Call<BinanceResponse>
 
     @GET("api/v3/ticker/24hr")
     fun getTicker(): Call<BinanceResponse>
 
     @GET("wapi/v3/assetDetail.html")
-    fun getAssetDetails(@QueryMap(encoded = true) options: Map<String, String>, @HeaderMap headers: Map<String, String>): Call<BinanceCurrenciesListResponse>
+    fun getAssetDetails(@QueryMap(encoded = true) options: Map<String, String>, @HeaderMap headers: Map<String, String>): Call<BinanceResponse>
 
     @GET("api/v3/exchangeInfo")
-    fun getExchangeInfo(): Call<BinanceTradeLimitResponse>
+    fun getExchangeInfo(): Call<BinanceResponse>
 
     @GET("wapi/v3/depositAddress.html")
-    fun getAddress(@QueryMap(encoded = true) options: Map<String, String>, @HeaderMap headers: Map<String, String>): Call<BinanceAddressResponse>
+    fun getAddress(@QueryMap(encoded = true) options: Map<String, String>, @HeaderMap headers: Map<String, String>): Call<BinanceResponse>
 
     @FormUrlEncoded
     @POST("wapi/v3/withdraw.html")
@@ -40,13 +40,14 @@ interface BinanceMarketService {
                  @Field(value = "quantity", encoded = true) quantity: String,
                  @Field(value = "price", encoded = true) price: String,
                  @Field(value = "timestamp", encoded = true) timestamp: String,
+                 @Field(value = "signature", encoded = true) signature: String,
                  @HeaderMap headers: Map<String, String>): Call<BinanceResponse>
 
     @GET("wapi/v3/depositHistory.html")
-    fun getDepositHistory(@QueryMap(encoded = true) options: Map<String, String>, @HeaderMap headers: Map<String, String>): Call<BinanceDepositHistoryResponse>
+    fun getDepositHistory(@QueryMap(encoded = true) options: Map<String, String>, @HeaderMap headers: Map<String, String>): Call<BinanceResponse>
 
     @GET("wapi/v3/withdrawHistory.html")
-    fun getWithdrawHistory(@QueryMap(encoded = true) options: Map<String, String>, @HeaderMap headers: Map<String, String>): Call<BinanceWithdrawHistoryResponse>
+    fun getWithdrawHistory(@QueryMap(encoded = true) options: Map<String, String>, @HeaderMap headers: Map<String, String>): Call<BinanceResponse>
 
     @GET("api/v3/allOrders")
     fun getAllOrders(@QueryMap(encoded = true) options: Map<String, String>, @HeaderMap headers: Map<String, String>): Call<BinanceResponse>

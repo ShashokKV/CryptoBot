@@ -4,7 +4,7 @@ import com.google.gson.GsonBuilder
 import org.junit.Test
 
 
-class AssetDetailDeserializerTest {
+class BinanceDeserializerTest {
 
     @Test
     fun deserialize() {
@@ -28,9 +28,9 @@ class AssetDetailDeserializerTest {
                 "}"
 
         val builder = GsonBuilder()
-        builder.registerTypeAdapter(BinanceResponse::class.java, AssetDetailDeserializer())
+        builder.registerTypeAdapter(BinanceResponse::class.java, BinanceDeserializer())
         val gson = builder.create()
-        val response: BinanceCurrenciesListResponse = gson.fromJson(json, BinanceCurrenciesListResponse::class.java)
+        val response: BinanceResponse = gson.fromJson(json, BinanceResponse::class.java)
 
         val detail = response.assetDetails?.filter { assetDetail -> assetDetail.currencyName.equals("SKY") }
         assert(detail?.get(0)?.fee == 0.01)

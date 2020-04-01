@@ -3,7 +3,7 @@ package com.chess.cryptobot.enricher
 import com.chess.cryptobot.model.Pair
 import com.chess.cryptobot.model.Price
 import com.chess.cryptobot.model.response.OrderBookResponse
-import com.chess.cryptobot.model.response.binance.BinanceOrderBookResponse
+import com.chess.cryptobot.model.response.binance.BinanceResponse
 import com.chess.cryptobot.model.response.bittrex.BittrexResponse
 
 class PairResponseEnricher(val pair: Pair) {
@@ -25,7 +25,7 @@ class PairResponseEnricher(val pair: Pair) {
             pair.bittrexAskQuantity = response.asks()?.get(0)?.quantity ?: 0.0
             pair.bittrexBid = response.bids()?.get(0)?.value ?: 0.0
             pair.bittrexBidQuantity = response.bids()?.get(0)?.quantity ?: 0.0
-        } else if (response is BinanceOrderBookResponse) {
+        } else if (response is BinanceResponse) {
             binanceResponse = response
             pair.binanceAsk = response.asks()?.get(0)?.value ?: 0.0
             pair.binanceAskQuantity = response.asks()?.get(0)?.quantity ?: 0.0

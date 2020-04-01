@@ -17,8 +17,6 @@
     <string name="binance_api_key">binance_api_key</string>
     <string name="binance_secret_key">binance_secret_key</string>
 
-    <string name="ignored_pairs">BTC/LUNA#BTC/CPT#BTC/PLA</string>
-
     <string name="crypto_icon">crypto Icon</string>
     <string name="currency">Currency</string>
     <string name="binance">Binance</string>
@@ -33,7 +31,7 @@
     <!--    <string name="bittrex_url">http://10.0.2.2:8888/crypt/bittrex/</string>-->
     <!--    <string name="binance_url">http://10.0.2.2:8888/crypt/binance/</string>-->
     <string name="bittrex_url">https://api.bittrex.com/api/v1.1/</string>
-    <string name="binance_url">https://api.livecoin.net/</string>
+    <string name="binance_url">https://api.binance.com/</string>
 
     <string name="_0_0d">0.0d</string>
     <string name="set_min_balance">Set min balance to&#160; $coinName</string>
@@ -68,4 +66,6 @@
     <string name="proxy_username">proxy_username</string>
     <string name="proxy_password">proxy_password</string>
     <string name="proxy_port">proxy_port</string>
+    <string name="binance_withdrawal_api_key">binance_withdrawal_api_key</string>
+    <string name="binance_withdrawal_secret_key">binance_withdrawal_secret_key</string>
 </resources>

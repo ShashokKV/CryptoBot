@@ -18,7 +18,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 @RunWith(JUnit4.class)
 public class MarketWorkerTest {
@@ -29,7 +29,7 @@ public class MarketWorkerTest {
     public void setUp() {
         mContext = ApplicationProvider.getApplicationContext();
         mExecutor = Executors.newSingleThreadExecutor();
-        initAvailablePairs();
+        //initAvailablePairs();
     }
 
     @Test
@@ -49,12 +49,8 @@ public class MarketWorkerTest {
         AllPairsPreferences preferences = new AllPairsPreferences(ApplicationProvider.getApplicationContext());
 
         HashSet<String> availablePairs = new HashSet<>();
-        availablePairs.add("BTC/ZEC");
-        availablePairs.add("BTC/DASH");
-        availablePairs.add("BTC/XRP");
+        availablePairs.add("BTC/ETH");
         availablePairs.add("BTC/GRS");
-        availablePairs.add("BTC/DGB");
-        availablePairs.add("BTC/WAVES");
 
         preferences.setItems(availablePairs);
     }

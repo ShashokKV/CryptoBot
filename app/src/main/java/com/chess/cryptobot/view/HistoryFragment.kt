@@ -23,7 +23,7 @@ class HistoryFragment(private var state: HistoryHolder.State? = HistoryHolder.St
     }
 
     override fun initHolder(): ContextHolder {
-        return HistoryHolder(this, state as HistoryHolder.State).init()
+        return HistoryHolder(this, state as HistoryHolder.State)
     }
 
     override fun initRecyclerView(view: View): RecyclerView {

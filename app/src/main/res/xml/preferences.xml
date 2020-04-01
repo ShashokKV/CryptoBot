@@ -23,6 +23,14 @@
             android:dialogLayout="@layout/keys_dialog"
             android:key="@string/binance_secret_key"
             android:title="@string/secret_key" />
+        <androidx.preference.EditTextPreference
+            android:dialogLayout="@layout/keys_dialog"
+            android:key="@string/binance_withdrawal_api_key"
+            android:title="Withdrawal api key" />
+        <androidx.preference.EditTextPreference
+            android:dialogLayout="@layout/keys_dialog"
+            android:key="@string/binance_withdrawal_secret_key"
+            android:title="Withdrawal secret key" />
     </androidx.preference.PreferenceCategory>
     <androidx.preference.PreferenceCategory
         android:key="proxy_settings"

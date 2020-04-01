@@ -20,6 +20,11 @@ class BalanceHolder(fragment: Fragment) : ContextHolder(fragment) {
     private var iconUrls: Map<String, String>? = null
     private val serialExecutor: SerialExecutor = SerialExecutor()
 
+    init {
+        super.init()
+        hasKeys = checkIfHasKeys()
+    }
+
     private fun checkIfHasKeys(): Boolean {
         val factory = MarketFactory()
         for (market in factory.getMarkets(this)) {
@@ -40,12 +45,6 @@ class BalanceHolder(fragment: Fragment) : ContextHolder(fragment) {
         return viewItems
     }
 
-    override fun init(): ContextHolder {
-        super.init()
-        hasKeys = checkIfHasKeys()
-        return this
-    }
-
     fun add(coinName: String) {
         val balance = Balance(coinName)
         if (!viewItems.contains(balance))
@@ -55,7 +54,7 @@ class BalanceHolder(fragment: Fragment) : ContextHolder(fragment) {
     override fun add(viewItem: ViewItem) {
         super.add(viewItem)
         val balance = viewItem as Balance
-        balance.setStatuses(binanceStatuses[balance.name]?: false, bittrexStatuses[balance.name]?: false)
+        balance.setStatuses(binanceStatuses[balance.name]?: true, bittrexStatuses[balance.name]?: true)
         if (iconUrls != null) balance.coinUrl = iconUrls!![balance.name]
         updateImage(balance)
         if (hasKeys) updateAmount(balance)
@@ -63,7 +62,7 @@ class BalanceHolder(fragment: Fragment) : ContextHolder(fragment) {
 
     public override fun updateItem(item: ViewItem) {
         val balance = item as Balance
-        balance.setStatuses(binanceStatuses[balance.name]?: false, bittrexStatuses[balance.name]?: false)
+        balance.setStatuses(binanceStatuses[balance.name]?: true, bittrexStatuses[balance.name]?: true)
         if (iconUrls != null) balance.coinUrl = iconUrls!![balance.name]
         updateImage(balance)
         if (hasKeys) updateAmount(balance)

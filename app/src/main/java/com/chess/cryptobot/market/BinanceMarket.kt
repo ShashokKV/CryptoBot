@@ -8,7 +8,8 @@ import com.chess.cryptobot.exceptions.MarketException
 import com.chess.cryptobot.model.History
 import com.chess.cryptobot.model.Pair
 import com.chess.cryptobot.model.response.*
-import com.chess.cryptobot.model.response.binance.*
+import com.chess.cryptobot.model.response.binance.BinanceDeserializer
+import com.chess.cryptobot.model.response.binance.BinanceResponse
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import okhttp3.OkHttpClient
@@ -24,7 +25,7 @@ import kotlin.collections.HashMap
 
 
 class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey: String?,
-                                         private val proxySelector: BinanceProxySelector) : MarketRequest(url, apiKey, secretKey) {
+                                              private val proxySelector: BinanceProxySelector) : MarketRequest(url, apiKey, secretKey) {
 
     private val service: BinanceMarketService
     var balances: MutableMap<String, Double> = HashMap()
@@ -36,7 +37,6 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
     }
 
     override fun initHttpClient(): OkHttpClient {
-
 
         return OkHttpClient.Builder()
                 .connectTimeout(2, TimeUnit.MINUTES)
@@ -53,7 +53,7 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
 
     override fun initGson(): Gson {
         return GsonBuilder()
-                .registerTypeAdapter(BinanceResponse::class.java, AssetDetailDeserializer())
+                .registerTypeAdapter(BinanceResponse::class.java, BinanceDeserializer())
                 .create()
     }
 
@@ -69,7 +69,7 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
         if (balance != null) return balance
 
         val params: MutableMap<String, String> = LinkedHashMap()
-        params["timestamp"] = System.currentTimeMillis().toString()
+        addTimestamp(params)
         val headers: MutableMap<String, String> = HashMap()
         val hash = makeHash(params)
         headers["X-MBX-APIKEY"] = apiKey
@@ -85,20 +85,20 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
 
         balances = HashMap()
         response.responsesList?.forEach { balanceResponse ->
-            balances[(balanceResponse as BinanceBalanceResponse).coinName!!] = balanceResponse.amount
+            balances[balanceResponse.coinName!!] = balanceResponse.amount
         }
         return balances[coinName] ?: 0.0
     }
 
     @Throws(BinanceException::class)
     override fun getOrderBook(pairName: String): OrderBookResponse {
-        val response: BinanceOrderBookResponse
+        val response: BinanceResponse
         val params: MutableMap<String, String> = LinkedHashMap()
         params["symbol"] = pairName
         params["limit"] = "10"
         val call = service.getOrderBook(params)
         response = try {
-            execute(call) as BinanceOrderBookResponse
+            execute(call) as BinanceResponse
         } catch (e: MarketException) {
             throw BinanceException(e.message!!)
         }
@@ -118,21 +118,22 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
         } catch (e: IOException) {
             throw BinanceException(e.message!!)
         }
-        return response.responsesList?.filterIsInstance<BinanceTickerResponse>()?: ArrayList()
+        return response.responsesList ?: ArrayList()
     }
 
     @Throws(MarketException::class)
     override fun getCurrencies(): List<CurrenciesResponse> {
+        if (keysIsEmpty()) return ArrayList()
         val params: MutableMap<String, String> = LinkedHashMap()
-        params["timestamp"] = System.currentTimeMillis().toString()
+        addTimestamp(params)
         val headers: MutableMap<String, String> = HashMap()
         val hash = makeHash(params)
         headers["X-MBX-APIKEY"] = apiKey
         params["signature"] = hash
-        val response: BinanceCurrenciesListResponse
+        val response: BinanceResponse
         val call = service.getAssetDetails(params, headers)
         response = try {
-            execute(call) as BinanceCurrenciesListResponse
+            execute(call) as BinanceResponse
         } catch (e: MarketException) {
             throw BinanceException(e.message!!)
         }
@@ -141,10 +142,10 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
 
     @Throws(MarketException::class)
     override fun getMinQuantity(): TradeLimitResponse {
-        val response: BinanceTradeLimitResponse
+        val response: BinanceResponse
         val call = service.getExchangeInfo()
         response = try {
-            execute(call) as BinanceTradeLimitResponse
+            execute(call) as BinanceResponse
         } catch (e: MarketException) {
             throw BinanceException(e.message!!)
         }
@@ -156,15 +157,15 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
         if (keysIsEmpty()) return null
         val params: MutableMap<String, String> = LinkedHashMap()
         params["asset"] = coinName
-        params["timestamp"] = System.currentTimeMillis().toString()
+        addTimestamp(params)
         val hash = makeHash(params)
         val headers: MutableMap<String, String> = HashMap()
         headers["X-MBX-APIKEY"] = apiKey
-        headers["signature"] = hash
-        val response: BinanceAddressResponse
+        params["signature"] = hash
+        val response: BinanceResponse
         val call = service.getAddress(params, headers)
         response = try {
-            execute(call) as BinanceAddressResponse
+            execute(call) as BinanceResponse
         } catch (e: MarketException) {
             throw BinanceException(e.message!!)
         }
@@ -179,11 +180,11 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
         params["amount"] = String.format(Locale.US, "%.8f", amount)
         params["asset"] = coinName
         params["address"] = address
-        params["timestamp"] = System.currentTimeMillis().toString()
+        addTimestamp(params)
         val hash = makeHash(params)
         val headers: MutableMap<String, String> = HashMap()
         headers["X-MBX-APIKEY"] = apiKey
-        headers["signature"] = hash
+        params["signature"] = hash
         val call = service.payment(
                 params["amount"]!!,
                 params["asset"]!!,
@@ -217,11 +218,11 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
         params["quantity"] = String.format(Locale.US, "%.8f", amount)
         params["price"] = String.format(Locale.US, "%.8f", price)
         params["newOrderRespType"] = "ACK"
-        params["timestamp"] = System.currentTimeMillis().toString()
+        addTimestamp(params)
         val hash = makeHash(params)
         val headers: MutableMap<String, String> = HashMap()
         headers["X-MBX-APIKEY"] = apiKey
-        headers["signature"] = hash
+        params["signature"] = hash
         val call = service.newOrder(
                 params["symbol"]!!,
                 params["side"]!!,
@@ -230,6 +231,7 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
                 params["quantity"]!!,
                 params["price"]!!,
                 params["timestamp"]!!,
+                params["signature"]!!,
                 headers)
         try {
             execute(call)
@@ -242,11 +244,11 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
     override fun getOpenOrders(): List<History> {
         if (keysIsEmpty()) return listOf(History())
         val params: MutableMap<String, String> = LinkedHashMap()
-        params["timestamp"] = System.currentTimeMillis().toString()
+        addTimestamp(params)
         val hash = makeHash(params)
         val headers: MutableMap<String, String> = HashMap()
         headers["X-MBX-APIKEY"] = apiKey
-        headers["signature"] = hash
+        params["signature"] = hash
         val response: BinanceResponse
         val call = service.getOpenOrders(params, headers)
         response = try {
@@ -254,7 +256,7 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
         } catch (e: MarketException) {
             throw BinanceException(e.message!!)
         }
-        return HistoryResponseFactory(response.responsesList?.filterIsInstance<BinanceOrdersResponse>()).history
+        return HistoryResponseFactory(response.responsesList).history
     }
 
     @Throws(MarketException::class)
@@ -284,11 +286,11 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
         val params: MutableMap<String, String> = LinkedHashMap()
         params["symbol"] = pairName
         params["startTime"] = startTime
-        params["timestamp"] = System.currentTimeMillis().toString()
+        addTimestamp(params)
         val hash = makeHash(params)
         val headers: MutableMap<String, String> = HashMap()
         headers["X-MBX-APIKEY"] = apiKey
-        headers["signature"] = hash
+        params["signature"] = hash
         val response: BinanceResponse
         val call = service.getAllOrders(params, headers)
         try {
@@ -296,44 +298,48 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
         } catch (e: MarketException) {
             throw BinanceException(e.message!!)
         }
-        return HistoryResponseFactory(response.responsesList?.filterIsInstance<BinanceAllOrdersResponse>()?.filter { order -> order.status.equals("FILLED") }).history
+        return HistoryResponseFactory(response.responsesList?.filter { order -> order.status.equals("FILLED") }).history
     }
 
     @Throws(BinanceException::class)
     private fun getDepositHistory(startTime: String): List<History> {
         val params: MutableMap<String, String> = LinkedHashMap()
-        params["timestamp"] = System.currentTimeMillis().toString()
+        addTimestamp(params)
         params["startTime"] = startTime
         val hash = makeHash(params)
         val headers: MutableMap<String, String> = HashMap()
         headers["X-MBX-APIKEY"] = apiKey
-        headers["signature"] = hash
-        val response: BinanceDepositHistoryResponse
+        params["signature"] = hash
+        val response: BinanceResponse
         val call = service.getDepositHistory(params, headers)
         response = try {
             execute(call)
         } catch (e: MarketException) {
             throw BinanceException(e.message!!)
-        } as BinanceDepositHistoryResponse
+        } as BinanceResponse
         return HistoryResponseFactory(response.depositList).history
     }
 
     @Throws(BinanceException::class)
     private fun getWithdrawHistory(startTime: String): List<History> {
         val params: MutableMap<String, String> = LinkedHashMap()
-        params["timestamp"] = System.currentTimeMillis().toString()
+        addTimestamp(params)
         params["startTime"] = startTime
         val hash = makeHash(params)
         val headers: MutableMap<String, String> = HashMap()
         headers["X-MBX-APIKEY"] = apiKey
-        headers["signature"] = hash
-        val response: BinanceWithdrawHistoryResponse
+        params["signature"] = hash
+        val response: BinanceResponse
         val call = service.getWithdrawHistory(params, headers)
         response = try {
             execute(call)
         } catch (e: MarketException) {
             throw BinanceException(e.message!!)
-        } as BinanceWithdrawHistoryResponse
+        } as BinanceResponse
         return HistoryResponseFactory(response.withdrawList).history
+    }
+
+    private fun addTimestamp(params: MutableMap<String, String>) {
+        params["timestamp"] = Instant.now().toEpochMilli().toString()
     }
 }

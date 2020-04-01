@@ -9,6 +9,7 @@ import com.chess.cryptobot.exceptions.MarketException
 import com.chess.cryptobot.exceptions.SyncServiceException
 import com.chess.cryptobot.market.Market
 import com.chess.cryptobot.market.MarketFactory
+import com.chess.cryptobot.market.WithdrawalMarketFactory
 import com.chess.cryptobot.util.CoinInfo
 import com.chess.cryptobot.view.notification.NotificationBuilder
 import com.chess.cryptobot.view.notification.NotificationID
@@ -23,7 +24,7 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
     override fun onHandleIntent(intent: Intent?) {
         if (intent == null) return
         val coinNames: List<String> = intent.getStringArrayListExtra("coinNames")
-        val marketFactory = MarketFactory()
+        val marketFactory = WithdrawalMarketFactory()
         val preferences = PreferenceManager.getDefaultSharedPreferences(this)
         val markets = marketFactory.getMarkets(this, preferences)
         markets.forEach { market: Market? -> marketsMap[market!!.getMarketName()] = market }

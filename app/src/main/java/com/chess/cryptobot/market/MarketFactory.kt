@@ -6,7 +6,13 @@ import com.chess.cryptobot.R
 import com.chess.cryptobot.content.ContextHolder
 import java.util.*
 
-class MarketFactory {
+open class MarketFactory {
+    open val bittrexApiKey = R.string.bittrex_api_key
+    open val bittrexSecretKey = R.string.bittrex_secret_key
+    open val binanceApiKey = R.string.binance_api_key
+    open val binanceSecretKey = R.string.binance_secret_key
+
+
     fun getMarkets(contextHolder: ContextHolder): List<Market?> {
         return getMarkets(contextHolder.context, contextHolder.prefs.sharedPreferences)
     }
@@ -24,24 +30,31 @@ class MarketFactory {
         if (context == null) return null
         return when (marketName) {
             "bittrex" -> {
-                BittrexMarket(context.getString(R.string.bittrex_url),
-                        preferences.getString(context.getString(R.string.bittrex_api_key), null),
-                        preferences.getString(context.getString(R.string.bittrex_secret_key), null))
+                bittrexMarket(preferences, context)
             }
             "binance" -> {
-                val proxySelector = BinanceProxySelector(preferences.getString(context.getString(R.string.proxy_url), null),
-                        preferences.getString(context.getString(R.string.proxy_port), null),
-                        preferences.getString(context.getString(R.string.proxy_username), null),
-                        preferences.getString(context.getString(R.string.proxy_password), null))
-                BinanceMarket(context.getString(R.string.binance_url),
-                        preferences.getString(context.getString(R.string.binance_api_key), null),
-                        preferences.getString(context.getString(R.string.binance_secret_key), null),
-                        proxySelector)
-
+                binanceMarket(preferences, context)
             }
             else -> {
                 throw IllegalArgumentException("Unknown market: $marketName")
             }
         }
+    }
+
+    fun bittrexMarket(preferences: SharedPreferences, context: Context): BittrexMarket {
+        return BittrexMarket(context.getString(R.string.bittrex_url),
+                preferences.getString(context.getString(bittrexApiKey), null),
+                preferences.getString(context.getString(bittrexSecretKey), null))
+    }
+
+    fun binanceMarket(preferences: SharedPreferences, context: Context): BinanceMarket {
+        val proxySelector = BinanceProxySelector(preferences.getString(context.getString(R.string.proxy_url), null),
+                preferences.getString(context.getString(R.string.proxy_port), null),
+                preferences.getString(context.getString(R.string.proxy_username), null),
+                preferences.getString(context.getString(R.string.proxy_password), null))
+        return BinanceMarket(context.getString(R.string.binance_url),
+                preferences.getString(context.getString(binanceApiKey), null),
+                preferences.getString(context.getString(binanceSecretKey), null),
+                proxySelector)
     }
 }
