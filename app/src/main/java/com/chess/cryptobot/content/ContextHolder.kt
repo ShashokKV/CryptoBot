@@ -45,11 +45,11 @@ abstract class ContextHolder protected constructor(private val fr: Fragment) {
     }
 
     protected fun retainAll(viewItems: List<ViewItem>) {
-        val invalidItems = ArrayList(viewItems)
+        val invalidItems = ArrayList(this.viewItems)
         this.viewItems.retainAll(viewItems)
 
         invalidItems.forEach { viewItem ->
-            if (!viewItems.contains(viewItem)) {
+            if (!this.viewItems.contains(viewItem)) {
                 removeFromPrefs(viewItem)
             }
         }

@@ -41,13 +41,13 @@ open class MarketFactory {
         }
     }
 
-    fun bittrexMarket(preferences: SharedPreferences, context: Context): BittrexMarket {
+    private fun bittrexMarket(preferences: SharedPreferences, context: Context): BittrexMarket {
         return BittrexMarket(context.getString(R.string.bittrex_url),
                 preferences.getString(context.getString(bittrexApiKey), null),
                 preferences.getString(context.getString(bittrexSecretKey), null))
     }
 
-    fun binanceMarket(preferences: SharedPreferences, context: Context): BinanceMarket {
+    private fun binanceMarket(preferences: SharedPreferences, context: Context): BinanceMarket {
         val proxySelector = BinanceProxySelector(preferences.getString(context.getString(R.string.proxy_url), null),
                 preferences.getString(context.getString(R.string.proxy_port), null),
                 preferences.getString(context.getString(R.string.proxy_username), null),

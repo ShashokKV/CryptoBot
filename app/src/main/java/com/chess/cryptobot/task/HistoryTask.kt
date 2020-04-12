@@ -5,7 +5,6 @@ import com.chess.cryptobot.content.history.HistoryHolder
 import com.chess.cryptobot.exceptions.MarketException
 import com.chess.cryptobot.market.Market
 import com.chess.cryptobot.model.History
-import java.util.function.Consumer
 
 class HistoryTask(private val holder: ContextHolder, private val state: HistoryHolder.State) : MarketTask<Int, String?>(holder) {
     private var historyList: MutableList<History> = ArrayList()

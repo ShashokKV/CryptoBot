@@ -15,7 +15,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 @RunWith(JUnit4.class)
 public class BalanceWorkerTest {

@@ -8,7 +8,6 @@ import com.chess.cryptobot.content.balance.BalancePreferences
 import com.chess.cryptobot.exceptions.MarketException
 import com.chess.cryptobot.exceptions.SyncServiceException
 import com.chess.cryptobot.market.Market
-import com.chess.cryptobot.market.MarketFactory
 import com.chess.cryptobot.market.WithdrawalMarketFactory
 import com.chess.cryptobot.util.CoinInfo
 import com.chess.cryptobot.view.notification.NotificationBuilder
