@@ -32,6 +32,14 @@ open class BinanceResponse : MarketResponse, TickerResponse, HistoryResponse, Cu
         return message
     }
 
+    @SerializedName("coin")
+    @Expose
+    val coinName: String? = null
+
+    @SerializedName("free")
+    @Expose
+    val amount: Double = 0.0
+
     @SerializedName("withdrawList")
     @Expose
     val withdrawList: List<Withdraw>? = null
@@ -84,14 +92,6 @@ open class BinanceResponse : MarketResponse, TickerResponse, HistoryResponse, Cu
     @SerializedName("address")
     @Expose
     override val address: String? = null
-
-    @SerializedName("coin")
-    @Expose
-    val coinName: String? = null
-
-    @SerializedName("free")
-    @Expose
-    val amount: Double = 0.0
 
     var assetDetails: MutableList<AssetDetail>? = null
 

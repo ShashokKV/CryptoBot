@@ -10,32 +10,34 @@ import java.lang.reflect.Type
 class BinanceDeserializer : JsonDeserializer<BinanceResponse> {
     override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): BinanceResponse {
         val gson = Gson()
+        val response = BinanceResponse()
         if (json.isJsonArray) {
-            val response  = BinanceResponse()
             val binanceType = object : TypeToken<List<BinanceResponse>>() {}.type
             response.responsesList = context.deserialize<List<BinanceResponse>>(json, binanceType)
             return response
         }
 
-        val jsonObject = json.asJsonObject
-        if (!jsonObject.keySet().contains("assetDetail")) {
-            return gson.fromJson(json, BinanceResponse::class.java)
-        }
+        if (json.isJsonObject) {
+            val jsonObject = json.asJsonObject
+            if (jsonObject.keySet().contains("assetDetail")) {
+                val assets: MutableList<AssetDetail> = ArrayList()
 
-        val assets: MutableList<AssetDetail> = ArrayList()
-        for (entry in jsonObject.entrySet()) {
-            if (entry.key == "assetDetail") {
-                val assetObject = entry.value.asJsonObject
-                for (asset in assetObject.entrySet()) {
-                    val assetDetail = gson.fromJson(asset.value, AssetDetail::class.java)
-                    assetDetail.currencyName = asset.key
-                    assets.add(assetDetail)
+                for (entry in jsonObject.entrySet()) {
+                    if (entry.key == "assetDetail") {
+                        val assetObject = entry.value.asJsonObject
+                        for (asset in assetObject.entrySet()) {
+                            val assetDetail = gson.fromJson(asset.value, AssetDetail::class.java)
+                            assetDetail.currencyName = asset.key
+                            assets.add(assetDetail)
+                        }
+                    }
                 }
+                response.assetDetails = assets
+            }else {
+                return gson.fromJson(json, BinanceResponse::class.java)
             }
         }
 
-        val response = BinanceResponse()
-        response.assetDetails = assets
         return response
     }
 }

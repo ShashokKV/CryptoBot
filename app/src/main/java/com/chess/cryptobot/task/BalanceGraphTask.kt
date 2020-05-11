@@ -19,7 +19,6 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.*
-import java.util.function.Consumer
 import kotlin.math.roundToLong
 
 class BalanceGraphTask(balanceGraphFragment: BalanceGraphFragment) : AsyncTask<Void?, Int?, Void?>() {
@@ -44,29 +43,29 @@ class BalanceGraphTask(balanceGraphFragment: BalanceGraphFragment) : AsyncTask<V
 
     override fun onPostExecute(param: Void?) {
         val lineChart = createChart() ?: return
-        val startPosition = lineChart.xChartMax - MAX_X_RANGE
-        if (startPosition > 0) {
-            lineChart.moveViewToX(startPosition)
-        } else {
-            lineChart.invalidate()
-        }
+       // val startPosition = lineChart.xChartMax - MAX_X_RANGE
+        //if (startPosition > 0) {
+            lineChart.moveViewToX(MAX_X_RANGE)
+        //} else {
+        //    lineChart.invalidate()
+        //}
     }
 
     private fun createDataSets(balances: List<BtcBalance>?): List<ILineDataSet?> {
         val entries: MutableList<Entry> = ArrayList()
         val dataSet = LineDataSet(entries, "BTC")
         if (balances==null) return ArrayList()
-        balances.forEach(Consumer { btcBalance: BtcBalance ->
+        balances.forEach{btcBalance: BtcBalance ->
             val balance = btcBalance.balance
             val time = floatDateTime(btcBalance.dateCreated)
-            entries.add(Entry(floatDateTime(btcBalance.dateCreated), balance))
+            entries.add(Entry(time, balance))
             if (balance > maxBalance) maxBalance = balance
             if (minBalance == 0f) minBalance = maxBalance
             if (minBalance > balance) minBalance = balance
             if (time > maxTime) maxTime = time
             if (minTime == 0f) minTime = time
             if (minTime > time) minTime = time
-        })
+        }
 
         dataSet.axisDependency = YAxis.AxisDependency.LEFT
         dataSet.color = Color.rgb(250, 87, 136)
@@ -134,7 +133,7 @@ class BalanceGraphTask(balanceGraphFragment: BalanceGraphFragment) : AsyncTask<V
     }
 
     companion object {
-        private const val MAX_X_RANGE = 450000f
+        private const val MAX_X_RANGE = 100000f
     }
 
 }
