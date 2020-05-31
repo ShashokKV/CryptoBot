@@ -1,9 +1,9 @@
 package com.chess.cryptobot.model.response
 
-import java.time.LocalDateTime
+import java.time.ZonedDateTime
 
 interface HistoryResponse {
-    val historyTime: LocalDateTime?
+    val historyTime: ZonedDateTime?
     val historyName: String?
     val historyMarket: String?
     val historyAmount: Double?

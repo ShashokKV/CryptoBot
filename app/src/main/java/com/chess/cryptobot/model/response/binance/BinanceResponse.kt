@@ -4,9 +4,7 @@ import com.chess.cryptobot.model.Price
 import com.chess.cryptobot.model.response.*
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
-import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneOffset
+import java.time.*
 import java.util.*
 import kotlin.math.roundToLong
 
@@ -140,7 +138,7 @@ open class BinanceResponse : MarketResponse, TickerResponse, HistoryResponse, Cu
     @Expose
     var executedQuantity: Double = 0.0
 
-    override val historyTime: LocalDateTime
+    override val historyTime: ZonedDateTime
         get() = longToTime(time)
 
     override val historyName: String
@@ -172,9 +170,13 @@ open class BinanceResponse : MarketResponse, TickerResponse, HistoryResponse, Cu
     }
 
     companion object {
-        fun longToTime(longTime: Long) : LocalDateTime {
-            return LocalDateTime.ofEpochSecond((longTime / 1000.toFloat()).roundToLong(), 0,
-                    ZoneOffset.systemDefault().rules.getOffset(Instant.now()))
+        fun longToTime(longTime: Long) : ZonedDateTime {
+            return ZonedDateTime.ofLocal(
+                        LocalDateTime.ofEpochSecond((longTime / 1000.toFloat()).roundToLong(),
+                        0,
+                        ZoneOffset.UTC),
+                    ZoneId.of("Z"),
+                    ZoneOffset.UTC)
         }
     }
 }

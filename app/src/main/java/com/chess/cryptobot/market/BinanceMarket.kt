@@ -17,6 +17,7 @@ import retrofit2.Retrofit
 import java.io.IOException
 import java.time.Instant
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.ZoneOffset
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -340,6 +341,6 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
     }
 
     private fun addTimestamp(params: MutableMap<String, String>) {
-        params["timestamp"] = Instant.now().toEpochMilli().toString()
+        params["timestamp"] = Instant.now().atZone(ZoneId.of("Z")).toInstant().toEpochMilli().toString()
     }
 }

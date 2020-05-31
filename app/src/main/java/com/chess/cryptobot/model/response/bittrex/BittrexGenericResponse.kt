@@ -6,6 +6,9 @@ import com.chess.cryptobot.model.response.TickerResponse
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZoneOffset
+import java.time.ZonedDateTime
 import java.util.*
 
 class BittrexGenericResponse : TickerResponse, CurrenciesResponse, HistoryResponse {
@@ -89,11 +92,11 @@ class BittrexGenericResponse : TickerResponse, CurrenciesResponse, HistoryRespon
     override val fee: Double
         get() = txFee ?: 0.0
 
-    override val historyTime: LocalDateTime
+    override val historyTime: ZonedDateTime
         get() {
             var timeString = closed ?: opened
             timeString = timeString ?: lastUpdated
-            return LocalDateTime.parse(timeString).plusHours(3)
+            return ZonedDateTime.ofLocal(LocalDateTime.parse(timeString), ZoneId.of("Z"), ZoneOffset.UTC)
         }
 
     override val historyName: String

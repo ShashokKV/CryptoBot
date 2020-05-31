@@ -5,6 +5,7 @@ import com.chess.cryptobot.model.response.binance.BinanceResponse.Companion.long
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 import java.time.LocalDateTime
+import java.time.ZonedDateTime
 
 class Deposit : HistoryResponse {
 
@@ -12,7 +13,7 @@ class Deposit : HistoryResponse {
     @Expose
     private val insertTime: Long = 0
 
-    override val historyTime: LocalDateTime
+    override val historyTime: ZonedDateTime
         get() = longToTime(insertTime)
 
     @SerializedName("asset")
