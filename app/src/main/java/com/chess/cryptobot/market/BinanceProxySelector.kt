@@ -10,7 +10,6 @@ class BinanceProxySelector(proxyUrl: String?,
                            proxyPort: String?,
                            private val proxyUserName: String?,
                            private val proxyPassword: String?): ProxySelector() {
-    private var defaultProxySelector: ProxySelector? = getDefault()
 
     val proxyAuthenticator = Authenticator { _, response ->
         val builder = response.request().newBuilder()
@@ -23,12 +22,9 @@ class BinanceProxySelector(proxyUrl: String?,
         builder.build()
     }
 
-    private var noProxy = ArrayList<Proxy>()
     private var secureProxy = ArrayList<Proxy>()
 
     init {
-        noProxy.add(Proxy.NO_PROXY)
-
         if (proxyUrl == null) {
             secureProxy.add(Proxy.NO_PROXY)
         }else {
@@ -39,11 +35,7 @@ class BinanceProxySelector(proxyUrl: String?,
     }
 
     override fun select(uri: URI?): MutableList<Proxy> {
-        if (uri!!.path.endsWith("withdraw.html")) {
-            return secureProxy
-        }
-
-        return   defaultProxySelector?.select(uri) ?: noProxy
+        return secureProxy
     }
 
     override fun connectFailed(uri: URI?, sa: SocketAddress?, ioe: IOException?) {

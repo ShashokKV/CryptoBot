@@ -26,7 +26,7 @@ import kotlin.collections.HashMap
 
 
 class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey: String?,
-                                              private val proxySelector: BinanceProxySelector) : MarketRequest(url, apiKey, secretKey) {
+                                              private val proxySelector: BinanceProxySelector?) : MarketRequest(url, apiKey, secretKey) {
 
     private val service: BinanceMarketService
     var balances: MutableMap<String, Double> = HashMap()
@@ -39,13 +39,18 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
 
     override fun initHttpClient(): OkHttpClient {
 
-        return OkHttpClient.Builder()
+        var clientBuilder = OkHttpClient.Builder()
                 .connectTimeout(2, TimeUnit.MINUTES)
                 .readTimeout(45, TimeUnit.SECONDS)
                 .writeTimeout(20, TimeUnit.SECONDS)
-                .proxySelector(proxySelector)
-                .proxyAuthenticator(proxySelector.proxyAuthenticator)
-                .build()
+
+        if (proxySelector!=null) {
+            clientBuilder = clientBuilder
+                    .proxySelector(proxySelector)
+                    .proxyAuthenticator(proxySelector.proxyAuthenticator)
+        }
+
+        return  clientBuilder.build()
     }
 
     override fun getMarketName(): String {
@@ -186,12 +191,7 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
         val headers: MutableMap<String, String> = HashMap()
         headers["X-MBX-APIKEY"] = apiKey
         params["signature"] = hash
-        val call = service.payment(
-                params["amount"]!!,
-                params["asset"]!!,
-                params["address"]!!,
-                params["timestamp"]!!,
-                headers)
+        val call = service.payment(params, headers)
         try {
             execute(call)
         } catch (e: MarketException) {
@@ -224,16 +224,7 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
         val headers: MutableMap<String, String> = HashMap()
         headers["X-MBX-APIKEY"] = apiKey
         params["signature"] = hash
-        val call = service.newOrder(
-                params["symbol"]!!,
-                params["side"]!!,
-                params["type"]!!,
-                params["timeInForce"]!!,
-                params["quantity"]!!,
-                params["price"]!!,
-                params["timestamp"]!!,
-                params["signature"]!!,
-                headers)
+        val call = service.newOrder(params, headers)
         try {
             execute(call)
         } catch (e: MarketException) {

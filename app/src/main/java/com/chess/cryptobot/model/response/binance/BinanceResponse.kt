@@ -23,7 +23,7 @@ open class BinanceResponse : MarketResponse, TickerResponse, HistoryResponse, Cu
     var responsesList: List<BinanceResponse>? = null
 
     override fun success(): Boolean {
-        return success ?: true
+        return success ?: false
     }
 
     override fun message(): String? {

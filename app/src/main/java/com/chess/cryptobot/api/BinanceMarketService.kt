@@ -25,23 +25,11 @@ interface BinanceMarketService {
 
     @FormUrlEncoded
     @POST("wapi/v3/withdraw.html")
-    fun payment(@Field(value = "amount", encoded = true) amount: String,
-                @Field(value = "asset", encoded = true) asset: String,
-                @Field(value = "address", encoded = true) address: String,
-                @Field(value = "timestamp", encoded = true) timestamp: String,
-                @HeaderMap headers: Map<String, String>): Call<BinanceResponse>
+    fun payment(@FieldMap(encoded = true) options: Map<String, String>, @HeaderMap headers: Map<String, String>): Call<BinanceResponse>
 
     @FormUrlEncoded
     @POST("api/v3/order")
-    fun newOrder(@Field(value = "symbol", encoded = true) symbol: String,
-                 @Field(value = "side", encoded = true) side: String,
-                 @Field(value = "type", encoded = true) type: String,
-                 @Field(value = "timeInForce", encoded = true) timeInForce: String,
-                 @Field(value = "quantity", encoded = true) quantity: String,
-                 @Field(value = "price", encoded = true) price: String,
-                 @Field(value = "timestamp", encoded = true) timestamp: String,
-                 @Field(value = "signature", encoded = true) signature: String,
-                 @HeaderMap headers: Map<String, String>): Call<BinanceResponse>
+    fun newOrder(@FieldMap(encoded = true) options: Map<String, String>, @HeaderMap headers: Map<String, String>): Call<BinanceResponse>
 
     @GET("wapi/v3/depositHistory.html")
     fun getDepositHistory(@QueryMap(encoded = true) options: Map<String, String>, @HeaderMap headers: Map<String, String>): Call<BinanceResponse>
