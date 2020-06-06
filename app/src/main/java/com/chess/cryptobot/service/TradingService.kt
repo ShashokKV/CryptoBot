@@ -3,7 +3,7 @@ package com.chess.cryptobot.service
 import android.app.IntentService
 import android.app.NotificationManager
 import android.content.Intent
-import android.preference.PreferenceManager
+import androidx.preference.PreferenceManager
 import com.chess.cryptobot.exceptions.MarketException
 import com.chess.cryptobot.market.BinanceMarket
 import com.chess.cryptobot.market.BittrexMarket

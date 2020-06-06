@@ -7,7 +7,7 @@ import android.content.ServiceConnection
 import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.os.IBinder
-import android.preference.PreferenceManager
+import androidx.preference.PreferenceManager
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.EditText

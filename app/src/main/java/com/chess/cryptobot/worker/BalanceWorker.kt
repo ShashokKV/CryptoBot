@@ -1,7 +1,7 @@
 package com.chess.cryptobot.worker
 
 import android.content.Context
-import android.preference.PreferenceManager
+import androidx.preference.PreferenceManager
 import android.util.Log
 import androidx.work.Worker
 import androidx.work.WorkerParameters

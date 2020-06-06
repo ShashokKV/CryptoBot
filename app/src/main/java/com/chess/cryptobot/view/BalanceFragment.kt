@@ -23,7 +23,7 @@ import com.chess.cryptobot.view.adapter.RecyclerViewAdapter
 import com.chess.cryptobot.view.adapter.SwipeBalanceCallback
 import com.chess.cryptobot.view.dialog.CryptoNameDialog
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import java.util.*
+import kotlin.collections.ArrayList
 
 class BalanceFragment : MainFragment<BalanceAdapter.BalanceViewHolder>() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -75,7 +75,7 @@ class BalanceFragment : MainFragment<BalanceAdapter.BalanceViewHolder>() {
                         if (activity != null) {
                             val intent = Intent(activity, BalanceSyncService::class.java)
                             intent.putStringArrayListExtra("coinNames",
-                                    ArrayList(holder.prefs.items))
+                                    holder.prefs.items?.let { it1 -> ArrayList(it1) })
                             activity.startService(intent)
                         }
                     }

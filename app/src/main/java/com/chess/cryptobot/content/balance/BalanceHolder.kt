@@ -40,8 +40,8 @@ class BalanceHolder(fragment: Fragment) : ContextHolder(fragment) {
         return prefs
     }
 
-    public override fun initViewItems(itemNamesSet: Set<String>):MutableList<ViewItem> {
-        itemNamesSet.forEach { coinName -> addItemToList(Balance(coinName)) }
+    public override fun initViewItems(itemNamesSet: HashSet<String>?):MutableList<ViewItem> {
+        itemNamesSet?.forEach { coinName -> addItemToList(Balance(coinName)) }
         return viewItems
     }
 

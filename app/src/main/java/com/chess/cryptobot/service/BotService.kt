@@ -6,9 +6,9 @@ import android.app.Service
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
-import androidx.preference.PreferenceManager
 import android.util.Log
 import android.widget.Toast
+import androidx.preference.PreferenceManager
 import com.chess.cryptobot.R
 import com.chess.cryptobot.content.balance.BalancePreferences
 import com.chess.cryptobot.content.pairs.AllPairsPreferences
@@ -126,16 +126,20 @@ class BotService : Service() {
         }
 
         private fun initPairsFromPrefs() {
-            val coinNames: Set<String> = BalancePreferences(this@BotService).items
-            val allPairNames: Set<String> = AllPairsPreferences(this@BotService).items
+            val coinNames = BalancePreferences(this@BotService).items
+            val allPairNames = AllPairsPreferences(this@BotService).items
             pairs = ArrayList()
-            for (baseName in coinNames) {
-                for (marketName in coinNames) {
-                    if (baseName != marketName) {
-                        val pair = Pair(baseName, marketName)
-                        val pairName = pair.name
-                        if (allPairNames.contains(pairName)) {
-                            (pairs as ArrayList<Pair>).add(pair)
+            if (coinNames != null) {
+                for (baseName in coinNames) {
+                    for (marketName in coinNames) {
+                        if (baseName != marketName) {
+                            val pair = Pair(baseName, marketName)
+                            val pairName = pair.name
+                            if (allPairNames != null) {
+                                if (allPairNames.contains(pairName)) {
+                                    (pairs as ArrayList<Pair>).add(pair)
+                                }
+                            }
                         }
                     }
                 }

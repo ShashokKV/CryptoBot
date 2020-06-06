@@ -269,7 +269,7 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
     private fun getAllPairs(context: Context?): List<String> {
         val prefs = PairsPreferences(context)
         val pairsList = ArrayList<Pair>()
-        prefs.items.forEach { item -> pairsList.add(Pair.fromPairName(item)) }
+        prefs.items?.forEach { item -> pairsList.add(Pair.fromPairName(item)) }
 
         return pairsList.map { pair: Pair -> pair.getPairNameForMarket(Market.BINANCE_MARKET) }
     }

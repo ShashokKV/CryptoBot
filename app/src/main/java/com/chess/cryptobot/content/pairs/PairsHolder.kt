@@ -11,6 +11,7 @@ import com.chess.cryptobot.task.AvailablePairsTask
 import com.chess.cryptobot.task.PairsUpdateTask
 import com.chess.cryptobot.task.SerialExecutor
 import java.util.*
+import kotlin.collections.HashSet
 
 class PairsHolder(fr: Fragment) : ContextHolder(fr) {
     private var invalidPairs: MutableList<String> = ArrayList()
@@ -36,8 +37,8 @@ class PairsHolder(fr: Fragment) : ContextHolder(fr) {
         return prefs
     }
 
-    public override fun initViewItems(itemNamesSet: Set<String>):MutableList<ViewItem> {
-        itemNamesSet.forEach { pairName -> if (isValidPair(pairName)) addItemToList(Pair.fromPairName(pairName)) }
+    public override fun initViewItems(itemNamesSet: HashSet<String>?):MutableList<ViewItem> {
+        itemNamesSet?.forEach { pairName -> if (isValidPair(pairName)) addItemToList(Pair.fromPairName(pairName)) }
         return viewItems
     }
 
@@ -45,13 +46,15 @@ class PairsHolder(fr: Fragment) : ContextHolder(fr) {
         val balancePreferences = BalancePreferences(context)
         val coinNames = balancePreferences.items
         val balancePairs = ArrayList<ViewItem>()
-        for (baseName in coinNames) {
-            for (marketName in coinNames) {
-                if (baseName != marketName) {
-                    val pair = Pair(baseName, marketName)
-                    val pairName = pair.name
-                    if (isValidPair(pairName) && !negativePercentPairs.contains(pairName)) {
-                        balancePairs.add(pair)
+        if (coinNames != null) {
+            for (baseName in coinNames) {
+                for (marketName in coinNames) {
+                    if (baseName != marketName) {
+                        val pair = Pair(baseName, marketName)
+                        val pairName = pair.name
+                        if (isValidPair(pairName) && !negativePercentPairs.contains(pairName)) {
+                            balancePairs.add(pair)
+                        }
                     }
                 }
             }

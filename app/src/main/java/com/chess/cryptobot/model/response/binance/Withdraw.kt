@@ -4,7 +4,6 @@ import com.chess.cryptobot.model.response.HistoryResponse
 import com.chess.cryptobot.model.response.binance.BinanceResponse.Companion.longToTime
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
-import java.time.LocalDateTime
 import java.time.ZonedDateTime
 
 class Withdraw : HistoryResponse {

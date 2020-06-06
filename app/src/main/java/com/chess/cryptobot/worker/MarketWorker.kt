@@ -1,7 +1,7 @@
 package com.chess.cryptobot.worker
 
 import android.content.Context
-import android.preference.PreferenceManager
+import androidx.preference.PreferenceManager
 import android.util.Log
 import androidx.work.Worker
 import androidx.work.WorkerParameters
@@ -18,9 +18,10 @@ import com.chess.cryptobot.util.CoinInfo
 import java.time.LocalDateTime
 import java.util.*
 import java.util.function.Consumer
+import kotlin.collections.HashSet
 
 class MarketWorker(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
-    private var allPairNames: Set<String> = AllPairsPreferences(applicationContext).items
+    private var allPairNames: HashSet<String>? = AllPairsPreferences(applicationContext).items
     private var coinInfo: CoinInfo? = null
 
     override fun doWork(): Result {
@@ -57,7 +58,7 @@ class MarketWorker(context: Context, workerParams: WorkerParameters) : Worker(co
             val tickers = market!!.getTicker()
             tickers.forEach { ticker: TickerResponse ->
                 val tickerName = ticker.marketName
-                if (allPairNames.contains(tickerName)) {
+                if (allPairNames?.contains(tickerName)!!) {
                     val pair = createOrGetPair(tickerName, tickerPairs)
                     if (coinInfo!!.checkCoinStatus(pair.baseName) && coinInfo!!.checkCoinStatus(pair.marketName)) {
                         enrichFromTickerByMarket(pair, ticker, market.getMarketName())

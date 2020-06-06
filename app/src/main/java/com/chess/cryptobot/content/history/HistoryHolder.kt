@@ -22,7 +22,7 @@ class HistoryHolder(fragment: Fragment, private val state: State) : ContextHolde
         return prefs
     }
 
-    override fun initViewItems(itemNamesSet: Set<String>):MutableList<ViewItem> {
+    override fun initViewItems(itemNamesSet: HashSet<String>?):MutableList<ViewItem> {
         return viewItems
     }
 

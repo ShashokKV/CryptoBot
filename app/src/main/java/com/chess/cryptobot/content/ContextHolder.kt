@@ -8,6 +8,7 @@ import com.chess.cryptobot.market.MarketFactory
 import com.chess.cryptobot.model.ViewItem
 import com.chess.cryptobot.view.MainFragment
 import java.util.*
+import kotlin.collections.HashSet
 
 abstract class ContextHolder protected constructor(private val fr: Fragment) {
     var viewItems: MutableList<ViewItem> = ArrayList()
@@ -30,7 +31,7 @@ abstract class ContextHolder protected constructor(private val fr: Fragment) {
 
     protected abstract fun initPrefs(context: Context?): Preferences
 
-    protected abstract fun initViewItems(itemNamesSet: Set<String>): MutableList<ViewItem>
+    protected abstract fun initViewItems(itemNamesSet: HashSet<String>?): MutableList<ViewItem>
 
     open fun add(viewItem: ViewItem) {
         addItemToList(viewItem)

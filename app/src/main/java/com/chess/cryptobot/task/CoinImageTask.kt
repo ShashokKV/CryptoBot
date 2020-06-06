@@ -67,7 +67,9 @@ class CoinImageTask(balanceHolder: BalanceHolder) : AsyncTask<Balance, Int?, Bal
         try {
             context.openFileOutput(fileName, Context.MODE_PRIVATE).use { out -> bitmap.compress(Bitmap.CompressFormat.PNG, 100, out) }
         } catch (e: IOException) {
-            Log.d(TAG, e.localizedMessage)
+            var message = e.localizedMessage
+            if (message==null) message = e.toString()
+            Log.d(TAG, message)
         }
     }
 

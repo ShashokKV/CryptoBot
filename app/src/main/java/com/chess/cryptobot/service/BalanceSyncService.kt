@@ -3,7 +3,7 @@ package com.chess.cryptobot.service
 import android.app.IntentService
 import android.app.NotificationManager
 import android.content.Intent
-import android.preference.PreferenceManager
+import androidx.preference.PreferenceManager
 import com.chess.cryptobot.content.balance.BalancePreferences
 import com.chess.cryptobot.exceptions.MarketException
 import com.chess.cryptobot.exceptions.SyncServiceException
@@ -22,7 +22,7 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
     private val marketsMap: MutableMap<String, Market?> = HashMap()
     override fun onHandleIntent(intent: Intent?) {
         if (intent == null) return
-        val coinNames: List<String> = intent.getStringArrayListExtra("coinNames")
+        val coinNames = intent.getStringArrayListExtra("coinNames")
         val marketFactory = WithdrawalMarketFactory()
         val preferences = PreferenceManager.getDefaultSharedPreferences(this)
         val markets = marketFactory.getMarkets(this, preferences)
@@ -34,7 +34,7 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
             makeNotification()
             return
         }
-        coinNames.forEach { coinName: String ->
+        coinNames?.forEach { coinName: String ->
             try {
                 sync(coinName, markets)
             } catch (e: SyncServiceException) {
