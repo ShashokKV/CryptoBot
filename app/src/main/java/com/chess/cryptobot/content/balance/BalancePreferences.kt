@@ -3,22 +3,22 @@ package com.chess.cryptobot.content.balance
 import android.content.Context
 import com.chess.cryptobot.R
 import com.chess.cryptobot.content.Preferences
-import java.util.*
 
 class BalancePreferences(context: Context?) : Preferences(context) {
+    private var minBtcKey: String = "min_btc_amount"
+    private var minEthKey: String = "min_eth_amount"
 
     public override fun initPrefKey(context: Context?): String {
+        minBtcKey = context?.resources?.getString(R.string.min_btc_amount) ?: "min_btc_amount"
+        minEthKey = context?.resources?.getString(R.string.min_eth_amount) ?: "min_eth_amount"
         return context?.resources?.getString(R.string.coin_names_pref_key) ?: "coinNames"
     }
 
-    fun getMinBalance(coinName: String): Double {
-        val minBalance = sharedPreferences.getString("min_$coinName", "0.0")
-        return minBalance?.toDouble() ?: 0.0
+    fun getMinBtcAmount(): Double {
+        return sharedPreferences.getString(minBtcKey, "0.0005")?.toDouble() ?: 0.0005
     }
 
-    internal fun setMinBalance(coinName: String, minBalance: Double) {
-        val editor = sharedPreferences.edit()
-        editor.putString("min_$coinName", String.format(Locale.US, "%.8f", minBalance))
-        editor.apply()
+    fun getMinEthAmount(): Double {
+        return sharedPreferences.getString(minEthKey, "0.025")?.toDouble() ?: 0.025
     }
 }

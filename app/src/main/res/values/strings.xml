@@ -40,7 +40,6 @@
     <string name="livecoin_url">https://api.livecoin.net/</string>
 
     <string name="_0_0d">0.0d</string>
-    <string name="set_min_balance">Set min balance to&#160; $coinName</string>
     <string name="percent">%</string>
     <string name="pair">Pair</string>
     <string name="bid">Bid:</string>
@@ -74,4 +73,6 @@
     <string name="proxy_port">proxy_port</string>
     <string name="binance_withdrawal_api_key">binance_withdrawal_api_key</string>
     <string name="binance_withdrawal_secret_key">binance_withdrawal_secret_key</string>
+    <string name="min_btc_amount">min_btc_amount</string>
+    <string name="min_eth_amount">min_eth_amount</string>
 </resources>

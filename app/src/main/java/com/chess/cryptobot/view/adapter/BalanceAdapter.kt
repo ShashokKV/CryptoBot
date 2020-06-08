@@ -14,13 +14,12 @@ import com.chess.cryptobot.view.adapter.BalanceAdapter.BalanceViewHolder
 import java.util.*
 
 class BalanceAdapter(balanceHolder: BalanceHolder) : RecyclerViewAdapter<BalanceViewHolder>(balanceHolder) {
-    private val mListener: RecyclerViewOnClickListener
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, i: Int): BalanceViewHolder {
         val context = viewGroup.context
         val layoutInflater = LayoutInflater.from(context)
         val balanceView = layoutInflater.inflate(R.layout.balance_line_layout, viewGroup, false)
-        return BalanceViewHolder(balanceView, mListener)
+        return BalanceViewHolder(balanceView)
     }
 
     override fun onBindViewHolder(balanceViewHolder: BalanceViewHolder, i: Int) {
@@ -43,26 +42,11 @@ class BalanceAdapter(balanceHolder: BalanceHolder) : RecyclerViewAdapter<Balance
         if (bitmap != null) balanceViewHolder.cryptoImageView.setImageBitmap(bitmap)
     }
 
-    inner class BalanceViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
-        private var mOnClickListener: RecyclerViewOnClickListener? = null
+    inner class BalanceViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val binanceBalanceView: TextView = itemView.findViewById(R.id.BinanceBalanceView)
         val bittrexBalanceView: TextView = itemView.findViewById(R.id.BittrexBalanceView)
         val livecoinBalanceView: TextView = itemView.findViewById(R.id.LivecoinBalanceView)
         val cryptoNameView: TextView = itemView.findViewById(R.id.CryptoNameView)
         val cryptoImageView: ImageView = itemView.findViewById(R.id.CryptoImageView)
-
-        constructor(view: View, onClickListener: RecyclerViewOnClickListener?) : this(view) {
-            mOnClickListener = onClickListener
-            view.setOnClickListener(this)
-        }
-
-        override fun onClick(v: View) {
-            mOnClickListener!!.onClick(v, itemNameByPosition(adapterPosition))
-        }
-
-    }
-
-    init {
-        mListener = BalanceViewOnClickListener(balanceHolder)
     }
 }

@@ -5,10 +5,12 @@ import android.app.NotificationManager
 import android.content.Intent
 import androidx.preference.PreferenceManager
 import com.chess.cryptobot.content.balance.BalancePreferences
+import com.chess.cryptobot.enricher.PairResponseEnricher
 import com.chess.cryptobot.exceptions.MarketException
 import com.chess.cryptobot.exceptions.SyncServiceException
 import com.chess.cryptobot.market.Market
 import com.chess.cryptobot.market.WithdrawalMarketFactory
+import com.chess.cryptobot.model.Pair
 import com.chess.cryptobot.util.CoinInfo
 import com.chess.cryptobot.view.notification.NotificationBuilder
 import com.chess.cryptobot.view.notification.NotificationID
@@ -19,12 +21,12 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
     private var resultInfo = ""
     private var coinInfo: CoinInfo? = null
     private val marketsMap: MutableMap<String, Market?> = HashMap()
+    private var minBalance = 0.0
     override fun onHandleIntent(intent: Intent?) {
         if (intent == null) return
         val coinNames = intent.getStringArrayListExtra("coinNames")
         val marketFactory = WithdrawalMarketFactory()
-        val preferences = PreferenceManager.getDefaultSharedPreferences(this)
-        val markets = marketFactory.getMarkets(this, preferences)
+        val markets = marketFactory.getMarkets(this, PreferenceManager.getDefaultSharedPreferences(this))
         markets.forEach { market: Market? -> marketsMap[market!!.getMarketName()] = market }
         coinInfo = try {
             CoinInfo(markets)
@@ -45,9 +47,10 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
 
     @Throws(SyncServiceException::class)
     private fun sync(coinName: String, markets: List<Market?>) {
-        val minBalance = BalancePreferences(this).getMinBalance(coinName)
-        if (minBalance == 0.0) {
-            throw SyncServiceException("Min balance not set")
+        try {
+            initMinBalance(coinName, markets)
+        } catch (e: MarketException) {
+            throw SyncServiceException(e.message)
         }
         if (!coinInfo!!.checkCoinStatus(coinName)) {
             throw SyncServiceException("Not active")
@@ -58,10 +61,36 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
         } catch (e: MarketException) {
             throw SyncServiceException(e.message)
         }
-        val coinMover = CoinMover(minBalance, coinName)
+        val coinMover = CoinMover(coinName)
         coinMover.setAmounts(marketAmounts)
         coinMover.computeDirection()
         coinMover.checkAndMove()
+    }
+
+    @Throws(MarketException::class)
+    private fun initMinBalance(coinName: String, markets: List<Market?>) {
+        var pair = Pair("BTC", coinName)
+        val minBtcAmount = BalancePreferences(this).getMinBtcAmount()
+        val minBalances = ArrayList<Double>(3)
+        markets.forEach { market ->
+            if (market != null) {
+                val marketName = market.getMarketName()
+                minBalances.add(market.getMinQuantity()?.getTradeLimitByName(pair.getPairNameForMarket(marketName))
+                        ?: 0.0)
+                pair = PairResponseEnricher(pair).enrichFromTicker(market.getTicker()
+                        .filter { tickerResponse ->
+                            tickerResponse.marketName == pair.getPairNameForMarket(marketName)
+                        }[0], marketName).pair
+            }
+        }
+
+        val minBalanceByTicker = pair.bidMap.values.max() ?: 0.0 * minBtcAmount
+        val minBalanceByMarket = minBalances.max() ?: 0.0
+        minBalance = if (minBalanceByTicker > minBalanceByMarket) {
+            minBalanceByTicker
+        } else {
+            minBalanceByMarket
+        }
     }
 
     @Throws(MarketException::class)
@@ -90,7 +119,7 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
         resultInfo = ""
     }
 
-    internal inner class CoinMover(private val minBalance: Double?, private val coinName: String) {
+    internal inner class CoinMover(private val coinName: String) {
         private var amounts: Map<String, Double>? = null
         private var moveFrom: String? = null
         private var moveTo: String? = null
@@ -113,7 +142,7 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
             val fee = coinInfo!!.getFee(moveFrom as String, coinName)
             val moveFromMarket: Market = marketsMap[moveFrom as String]!!
             val moveToMarket: Market = marketsMap[moveTo as String]!!
-            var delta = getDelta(toAmount, minBalance)
+            var delta = getDelta(toAmount)
             if (needSync(delta)) {
                 checkAmount(fromAmount, fee)
                 delta = formatAmount(recalculateDelta(fromAmount, toAmount, fee))
@@ -131,8 +160,8 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
             return delta > 0
         }
 
-        private fun getDelta(amount: Double, minBalance: Double?): Double {
-            return minBalance!! - amount
+        private fun getDelta(amount: Double): Double {
+            return minBalance - amount
         }
 
         @Throws(SyncServiceException::class)

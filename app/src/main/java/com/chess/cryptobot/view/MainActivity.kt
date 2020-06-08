@@ -24,7 +24,6 @@ import com.chess.cryptobot.service.BotService.BotBinder
 import com.chess.cryptobot.view.dialog.CryptoDialog
 import com.chess.cryptobot.view.dialog.CryptoNameDialog
 import com.chess.cryptobot.view.dialog.DialogListener
-import com.chess.cryptobot.view.dialog.MinBalanceDialog
 import com.chess.cryptobot.worker.BalanceWorker
 import com.chess.cryptobot.worker.MarketWorker
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -142,22 +141,11 @@ class MainActivity : AppCompatActivity(), DialogListener {
             is CryptoNameDialog -> {
                 onCryptoNamePositiveClick(dialog)
             }
-            is MinBalanceDialog -> {
-                onMinBalancePositiveClick(dialog)
-            }
             else -> {
                 throw IllegalArgumentException("Unknown type of " + (dialog?.javaClass?.canonicalName
                         ?: dialog.toString()))
             }
         }
-    }
-
-    private fun onMinBalancePositiveClick(dialog: MinBalanceDialog) {
-        val coinName = dialog.coinName
-        val balanceHolder = dialog.balanceHolder
-        val minBalanceView = dialog.dialog?.findViewById<EditText>(R.id.min_balance_edit_text)
-        val minBalance = minBalanceView?.text.toString().toDouble()
-        balanceHolder.setMinBalance(coinName, minBalance)
     }
 
     private fun onCryptoNamePositiveClick(dialog: CryptoNameDialog) {

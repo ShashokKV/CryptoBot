@@ -74,6 +74,16 @@
             android:key="@string/min_profit_percent"
             android:title="Minimum profit percent" />
         <androidx.preference.EditTextPreference
+            android:defaultValue="0.0005"
+            android:dialogLayout="@layout/number_dialog"
+            android:key="@string/min_btc_amount"
+            android:title="Minimum BTC trade value" />
+        <androidx.preference.EditTextPreference
+            android:defaultValue="0.025"
+            android:dialogLayout="@layout/number_dialog"
+            android:key="@string/min_eth_amount"
+            android:title="Minimum ETH trade value" />
+        <androidx.preference.EditTextPreference
             android:defaultValue="5"
             android:dialogLayout="@layout/number_dialog"
             android:key="@string/service_run_period"

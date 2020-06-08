@@ -40,10 +40,11 @@ class PairResponseEnricher(val pair: Pair) {
                 response.asks()?.get(0)?.quantity ?: 0.0)
     }
 
-    fun enrichFromTicker(tickerResponse: TickerResponse, marketName: String) {
+    fun enrichFromTicker(tickerResponse: TickerResponse, marketName: String): PairResponseEnricher {
         pair.askMap[marketName] = tickerResponse.tickerAsk!!
         pair.bidMap[marketName] = tickerResponse.tickerBid!!
         pair.volumeMap[marketName] = tickerResponse.volume
+        return this
     }
 
     private fun initMaps(marketName: String, response: OrderBookResponse, bid: Double, bidQuantity: Double, ask: Double, askQuantity: Double) {

@@ -4,6 +4,7 @@ import android.app.IntentService
 import android.app.NotificationManager
 import android.content.Intent
 import androidx.preference.PreferenceManager
+import com.chess.cryptobot.content.balance.BalancePreferences
 import com.chess.cryptobot.exceptions.MarketException
 import com.chess.cryptobot.market.Market
 import com.chess.cryptobot.market.MarketFactory
@@ -19,11 +20,11 @@ class TradingService : IntentService("TradingService") {
     private var resultInfo = ""
     private lateinit var pair: Pair
     private var marketsMap = HashMap<String, Market>()
-    private var bidBaseAmount: Double? = null
-    private var bidMarketAmount: Double? = null
-    private var askBaseAmount: Double? = null
-    private var askMarketAmount: Double? = null
+    private var bidMarketAmount: Double = 0.0
+    private var askBaseAmount: Double = 0.0
     private var minMarketQuantity: Double = 0.0
+    private var minBtcAmount = 0.0005
+    private var minEthAmount = 0.025
     override fun onHandleIntent(intent: Intent?) {
         if (intent == null) return
         initFromIntent(intent)
@@ -39,7 +40,7 @@ class TradingService : IntentService("TradingService") {
             return
         }
         val trader = Trader(pair)
-        if (trader.quantity!! <= minMarketQuantity) return
+        if (trader.quantity <= minMarketQuantity) return
         try {
             trader.buy()
             trader.sell()
@@ -79,10 +80,11 @@ class TradingService : IntentService("TradingService") {
 
     @Throws(MarketException::class)
     private fun initAmounts() {
-        bidBaseAmount = marketsMap[pair.bidMarketName]?.getAmount(pair.baseName)
-        askBaseAmount = marketsMap[pair.askMarketName]?.getAmount(pair.baseName)
-        bidMarketAmount = marketsMap[pair.bidMarketName]?.getAmount(pair.marketName)
-        askMarketAmount = marketsMap[pair.askMarketName]?.getAmount(pair.marketName)
+        askBaseAmount = marketsMap[pair.askMarketName]?.getAmount(pair.baseName)?:0.0
+        bidMarketAmount = marketsMap[pair.bidMarketName]?.getAmount(pair.marketName)?:0.0
+        val balancePreferences = BalancePreferences(this)
+        minBtcAmount = balancePreferences.getMinBtcAmount()
+        minEthAmount = balancePreferences.getMinEthAmount()
     }
 
     private fun makeNotification(title: String, message: String?) {
@@ -100,26 +102,38 @@ class TradingService : IntentService("TradingService") {
     }
 
     private inner class Trader internal constructor(pair: Pair) {
-        var bidPrice: Double? = null
-        var askPrice: Double? = null
-        var quantity: Double? = null
+        var bidPrice: Double = 0.0
+        var askPrice: Double = 0.0
+        var quantity: Double = 0.0
         private var sellMarket: Market? = null
         private var buyMarket: Market? = null
-        private var baseAmount: Double? = null
-        private var marketAmount: Double? = null
+        private var baseAmount: Double = 0.0
+        private var marketAmount: Double = 0.0
         private var sellPairName: String? = null
         var buyPairName: String? = null
 
-        private fun countMinQuantity(bidQuantity: Double?, askQuantity: Double?): Double? {
-            val minAvailableAmount = if (baseAmount!! < marketAmount!!) baseAmount else marketAmount
-            quantity = if (bidQuantity!! < askQuantity!!) bidQuantity else askQuantity
-            if (quantity!! > minAvailableAmount!!) quantity = minAvailableAmount
+        init {
+            bidPrice = pair.bid
+            askPrice = pair.ask
+            sellMarket = marketsMap[pair.bidMarketName]
+            buyMarket = marketsMap[pair.askMarketName]
+            baseAmount = askBaseAmount / askPrice
+            marketAmount = bidMarketAmount
+            quantity = countMinQuantity(pair.bidQuantity, pair.askQuantity)
+            sellPairName = pair.getPairNameForMarket(sellMarket!!.getMarketName())
+            buyPairName = pair.getPairNameForMarket(buyMarket!!.getMarketName())
+        }
+
+        private fun countMinQuantity(bidQuantity: Double, askQuantity: Double): Double {
+            val minAvailableAmount = if (baseAmount < marketAmount) baseAmount else marketAmount
+            quantity = if (bidQuantity < askQuantity) bidQuantity else askQuantity
+            if (quantity > minAvailableAmount) quantity = minAvailableAmount
             //-1% for trading fee
-            quantity = formatAmount(quantity!! - quantity!! / 100)
+            quantity = formatAmount(quantity - quantity / 100)
             if (pair.baseName == "BTC") {
-                if (quantity!! * askPrice!! < minBtcAmount) quantity = 0.0
+                if (quantity * askPrice < minBtcAmount) quantity = 0.0
             } else if (pair.baseName == "ETH") {
-                if (quantity!! * askPrice!! < minEthAmount) quantity = 0.0
+                if (quantity * askPrice < minEthAmount) quantity = 0.0
             }
             return quantity
         }
@@ -127,7 +141,7 @@ class TradingService : IntentService("TradingService") {
         @Throws(MarketException::class)
         fun buy() {
             val price = formatAmount(askPrice)
-            buyMarket!!.buy(buyPairName!!, price, quantity!!)
+            buyMarket!!.buy(buyPairName!!, price, quantity)
             updateInfo(String.format(Locale.getDefault(), "buy %.8f%s for %.8f on %s", quantity, buyPairName,
                     price, buyMarket!!.getMarketName()))
         }
@@ -135,7 +149,7 @@ class TradingService : IntentService("TradingService") {
         @Throws(MarketException::class)
         fun sell() {
             val price = formatAmount(bidPrice)
-            sellMarket!!.sell(sellPairName!!, price, quantity!!)
+            sellMarket!!.sell(sellPairName!!, price, quantity)
             updateInfo(String.format(Locale.getDefault(), "sell %.8f%s for %.8f on %s", quantity, sellPairName,
                     price, sellMarket!!.getMarketName()))
         }
@@ -157,24 +171,10 @@ class TradingService : IntentService("TradingService") {
             intent.putExtra("coinNames", coinNames)
             startService(intent)
         }
-
-        init {
-                bidPrice = pair.bid
-                askPrice = pair.ask
-                sellMarket = marketsMap[pair.bidMarketName]
-                buyMarket = marketsMap[pair.askMarketName]
-                baseAmount = marketsMap[pair.askMarketName]?.getAmount(pair.baseName)?:0.0 / askPrice!!
-                marketAmount = marketsMap[pair.bidMarketName]?.getAmount(pair.marketName)?:0.0
-                quantity = countMinQuantity(pair.bidQuantity, pair.askQuantity)
-                sellPairName = pair.getPairNameForMarket(sellMarket!!.getMarketName())
-                buyPairName = pair.getPairNameForMarket(buyMarket!!.getMarketName())
-        }
     }
 
     companion object {
         var workingOnPair: String? = null
         private const val CHANNEL_ID = "trading_chanel"
-        private const val minBtcAmount = 0.0005
-        private const val minEthAmount = 0.025
     }
 }

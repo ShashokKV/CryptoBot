@@ -97,11 +97,6 @@ class BalanceHolder(fragment: Fragment) : ContextHolder(fragment) {
         return this.getItemByName(coinName) as Balance
     }
 
-    fun setMinBalance(coinName: String, minBalance: Double) {
-        val preferences = prefs as BalancePreferences
-        preferences.setMinBalance(coinName, minBalance)
-    }
-
     fun setCurrencyStatus(bittrexStatuses: Map<String, Boolean>, binanceStatuses: Map<String, Boolean>, livecoinStatuses: Map<String, Boolean>) {
         this.bittrexStatuses = bittrexStatuses
         this.binanceStatuses = binanceStatuses
