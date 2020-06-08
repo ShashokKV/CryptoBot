@@ -7,7 +7,6 @@ import com.chess.cryptobot.market.Market
 import com.chess.cryptobot.market.MarketFactory
 import com.chess.cryptobot.model.ViewItem
 import com.chess.cryptobot.view.MainFragment
-import java.util.*
 import kotlin.collections.HashSet
 
 abstract class ContextHolder protected constructor(private val fr: Fragment) {

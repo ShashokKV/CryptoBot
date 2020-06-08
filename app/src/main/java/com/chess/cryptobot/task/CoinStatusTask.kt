@@ -13,6 +13,7 @@ import java.util.*
 class CoinStatusTask(holder: ContextHolder?) : MarketTask<Int, Int>(holder!!) {
     private var bittrexStatuses: MutableMap<String, Boolean> = HashMap()
     private var binanceStatuses: MutableMap<String, Boolean> = HashMap()
+    private var livecoinStatuses: MutableMap<String, Boolean> = HashMap()
     private var coinIcons: MutableMap<String, String> = HashMap()
 
     override fun preMarketProcess(param: Int) {
@@ -20,12 +21,18 @@ class CoinStatusTask(holder: ContextHolder?) : MarketTask<Int, Int>(holder!!) {
 
     @Throws(MarketException::class)
     override fun marketProcess(market: Market, param: Int): Int {
-        if (market.getMarketName() == Market.BITTREX_MARKET) {
-            updateStatuses(bittrexStatuses, market.getCurrencies())
-            val bittrexMarket = market as BittrexMarket
-            updateIcons(bittrexMarket.markets)
-        } else if (market.getMarketName() == Market.BINANCE_MARKET) {
-            updateStatuses(binanceStatuses, market.getCurrencies())
+        when {
+            market.getMarketName() == Market.BITTREX_MARKET -> {
+                updateStatuses(bittrexStatuses, market.getCurrencies())
+                val bittrexMarket = market as BittrexMarket
+                updateIcons(bittrexMarket.markets)
+            }
+            market.getMarketName() == Market.BINANCE_MARKET -> {
+                updateStatuses(binanceStatuses, market.getCurrencies())
+            }
+            market.getMarketName() == Market.LIVECOIN_MARKET -> {
+                updateStatuses(livecoinStatuses, market.getCurrencies())
+            }
         }
         return 0
     }
@@ -48,7 +55,7 @@ class CoinStatusTask(holder: ContextHolder?) : MarketTask<Int, Int>(holder!!) {
 
     override fun doInPostExecute(result: Int, holder: ContextHolder) {
         val balanceHolder = holder as BalanceHolder
-        balanceHolder.setCurrencyStatus(bittrexStatuses, binanceStatuses)
+        balanceHolder.setCurrencyStatus(bittrexStatuses, binanceStatuses, livecoinStatuses)
         balanceHolder.setIconUrls(coinIcons)
         balanceHolder.updateAllItems()
     }

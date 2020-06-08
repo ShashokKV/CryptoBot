@@ -9,7 +9,7 @@
         android:id="@+id/pair_name"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="0.3"
+        android:layout_weight="0.2"
         android:gravity="center"
         android:textAlignment="center"
         android:textColor="@color/colorWhite"
@@ -21,7 +21,7 @@
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="0.3"
+        android:layout_weight="0.233"
         android:orientation="vertical">
 
         <TextView
@@ -36,6 +36,7 @@
             android:layout_height="wrap_content"
             android:maxLength="18"
             android:textColor="@color/colorWhite"
+            android:textSize="12sp"
             tools:text="0.00000000000" />
 
         <TextView
@@ -50,6 +51,7 @@
             android:layout_height="wrap_content"
             android:maxLength="18"
             android:textColor="@color/colorWhite"
+            android:textSize="12sp"
             tools:text="0.00000000000" />
 
         <TextView
@@ -64,6 +66,7 @@
             android:layout_height="wrap_content"
             android:maxLength="18"
             android:textColor="@color/colorWhite"
+            android:textSize="12sp"
             tools:text="0.00000000000" />
 
         <TextView
@@ -78,6 +81,7 @@
             android:layout_height="wrap_content"
             android:maxLength="18"
             android:textColor="@color/colorWhite"
+            android:textSize="12sp"
             tools:text="0.00000000000" />
 
         <TextView
@@ -92,6 +96,7 @@
             android:layout_height="wrap_content"
             android:maxLength="10"
             android:textColor="@color/colorWhite"
+            android:textSize="12sp"
             tools:text="0.000000000000" />
 
     </LinearLayout>
@@ -99,7 +104,7 @@
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="0.3"
+        android:layout_weight="0.233"
         android:orientation="vertical">
 
         <TextView
@@ -114,6 +119,7 @@
             android:layout_height="wrap_content"
             android:maxLength="18"
             android:textColor="@color/colorWhite"
+            android:textSize="12sp"
             tools:text="0.000000000000" />
 
         <TextView
@@ -128,6 +134,7 @@
             android:layout_height="wrap_content"
             android:maxLength="18"
             android:textColor="@color/colorWhite"
+            android:textSize="12sp"
             tools:text="0.00000000000" />
 
         <TextView
@@ -142,6 +149,7 @@
             android:layout_height="wrap_content"
             android:maxLength="18"
             android:textColor="@color/colorWhite"
+            android:textSize="12sp"
             tools:text="0.000000000000" />
 
         <TextView
@@ -156,6 +164,7 @@
             android:layout_height="wrap_content"
             android:maxLength="18"
             android:textColor="@color/colorWhite"
+            android:textSize="12sp"
             tools:text="0.00000000000" />
 
         <TextView
@@ -170,6 +179,90 @@
             android:layout_height="wrap_content"
             android:maxLength="10"
             android:textColor="@color/colorWhite"
+            android:textSize="12sp"
+            tools:text="0.000000000000" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="0.233"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/bid"
+            android:textColor="@color/colorWhite" />
+
+        <TextView
+            android:id="@+id/livecoin_bid"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLength="18"
+            android:textColor="@color/colorWhite"
+            android:textSize="12sp"
+            tools:text="0.000000000000" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/quantity"
+            android:textColor="@color/colorWhite" />
+
+        <TextView
+            android:id="@+id/livecoin_bid_quantity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLength="18"
+            android:textColor="@color/colorWhite"
+            android:textSize="12sp"
+            tools:text="0.00000000000" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/ask"
+            android:textColor="@color/colorWhite" />
+
+        <TextView
+            android:id="@+id/livecoin_ask"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLength="18"
+            android:textColor="@color/colorWhite"
+            android:textSize="12sp"
+            tools:text="0.000000000000" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/quantity"
+            android:textColor="@color/colorWhite" />
+
+        <TextView
+            android:id="@+id/livecoin_ask_quantity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLength="18"
+            android:textColor="@color/colorWhite"
+            android:textSize="12sp"
+            tools:text="0.00000000000" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/volume"
+            android:textColor="@color/colorWhite" />
+
+        <TextView
+            android:id="@+id/livecoin_volume"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLength="10"
+            android:textColor="@color/colorWhite"
+            android:textSize="12sp"
             tools:text="0.000000000000" />
 
     </LinearLayout>

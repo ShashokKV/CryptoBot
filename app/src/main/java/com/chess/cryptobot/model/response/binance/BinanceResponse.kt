@@ -5,7 +5,6 @@ import com.chess.cryptobot.model.response.*
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 import java.time.*
-import java.util.*
 import kotlin.math.roundToLong
 
 const val MIN_QTY_FILTER: String = "LOT_SIZE"

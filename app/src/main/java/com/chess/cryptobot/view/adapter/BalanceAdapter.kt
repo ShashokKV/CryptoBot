@@ -34,6 +34,10 @@ class BalanceAdapter(balanceHolder: BalanceHolder) : RecyclerViewAdapter<Balance
         if (!balance.getStatus(Market.BINANCE_MARKET)) {
             balanceViewHolder.binanceBalanceView.setTextColor(context.resources.getColor(R.color.colorError, null))
         }
+        balanceViewHolder.livecoinBalanceView.text = String.format(Locale.US, "%.8f", balance.getAmount(Market.LIVECOIN_MARKET))
+        if (!balance.getStatus(Market.LIVECOIN_MARKET)) {
+            balanceViewHolder.livecoinBalanceView.setTextColor(context.resources.getColor(R.color.colorError, null))
+        }
         balanceViewHolder.cryptoNameView.text = balance.name
         val bitmap = balance.coinIcon
         if (bitmap != null) balanceViewHolder.cryptoImageView.setImageBitmap(bitmap)
@@ -43,6 +47,7 @@ class BalanceAdapter(balanceHolder: BalanceHolder) : RecyclerViewAdapter<Balance
         private var mOnClickListener: RecyclerViewOnClickListener? = null
         val binanceBalanceView: TextView = itemView.findViewById(R.id.BinanceBalanceView)
         val bittrexBalanceView: TextView = itemView.findViewById(R.id.BittrexBalanceView)
+        val livecoinBalanceView: TextView = itemView.findViewById(R.id.LivecoinBalanceView)
         val cryptoNameView: TextView = itemView.findViewById(R.id.CryptoNameView)
         val cryptoImageView: ImageView = itemView.findViewById(R.id.CryptoImageView)
 

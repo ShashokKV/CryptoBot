@@ -16,8 +16,6 @@ import com.chess.cryptobot.model.room.CryptoBotDatabase
 import com.chess.cryptobot.model.room.ProfitPair
 import com.chess.cryptobot.util.CoinInfo
 import java.time.LocalDateTime
-import java.util.*
-import java.util.function.Consumer
 import kotlin.collections.HashSet
 
 class MarketWorker(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
@@ -40,7 +38,7 @@ class MarketWorker(context: Context, workerParams: WorkerParameters) : Worker(co
         val profitPairs: MutableList<Pair> = ArrayList()
         try {
             tickerPairs.forEach{ pair: Pair ->
-                val tmpPair: Pair = PairResponseEnricher(pair).countPercent().pair
+                val tmpPair: Pair = PairResponseEnricher(pair).enrichWithMinPercent(null).pair
                 if (tmpPair.percent > 0) profitPairs.add(tmpPair)
             }
         } catch (e: Exception) {
@@ -61,7 +59,7 @@ class MarketWorker(context: Context, workerParams: WorkerParameters) : Worker(co
                 if (allPairNames?.contains(tickerName)!!) {
                     val pair = createOrGetPair(tickerName, tickerPairs)
                     if (coinInfo!!.checkCoinStatus(pair.baseName) && coinInfo!!.checkCoinStatus(pair.marketName)) {
-                        enrichFromTickerByMarket(pair, ticker, market.getMarketName())
+                        PairResponseEnricher(pair).enrichFromTicker(ticker, market.getMarketName())
                         if (!tickerPairs.contains(pair)) tickerPairs.add(pair)
                     }
                 }
@@ -73,16 +71,6 @@ class MarketWorker(context: Context, workerParams: WorkerParameters) : Worker(co
     private fun createOrGetPair(tickerName: String, pairs: List<Pair>): Pair {
         val pair = Pair.fromPairName(tickerName)
         return if (pairs.contains(pair)) pairs[pairs.indexOf(pair)] else pair
-    }
-
-    private fun enrichFromTickerByMarket(pair: Pair, ticker: TickerResponse, marketName: String) {
-        if (marketName == Market.BITTREX_MARKET) {
-            pair.bittrexAsk = ticker.tickerAsk!!
-            pair.bittrexBid = ticker.tickerBid!!
-        } else {
-            pair.binanceAsk = ticker.tickerAsk!!
-            pair.binanceBid = ticker.tickerBid!!
-        }
     }
 
     private fun cleanDatabase() {
@@ -98,13 +86,13 @@ class MarketWorker(context: Context, workerParams: WorkerParameters) : Worker(co
         val database = CryptoBotDatabase.getInstance(applicationContext)
         val pairDao = database!!.profitPairDao
         val profitPairs: MutableList<ProfitPair?> = ArrayList()
-        pairs.forEach(Consumer { pair: Pair ->
+        pairs.forEach { pair: Pair ->
             val profitPair = ProfitPair()
             profitPair.dateCreated = LocalDateTime.now()
             profitPair.pairName = pair.name
             profitPair.percent = pair.percent
             profitPairs.add(profitPair)
-        })
+        }
         pairDao!!.insertAll(profitPairs)
     }
 

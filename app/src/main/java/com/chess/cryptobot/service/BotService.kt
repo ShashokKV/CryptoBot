@@ -23,6 +23,8 @@ import com.chess.cryptobot.util.CoinInfo
 import com.chess.cryptobot.view.notification.NotificationBuilder
 import java.util.*
 import java.util.stream.Collectors
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 class BotService : Service() {
     private var botTimer: Timer? = null
@@ -181,9 +183,7 @@ class BotService : Service() {
                     if (!isNotificationShown) makeNotification("Get order book exception", e.message)
                     return null
                 }
-                if (response != null) {
-                    enricher.enrichWithResponse(response)
-                }
+                enricher.enrichWithResponse(response)
             }
             return enricher.enrichWithMinPercent(minPercent).pair
         }

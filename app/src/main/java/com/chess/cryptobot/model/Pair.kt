@@ -1,18 +1,20 @@
 package com.chess.cryptobot.model
 
+import com.chess.cryptobot.market.Market
 import java.io.Serializable
 
 class Pair(val baseName: String, val marketName: String) : ViewItem, Serializable {
-    var bittrexAsk = 0.0
-    var bittrexAskQuantity = 0.0
-    var bittrexBid = 0.0
-    var bittrexBidQuantity = 0.0
-    var bittrexVolume = 0.0
-    var binanceAsk = 0.0
-    var binanceAskQuantity = 0.0
-    var binanceBid = 0.0
-    var binanceBidQuantity = 0.0
-    var binanceVolume = 0.0
+    var ask = 0.0
+    var bid = 0.0
+    var askQuantity = 0.0
+    var bidQuantity = 0.0
+    var bidMarketName = ""
+    var askMarketName = ""
+    var askMap = HashMap<String, Double>()
+    var askQuantityMap = HashMap<String, Double>()
+    var bidMap = HashMap<String, Double>()
+    var bidQuantityMap = HashMap<String, Double>()
+    var volumeMap = HashMap<String, Double>()
     var percent = 0.0f
     var message: String? = null
 
@@ -29,10 +31,19 @@ class Pair(val baseName: String, val marketName: String) : ViewItem, Serializabl
         get() = "$baseName/$marketName"
 
     fun getPairNameForMarket(marketName: String): String {
-        return if (marketName == "bittrex") {
-            bittrexPairName
-        } else {
-            binancePairName
+        return when(marketName) {
+            Market.BITTREX_MARKET -> {
+                bittrexPairName
+            }
+            Market.BINANCE_MARKET -> {
+                binancePairName
+            }
+            Market.LIVECOIN_MARKET -> {
+                livecoinPairName
+            }
+            else -> {
+                throw IllegalArgumentException("Unknown market: $marketName")
+            }
         }
     }
 
@@ -47,6 +58,9 @@ class Pair(val baseName: String, val marketName: String) : ViewItem, Serializabl
 
     private val binancePairName: String
         get() = "$marketName$baseName"
+
+    private val livecoinPairName: String
+        get() = "$marketName/$baseName"
 
     companion object {
         fun fromPairName(pairName: String): Pair {

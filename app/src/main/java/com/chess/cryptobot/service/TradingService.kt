@@ -5,8 +5,6 @@ import android.app.NotificationManager
 import android.content.Intent
 import androidx.preference.PreferenceManager
 import com.chess.cryptobot.exceptions.MarketException
-import com.chess.cryptobot.market.BinanceMarket
-import com.chess.cryptobot.market.BittrexMarket
 import com.chess.cryptobot.market.Market
 import com.chess.cryptobot.market.MarketFactory
 import com.chess.cryptobot.model.Pair
@@ -15,17 +13,16 @@ import com.chess.cryptobot.view.notification.NotificationID
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.util.*
-import java.util.function.Consumer
+import kotlin.collections.HashMap
 
 class TradingService : IntentService("TradingService") {
     private var resultInfo = ""
-    private var pair: Pair? = null
-    private var bittrexMarket: BittrexMarket? = null
-    private var binanceMarket: BinanceMarket? = null
-    private var binanceBaseAmount: Double? = null
-    private var binanceMarketAmount: Double? = null
-    private var bittrexBaseAmount: Double? = null
-    private var bittrexMarketAmount: Double? = null
+    private lateinit var pair: Pair
+    private var marketsMap = HashMap<String, Market>()
+    private var bidBaseAmount: Double? = null
+    private var bidMarketAmount: Double? = null
+    private var askBaseAmount: Double? = null
+    private var askMarketAmount: Double? = null
     private var minMarketQuantity: Double = 0.0
     override fun onHandleIntent(intent: Intent?) {
         if (intent == null) return
@@ -67,30 +64,25 @@ class TradingService : IntentService("TradingService") {
 
     private fun initFromIntent(intent: Intent) {
         pair = intent.getSerializableExtra(Pair::class.java.name) as Pair
-        workingOnPair = pair!!.name
+        workingOnPair = pair.name
         minMarketQuantity = intent.getDoubleExtra("minQuantity", 0.0)
     }
 
     private fun initMarkets() {
-        val markets = MarketFactory().getMarkets(this, PreferenceManager.getDefaultSharedPreferences(this))
-        markets.forEach(Consumer { market: Market? ->
-            if (market is BittrexMarket) {
-                bittrexMarket = market
-            } else if (market is BinanceMarket) {
-                binanceMarket = market
-            }
-        })
+        MarketFactory().getMarkets(this,
+                PreferenceManager.getDefaultSharedPreferences(this))
+                .forEach { market ->  if (market!=null) marketsMap[market.getMarketName()] = market }
     }
 
     private val isApiKeysEmpty: Boolean
-        get() = bittrexMarket!!.keysIsEmpty() || binanceMarket!!.keysIsEmpty()
+        get() = marketsMap.values.stream().allMatch { market: Market? -> market?.keysIsEmpty()?:false }
 
     @Throws(MarketException::class)
     private fun initAmounts() {
-        binanceBaseAmount = binanceMarket!!.getAmount(pair!!.baseName)
-        bittrexBaseAmount = bittrexMarket!!.getAmount(pair!!.baseName)
-        binanceMarketAmount = binanceMarket!!.getAmount(pair!!.marketName)
-        bittrexMarketAmount = bittrexMarket!!.getAmount(pair!!.marketName)
+        bidBaseAmount = marketsMap[pair.bidMarketName]?.getAmount(pair.baseName)
+        askBaseAmount = marketsMap[pair.askMarketName]?.getAmount(pair.baseName)
+        bidMarketAmount = marketsMap[pair.bidMarketName]?.getAmount(pair.marketName)
+        askMarketAmount = marketsMap[pair.askMarketName]?.getAmount(pair.marketName)
     }
 
     private fun makeNotification(title: String, message: String?) {
@@ -107,7 +99,7 @@ class TradingService : IntentService("TradingService") {
         resultInfo = ""
     }
 
-    private inner class Trader internal constructor(pair: Pair?) {
+    private inner class Trader internal constructor(pair: Pair) {
         var bidPrice: Double? = null
         var askPrice: Double? = null
         var quantity: Double? = null
@@ -117,15 +109,16 @@ class TradingService : IntentService("TradingService") {
         private var marketAmount: Double? = null
         private var sellPairName: String? = null
         var buyPairName: String? = null
+
         private fun countMinQuantity(bidQuantity: Double?, askQuantity: Double?): Double? {
             val minAvailableAmount = if (baseAmount!! < marketAmount!!) baseAmount else marketAmount
             quantity = if (bidQuantity!! < askQuantity!!) bidQuantity else askQuantity
             if (quantity!! > minAvailableAmount!!) quantity = minAvailableAmount
             //-1% for trading fee
             quantity = formatAmount(quantity!! - quantity!! / 100)
-            if (pair!!.baseName == "BTC") {
+            if (pair.baseName == "BTC") {
                 if (quantity!! * askPrice!! < minBtcAmount) quantity = 0.0
-            } else if (pair!!.baseName == "ETH") {
+            } else if (pair.baseName == "ETH") {
                 if (quantity!! * askPrice!! < minEthAmount) quantity = 0.0
             }
             return quantity
@@ -158,35 +151,23 @@ class TradingService : IntentService("TradingService") {
 
         fun syncBalance() {
             val coinNames = ArrayList<String>()
-            coinNames.add(pair!!.baseName)
-            coinNames.add(pair!!.marketName)
+            coinNames.add(pair.baseName)
+            coinNames.add(pair.marketName)
             val intent = Intent(this@TradingService, BalanceSyncService::class.java)
             intent.putExtra("coinNames", coinNames)
             startService(intent)
         }
 
         init {
-            if (pair!!.bittrexBid - pair.binanceAsk > pair.binanceBid - pair.bittrexAsk) {
-                bidPrice = pair.bittrexBid
-                askPrice = pair.binanceAsk
-                sellMarket = bittrexMarket
-                buyMarket = binanceMarket
-                baseAmount = binanceBaseAmount!! / askPrice!!
-                marketAmount = bittrexMarketAmount
-                quantity = countMinQuantity(pair.bittrexBidQuantity, pair.binanceAskQuantity)
-                sellPairName = pair.getPairNameForMarket(bittrexMarket!!.getMarketName())
-                buyPairName = pair.getPairNameForMarket(binanceMarket!!.getMarketName())
-            } else {
-                bidPrice = pair.binanceBid
-                askPrice = pair.bittrexAsk
-                sellMarket = binanceMarket
-                buyMarket = bittrexMarket
-                baseAmount = bittrexBaseAmount!! / askPrice!!
-                marketAmount = binanceMarketAmount
-                quantity = countMinQuantity(pair.binanceBidQuantity, pair.bittrexAskQuantity)
-                sellPairName = pair.getPairNameForMarket(binanceMarket!!.getMarketName())
-                buyPairName = pair.getPairNameForMarket(bittrexMarket!!.getMarketName())
-            }
+                bidPrice = pair.bid
+                askPrice = pair.ask
+                sellMarket = marketsMap[pair.bidMarketName]
+                buyMarket = marketsMap[pair.askMarketName]
+                baseAmount = marketsMap[pair.askMarketName]?.getAmount(pair.baseName)?:0.0 / askPrice!!
+                marketAmount = marketsMap[pair.bidMarketName]?.getAmount(pair.marketName)?:0.0
+                quantity = countMinQuantity(pair.bidQuantity, pair.askQuantity)
+                sellPairName = pair.getPairNameForMarket(sellMarket!!.getMarketName())
+                buyPairName = pair.getPairNameForMarket(buyMarket!!.getMarketName())
         }
     }
 

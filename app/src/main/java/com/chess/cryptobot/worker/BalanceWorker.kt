@@ -43,7 +43,7 @@ class BalanceWorker(context: Context, workerParams: WorkerParameters) : Worker(c
                         var price: Double
                         price = try {
                             val orderBook = market.getOrderBook(Pair("BTC", coinName).getPairNameForMarket(market.getMarketName()))
-                            orderBook?.bids()?.get(0)?.value ?: 0.0
+                            orderBook.bids()?.get(0)?.value ?: 0.0
                         } catch (e: MarketException) {
                             Log.d(TAG, e.localizedMessage, e)
                             return Result.failure()

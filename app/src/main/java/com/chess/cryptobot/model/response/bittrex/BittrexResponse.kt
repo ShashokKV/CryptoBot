@@ -3,7 +3,6 @@ package com.chess.cryptobot.model.response.bittrex
 import com.chess.cryptobot.model.History
 import com.chess.cryptobot.model.Price
 import com.chess.cryptobot.model.response.*
-import java.util.*
 import java.util.function.Consumer
 
 class BittrexResponse : MarketResponse, BalanceResponse, OrderBookResponse, CurrenciesListResponse, AddressResponse, TradeLimitResponse {

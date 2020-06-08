@@ -10,9 +10,12 @@ class CoinInfo(markets: List<Market?>) {
     fun checkCoinStatus(coinName: String): Boolean {
         val bittrexStatuses = statuses[Market.BITTREX_MARKET] ?: return true
         val binanceStatuses = statuses[Market.BINANCE_MARKET] ?: return true
+        val livecoinStatuses = statuses[Market.LIVECOIN_MARKET] ?: return true
         val bittrexStatus = bittrexStatuses[coinName]
         val binanceStatus = binanceStatuses[coinName]
-        return if (bittrexStatus == null || binanceStatus == null) true else bittrexStatus && binanceStatus
+        val livecoinStatus = livecoinStatuses[coinName]
+        return if (bittrexStatus == null || binanceStatus == null || livecoinStatus == null ) true
+        else bittrexStatus && binanceStatus && livecoinStatus
     }
 
     @Throws(SyncServiceException::class)

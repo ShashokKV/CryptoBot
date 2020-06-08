@@ -2,7 +2,6 @@ package com.chess.cryptobot.model
 
 import android.graphics.Bitmap
 import com.chess.cryptobot.market.Market
-import java.util.*
 
 class Balance(override val name: String) : ViewItem {
     var coinUrl: String? = null
@@ -33,9 +32,10 @@ class Balance(override val name: String) : ViewItem {
         return amounts
     }
 
-    fun setStatuses(binanceStatus: Boolean, bittrexStatus: Boolean) {
+    fun setStatuses(binanceStatus: Boolean, bittrexStatus: Boolean, livecoinStatus: Boolean) {
         statuses[Market.BINANCE_MARKET] = binanceStatus
         statuses[Market.BITTREX_MARKET] = bittrexStatus
+        statuses[Market.LIVECOIN_MARKET] = livecoinStatus
     }
 
     fun getStatus(marketName: String?): Boolean {
@@ -50,7 +50,9 @@ class Balance(override val name: String) : ViewItem {
         amounts = HashMap()
         amounts[Market.BITTREX_MARKET] = 0.0
         amounts[Market.BINANCE_MARKET] = 0.0
+        amounts[Market.LIVECOIN_MARKET] = 0.0
         statuses[Market.BITTREX_MARKET] = true
         statuses[Market.BINANCE_MARKET] = true
+        statuses[Market.LIVECOIN_MARKET] = true
     }
 }

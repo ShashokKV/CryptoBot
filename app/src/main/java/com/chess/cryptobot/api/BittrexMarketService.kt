@@ -12,7 +12,7 @@ interface BittrexMarketService {
     fun getBalance(@QueryMap options: Map<String, String>?, @HeaderMap headers: Map<String?, String?>?): Call<BittrexResponse>
 
     @GET("public/getorderbook")
-    fun getOrderBook(@QueryMap options: Map<String?, String?>?): Call<BittrexResponse>
+    fun getOrderBook(@QueryMap options: Map<String, String>): Call<BittrexResponse>
 
     @GET("public/getmarketsummaries")
     fun getTicker(): Call<BittrexResponse>

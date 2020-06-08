@@ -2,7 +2,6 @@ package com.chess.cryptobot.model.response
 
 import com.chess.cryptobot.model.History
 import java.time.ZoneId
-import java.util.*
 
 class HistoryResponseFactory(private val historyResponseList: List<HistoryResponse>?) {
     val history: List<History>

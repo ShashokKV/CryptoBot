@@ -15,6 +15,9 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import retrofit2.Retrofit
 import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
+import kotlin.collections.LinkedHashMap
 
 class BittrexMarket internal constructor(url: String, apiKey: String?, secretKey: String?) : MarketRequest(url, apiKey, secretKey) {
     private val service: BittrexMarketService
@@ -83,7 +86,7 @@ class BittrexMarket internal constructor(url: String, apiKey: String?, secretKey
     @Throws(BittrexException::class)
     override fun getOrderBook(pairName: String): OrderBookResponse {
         val response: BittrexResponse
-        val params: MutableMap<String?, String?> = LinkedHashMap()
+        val params: MutableMap<String, String> = LinkedHashMap()
         params["market"] = pairName
         params["type"] = "both"
         response = try {

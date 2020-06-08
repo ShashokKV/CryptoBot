@@ -4,13 +4,14 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.chess.cryptobot.R
 import com.chess.cryptobot.content.ContextHolder
-import java.util.*
 
 open class MarketFactory {
     open val bittrexApiKey = R.string.bittrex_api_key
     open val bittrexSecretKey = R.string.bittrex_secret_key
     open val binanceApiKey = R.string.binance_api_key
     open val binanceSecretKey = R.string.binance_secret_key
+    open val livecoinApiKey = R.string.livecoin_api_key
+    open val livecoinSecretKey = R.string.livecoin_secret_key
 
 
     fun getMarkets(contextHolder: ContextHolder): List<Market?> {
@@ -18,7 +19,7 @@ open class MarketFactory {
     }
 
     fun getMarkets(context: Context?, preferences: SharedPreferences): List<Market?> {
-        val marketNames = arrayOf("bittrex", "binance")
+        val marketNames = arrayOf(Market.BITTREX_MARKET, Market.BINANCE_MARKET, Market.LIVECOIN_MARKET)
         val markets: MutableList<Market?> = ArrayList()
         for (marketName in marketNames) {
             markets.add(getMarket(marketName, preferences, context))
@@ -29,11 +30,14 @@ open class MarketFactory {
     private fun getMarket(marketName: String, preferences: SharedPreferences, context: Context?): Market? {
         if (context == null) return null
         return when (marketName) {
-            "bittrex" -> {
+            Market.BITTREX_MARKET -> {
                 bittrexMarket(preferences, context)
             }
-            "binance" -> {
+            Market.BINANCE_MARKET -> {
                 binanceMarket(preferences, context)
+            }
+            Market.LIVECOIN_MARKET -> {
+                livecoinMarket(preferences, context)
             }
             else -> {
                 throw IllegalArgumentException("Unknown market: $marketName")
@@ -52,5 +56,11 @@ open class MarketFactory {
                 preferences.getString(context.getString(binanceApiKey), null),
                 preferences.getString(context.getString(binanceSecretKey), null),
                 null)
+    }
+
+    private fun livecoinMarket(preferences: SharedPreferences, context: Context): LivecoinMarket {
+        return LivecoinMarket(context.getString(R.string.livecoin_url),
+                preferences.getString(context.getString(livecoinApiKey), null),
+                preferences.getString(context.getString(livecoinSecretKey), null))
     }
 }

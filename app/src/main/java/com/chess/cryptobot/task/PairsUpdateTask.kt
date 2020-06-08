@@ -17,12 +17,12 @@ class PairsUpdateTask(pairsHolder: PairsHolder) : MarketTask<Pair, Pair>(pairsHo
     @Throws(MarketException::class)
     override fun marketProcess(market: Market, param: Pair): Pair {
         val response = market.getOrderBook(param.getPairNameForMarket(market.getMarketName()))
-        enricher!!.enrichWithResponse(response!!)
+        enricher!!.enrichWithResponse(response)
         return param
     }
 
     public override fun postMarketProcess(result: Pair?): Pair {
-        return enricher!!.countPercent().pair
+        return enricher!!.enrichWithMinPercent(null).pair
     }
 
     override fun exceptionProcess(param: Pair, exceptionMessage: String?): Pair {

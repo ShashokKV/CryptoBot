@@ -33,6 +33,18 @@
             android:title="Withdrawal secret key" />
     </androidx.preference.PreferenceCategory>
     <androidx.preference.PreferenceCategory
+        android:key="livecoin_keys"
+        android:title="@string/livecoin_api_keys">
+        <androidx.preference.EditTextPreference
+            android:dialogLayout="@layout/keys_dialog"
+            android:key="@string/livecoin_api_key"
+            android:title="@string/api_key" />
+        <androidx.preference.EditTextPreference
+            android:dialogLayout="@layout/keys_dialog"
+            android:key="@string/livecoin_secret_key"
+            android:title="@string/secret_key" />
+    </androidx.preference.PreferenceCategory>
+    <androidx.preference.PreferenceCategory
         android:key="proxy_settings"
         android:title="Proxy Settings">
         <androidx.preference.EditTextPreference

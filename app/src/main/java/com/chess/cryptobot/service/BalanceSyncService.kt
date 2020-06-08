@@ -14,7 +14,6 @@ import com.chess.cryptobot.view.notification.NotificationBuilder
 import com.chess.cryptobot.view.notification.NotificationID
 import java.math.BigDecimal
 import java.math.RoundingMode
-import java.util.*
 
 class BalanceSyncService : IntentService("BalanceSyncService") {
     private var resultInfo = ""
@@ -61,11 +60,8 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
         }
         val coinMover = CoinMover(minBalance, coinName)
         coinMover.setAmounts(marketAmounts)
-        coinMover.setDirection(Market.BITTREX_MARKET, Market.BINANCE_MARKET)
-        if (!coinMover.checkAndMove()) {
-            coinMover.setDirection(Market.BINANCE_MARKET, Market.BITTREX_MARKET)
-            coinMover.checkAndMove()
-        }
+        coinMover.computeDirection()
+        coinMover.checkAndMove()
     }
 
     @Throws(MarketException::class)
@@ -102,9 +98,11 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
             this.amounts = amounts
         }
 
-        internal fun setDirection(moveFrom: String, moveTo: String) {
-            this.moveFrom = moveFrom
-            this.moveTo = moveTo
+        internal fun computeDirection() {
+            val maxValue = amounts?.values?.max()
+            val minValue = amounts?.values?.min()
+            moveFrom = amounts?.filterValues { amount -> amount == maxValue }?.keys?.first()
+            moveTo = amounts?.filterValues { amount -> amount == minValue }?.keys?.first()
         }
 
         @Throws(SyncServiceException::class)

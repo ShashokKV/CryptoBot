@@ -22,7 +22,7 @@
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="0.3"
+                android:layout_weight="0.225"
                 android:text="@string/pair"
                 android:textAlignment="center"
                 android:textColor="@color/colorSecondary"
@@ -32,7 +32,7 @@
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="0.3"
+                android:layout_weight="0.225"
                 android:text="@string/bittrex"
                 android:textColor="@color/colorSecondary"
                 android:textSize="18sp"
@@ -41,8 +41,17 @@
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="0.3"
+                android:layout_weight="0.225"
                 android:text="@string/binance"
+                android:textColor="@color/colorSecondary"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.225"
+                android:text="@string/livecoin"
                 android:textColor="@color/colorSecondary"
                 android:textSize="18sp"
                 android:textStyle="bold" />

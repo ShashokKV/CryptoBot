@@ -17,6 +17,7 @@ class BalanceHolder(fragment: Fragment) : ContextHolder(fragment) {
     private var hasKeys: Boolean = false
     private var bittrexStatuses: Map<String, Boolean> = HashMap()
     private var binanceStatuses: Map<String, Boolean> = HashMap()
+    private var livecoinStatuses: Map<String, Boolean> = HashMap()
     private var iconUrls: Map<String, String>? = null
     private val serialExecutor: SerialExecutor = SerialExecutor()
 
@@ -54,7 +55,9 @@ class BalanceHolder(fragment: Fragment) : ContextHolder(fragment) {
     override fun add(viewItem: ViewItem) {
         super.add(viewItem)
         val balance = viewItem as Balance
-        balance.setStatuses(binanceStatuses[balance.name]?: true, bittrexStatuses[balance.name]?: true)
+        balance.setStatuses(binanceStatuses[balance.name]?: true,
+                bittrexStatuses[balance.name]?: true,
+                livecoinStatuses[balance.name]?: true)
         if (iconUrls != null) balance.coinUrl = iconUrls!![balance.name]
         updateImage(balance)
         if (hasKeys) updateAmount(balance)
@@ -62,7 +65,9 @@ class BalanceHolder(fragment: Fragment) : ContextHolder(fragment) {
 
     public override fun updateItem(item: ViewItem) {
         val balance = item as Balance
-        balance.setStatuses(binanceStatuses[balance.name]?: true, bittrexStatuses[balance.name]?: true)
+        balance.setStatuses(binanceStatuses[balance.name]?: true,
+                bittrexStatuses[balance.name]?: true,
+                livecoinStatuses[balance.name]?: true)
         if (iconUrls != null) balance.coinUrl = iconUrls!![balance.name]
         updateImage(balance)
         if (hasKeys) updateAmount(balance)
@@ -97,9 +102,10 @@ class BalanceHolder(fragment: Fragment) : ContextHolder(fragment) {
         preferences.setMinBalance(coinName, minBalance)
     }
 
-    fun setCurrencyStatus(bittrexStatuses: Map<String, Boolean>, binanceStatuses: Map<String, Boolean>) {
+    fun setCurrencyStatus(bittrexStatuses: Map<String, Boolean>, binanceStatuses: Map<String, Boolean>, livecoinStatuses: Map<String, Boolean>) {
         this.bittrexStatuses = bittrexStatuses
         this.binanceStatuses = binanceStatuses
+        this.livecoinStatuses = livecoinStatuses
     }
 
     fun setIconUrls(urls: Map<String, String>) {

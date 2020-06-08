@@ -20,6 +20,6 @@ class BinanceMarketTest {
     fun getAddress() {
         val address = binanceMarket.getAddress("BTC")
         println(address)
-        assert(address!=null && !address.isEmpty())
+        assert(address!=null && address.isNotEmpty())
     }
 }

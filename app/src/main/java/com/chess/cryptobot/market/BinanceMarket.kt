@@ -23,6 +23,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
+import kotlin.collections.LinkedHashMap
 
 
 class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey: String?,

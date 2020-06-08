@@ -15,7 +15,7 @@ interface Market {
     fun getAmount(coinName: String): Double
 
     @Throws(MarketException::class)
-    fun getOrderBook(pairName: String): OrderBookResponse?
+    fun getOrderBook(pairName: String): OrderBookResponse
 
     @Throws(MarketException::class)
     fun getTicker(): List<TickerResponse>
@@ -46,6 +46,7 @@ interface Market {
     fun getHistory(context: Context?): List<History>
 
     companion object {
+        const val LIVECOIN_MARKET = "livecoin"
         const val BITTREX_MARKET = "bittrex"
         const val BINANCE_MARKET = "binance"
     }

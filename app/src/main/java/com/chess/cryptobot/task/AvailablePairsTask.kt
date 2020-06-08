@@ -11,6 +11,8 @@ class AvailablePairsTask(pairsHolder: PairsHolder) : MarketTask<Int, MutableList
     private var availablePairNames: MutableList<String>? = null
     private var bittrexVolumes: MutableMap<String, Double> = HashMap()
     private var binanceVolumes: MutableMap<String, Double> = HashMap()
+    private var livecoinVolumes: MutableMap<String, Double> = HashMap()
+
 
     override fun preMarketProcess(param: Int) {}
 
@@ -26,6 +28,7 @@ class AvailablePairsTask(pairsHolder: PairsHolder) : MarketTask<Int, MutableList
             availablePairNames?.retainAll(pairNames)
             binanceVolumes.keys.retainAll(availablePairNames!!)
             bittrexVolumes.keys.retainAll(availablePairNames!!)
+            livecoinVolumes.keys.retainAll(availablePairNames!!)
         }
         return availablePairNames
     }
@@ -37,10 +40,19 @@ class AvailablePairsTask(pairsHolder: PairsHolder) : MarketTask<Int, MutableList
     }
 
     private fun updateVolumesForMarket(marketName: String, tickers: List<TickerResponse>) {
-        if (marketName == Market.BITTREX_MARKET) {
-            updateVolumes(bittrexVolumes, tickers)
-        } else {
-            updateVolumes(binanceVolumes, tickers)
+        when (marketName) {
+            Market.BITTREX_MARKET -> {
+                updateVolumes(bittrexVolumes, tickers)
+            }
+            Market.BINANCE_MARKET -> {
+                updateVolumes(binanceVolumes, tickers)
+            }
+            Market.LIVECOIN_MARKET -> {
+                updateVolumes(livecoinVolumes, tickers)
+            }
+            else -> {
+                throw IllegalArgumentException("Unknown market: $marketName")
+            }
         }
     }
 
@@ -59,7 +71,7 @@ class AvailablePairsTask(pairsHolder: PairsHolder) : MarketTask<Int, MutableList
     override fun doInPostExecute(result: MutableList<String>?, holder: ContextHolder) {
         val pairsHolder = holder as PairsHolder
         pairsHolder.setAvailablePairs(excludePairs(result))
-        pairsHolder.setVolumes(bittrexVolumes, binanceVolumes)
+        pairsHolder.setVolumes(bittrexVolumes, binanceVolumes, livecoinVolumes)
         pairsHolder.removeInvalidPairs()
         pairsHolder.updateAllItems()
     }
