@@ -14,6 +14,8 @@
         <item name="android:textColor">@color/colorWhite</item>
         <item name="android:divider">@color/dividerColor</item>
         <item name="alertDialogTheme">@style/AlertDialogTheme</item>
+        <item name="android:autoCompleteTextViewStyle">@style/AutoCompleteTextViewLight</item>
+        <item name="android:dropDownItemStyle">@style/Widget.DropDownItemLight</item>
     </style>
 
     <style name="AlertDialogTheme" parent="ThemeOverlay.AppCompat.Dialog.Alert">
@@ -29,6 +31,13 @@
     </style>
 
     <style name="PositiveButtonStyle" parent="Widget.AppCompat.Button.ButtonBar.AlertDialog">
+        <item name="android:textColor">@color/colorSecondaryDark</item>
+    </style>
+
+    <style name="AutoCompleteTextViewLight" parent="@android:style/Widget.AutoCompleteTextView">
+        <item name="android:textColor">@color/colorSecondaryDark</item>
+    </style>
+    <style name="Widget.DropDownItemLight" parent="@android:style/Widget.DropDownItem">
         <item name="android:textColor">@color/colorSecondaryDark</item>
     </style>
 </resources>

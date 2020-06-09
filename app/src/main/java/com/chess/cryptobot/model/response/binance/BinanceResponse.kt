@@ -17,16 +17,24 @@ open class BinanceResponse : MarketResponse, TickerResponse, HistoryResponse, Cu
 
     @SerializedName("msg")
     @Expose
+    private var msg: String? = null
+
+    @SerializedName("message")
+    @Expose
     private var message: String? = null
+
+    @SerializedName("code")
+    @Expose
+    private var code: Int? = null
 
     var responsesList: List<BinanceResponse>? = null
 
     override fun success(): Boolean {
-        return success ?: false
+        return success ?: (code==null)
     }
 
-    override fun message(): String? {
-        return message
+    override fun message(): String {
+        return msg?:message?:"No error message"
     }
 
     @SerializedName("coin")

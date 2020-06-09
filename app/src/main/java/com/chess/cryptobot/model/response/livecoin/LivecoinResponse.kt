@@ -16,11 +16,12 @@ open class LivecoinResponse : MarketResponse {
     @SerializedName("exception")
     @Expose
     private val exception: String? = null
+
     override fun success(): Boolean {
         return success ?: true
     }
 
-    override fun message(): String? {
-        return errorMessage ?: exception
+    override fun message(): String {
+        return errorMessage ?: exception ?: "no message"
     }
 }

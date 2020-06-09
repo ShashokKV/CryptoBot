@@ -31,8 +31,8 @@ class BittrexResponse : MarketResponse, BalanceResponse, OrderBookResponse, Curr
         this.message = message
     }
 
-    override fun message(): String? {
-        return message
+    override fun message(): String {
+        return message?:"no message"
     }
 
     override val amount: Double

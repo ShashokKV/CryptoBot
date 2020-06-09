@@ -6,8 +6,8 @@ import com.google.gson.annotations.SerializedName
 class ErrorResponse {
     @SerializedName("errorMessage")
     @Expose
-    val errorMessage: String? = null
-        get() = field ?: message ?: msg
+    val errorMessage: String = "no error Message"
+        get() = message?:msg?:field
     @SerializedName("message")
     @Expose
     private val message: String? = null
