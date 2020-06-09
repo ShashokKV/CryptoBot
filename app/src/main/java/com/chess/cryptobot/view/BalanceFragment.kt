@@ -44,7 +44,6 @@ class BalanceFragment : MainFragment<BalanceAdapter.BalanceViewHolder>() {
             anim.duration = 300
             anim.start()
             CryptoNameDialog(holder as BalanceHolder).show(parentFragmentManager, "coinName")
-
         }
     }
 

@@ -2,7 +2,4 @@
 <resources>
     <item name="name_dialog_edit_text" type="id" />
     <item name="name_dialog_title" type="id" />
-    <item name="min_balance_edit_text" type="id" />
-    <item name="min_balance_title" type="id" />
-
 </resources>

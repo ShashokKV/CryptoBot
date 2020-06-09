@@ -19,6 +19,7 @@ class BalanceHolder(fragment: Fragment) : ContextHolder(fragment) {
     private var binanceStatuses: Map<String, Boolean> = HashMap()
     private var livecoinStatuses: Map<String, Boolean> = HashMap()
     private var iconUrls: Map<String, String>? = null
+    var availableCoins = ArrayList<String>()
     private val serialExecutor: SerialExecutor = SerialExecutor()
 
     init {

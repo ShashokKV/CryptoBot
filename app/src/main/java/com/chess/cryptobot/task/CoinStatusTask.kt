@@ -9,12 +9,14 @@ import com.chess.cryptobot.model.response.CurrenciesResponse
 import com.chess.cryptobot.model.response.bittrex.BittrexGenericResponse
 import com.chess.cryptobot.model.response.bittrex.BittrexResponse
 import java.util.*
+import kotlin.collections.ArrayList
 
 class CoinStatusTask(holder: ContextHolder?) : MarketTask<Int, Int>(holder!!) {
     private var bittrexStatuses: MutableMap<String, Boolean> = HashMap()
     private var binanceStatuses: MutableMap<String, Boolean> = HashMap()
     private var livecoinStatuses: MutableMap<String, Boolean> = HashMap()
     private var coinIcons: MutableMap<String, String> = HashMap()
+    private var availableCoins = ArrayList<String>()
 
     override fun preMarketProcess(param: Int) {
     }
@@ -38,7 +40,16 @@ class CoinStatusTask(holder: ContextHolder?) : MarketTask<Int, Int>(holder!!) {
     }
 
     private fun updateStatuses(statusMap: MutableMap<String, Boolean>, currencies: List<CurrenciesResponse>) {
-        currencies.forEach{ currency: CurrenciesResponse -> statusMap[currency.currencyName!!] = currency.isActive?: true}
+        val marketCoins = ArrayList<String>()
+        currencies.forEach{ currency: CurrenciesResponse ->
+            statusMap[currency.currencyName!!] = currency.isActive?: true
+            marketCoins.add(currency.currencyName!!)
+        }
+        if (availableCoins.isEmpty()) {
+            availableCoins.addAll(marketCoins)
+        } else {
+            availableCoins.retainAll(marketCoins)
+        }
     }
 
     private fun updateIcons(response: BittrexResponse) {
@@ -57,6 +68,7 @@ class CoinStatusTask(holder: ContextHolder?) : MarketTask<Int, Int>(holder!!) {
         val balanceHolder = holder as BalanceHolder
         balanceHolder.setCurrencyStatus(bittrexStatuses, binanceStatuses, livecoinStatuses)
         balanceHolder.setIconUrls(coinIcons)
+        balanceHolder.availableCoins = availableCoins
         balanceHolder.updateAllItems()
     }
 
