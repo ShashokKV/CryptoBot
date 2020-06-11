@@ -18,7 +18,6 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
-import java.util.*
 import kotlin.math.roundToLong
 
 class BalanceGraphTask(balanceGraphFragment: BalanceGraphFragment) : AsyncTask<Void?, Int?, Void?>() {
@@ -43,19 +42,15 @@ class BalanceGraphTask(balanceGraphFragment: BalanceGraphFragment) : AsyncTask<V
 
     override fun onPostExecute(param: Void?) {
         val lineChart = createChart() ?: return
-       // val startPosition = lineChart.xChartMax - MAX_X_RANGE
-        //if (startPosition > 0) {
-            lineChart.moveViewToX(MAX_X_RANGE)
-        //} else {
-        //    lineChart.invalidate()
-        //}
+        lineChart.invalidate()
+
     }
 
     private fun createDataSets(balances: List<BtcBalance>?): List<ILineDataSet?> {
         val entries: MutableList<Entry> = ArrayList()
         val dataSet = LineDataSet(entries, "BTC")
-        if (balances==null) return ArrayList()
-        balances.forEach{btcBalance: BtcBalance ->
+        if (balances == null) return ArrayList()
+        balances.forEach { btcBalance: BtcBalance ->
             val balance = btcBalance.balance
             val time = floatDateTime(btcBalance.dateCreated)
             entries.add(Entry(time, balance))

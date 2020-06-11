@@ -3,7 +3,6 @@ package com.chess.cryptobot.model.response.bittrex
 import com.chess.cryptobot.model.History
 import com.chess.cryptobot.model.Price
 import com.chess.cryptobot.model.response.*
-import java.util.function.Consumer
 
 class BittrexResponse : MarketResponse, BalanceResponse, OrderBookResponse, CurrenciesListResponse, AddressResponse, TradeLimitResponse {
     private var success: Boolean? = null
@@ -51,7 +50,7 @@ class BittrexResponse : MarketResponse, BalanceResponse, OrderBookResponse, Curr
 
     private fun parsePrices(prices: List<BittrexPrice>?): List<Price?> {
         val parsedPrices = ArrayList<Price?>()
-        prices!!.forEach(Consumer { price: BittrexPrice -> parsedPrices.add(Price(price.rate!!, price.quantity!!)) })
+        prices!!.forEach{ price: BittrexPrice -> parsedPrices.add(Price(price.rate!!, price.quantity!!)) }
         return parsedPrices
     }
 

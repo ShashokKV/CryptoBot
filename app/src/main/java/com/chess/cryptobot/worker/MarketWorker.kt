@@ -55,7 +55,7 @@ class MarketWorker(context: Context, workerParams: WorkerParameters) : Worker(co
         for (market in markets) {
             val tickers = market!!.getTicker()
             tickers.forEach { ticker: TickerResponse ->
-                val tickerName = ticker.marketName
+                val tickerName = ticker.tickerName
                 if (allPairNames?.contains(tickerName)!!) {
                     val pair = createOrGetPair(tickerName, tickerPairs)
                     if (coinInfo!!.checkCoinStatus(pair.baseName) && coinInfo!!.checkCoinStatus(pair.marketName)) {

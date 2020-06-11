@@ -79,7 +79,7 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
                         ?: 0.0)
                 pair = PairResponseEnricher(pair).enrichFromTicker(market.getTicker()
                         .filter { tickerResponse ->
-                            tickerResponse.marketName == pair.getPairNameForMarket(marketName)
+                            tickerResponse.tickerName == pair.getPairNameForMarket(marketName)
                         }[0], marketName).pair
             }
         }

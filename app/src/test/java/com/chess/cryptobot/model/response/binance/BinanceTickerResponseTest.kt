@@ -28,6 +28,6 @@ class BinanceTickerResponseTest {
                 "  \"lastId\": 28460,    // Last tradeId\n" +
                 "  \"count\": 76         // Trade count\n" +
                 "}", BinanceResponse::class.java)
-        assert(binanceTickerResponse.marketName == "BNB/BTC")
+        assert(binanceTickerResponse.tickerName == "BNB/BTC")
     }
 }

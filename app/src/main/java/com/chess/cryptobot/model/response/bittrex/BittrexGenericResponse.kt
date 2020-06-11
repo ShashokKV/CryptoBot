@@ -86,7 +86,7 @@ class BittrexGenericResponse : TickerResponse, CurrenciesResponse, HistoryRespon
     @Expose
     val logoUrl: String? = null
 
-    override val marketName: String
+    override val tickerName: String
         get() = pairName?.replace("-", "/") ?: ""
 
     override val fee: Double

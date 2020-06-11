@@ -18,9 +18,8 @@ class AvailablePairsTask(pairsHolder: PairsHolder) : MarketTask<Int, MutableList
 
     @Throws(MarketException::class)
     override fun marketProcess(market: Market, param: Int): MutableList<String>? {
-        val pairNames: MutableList<String>
         val tickers = market.getTicker()
-        pairNames = getPairNames(tickers)
+        val pairNames = getPairNames(tickers)
         updateVolumesForMarket(market.getMarketName(), tickers)
         if (availablePairNames == null) {
             availablePairNames = LinkedList(pairNames)
@@ -35,7 +34,7 @@ class AvailablePairsTask(pairsHolder: PairsHolder) : MarketTask<Int, MutableList
 
     private fun getPairNames(tickers: List<TickerResponse>): MutableList<String> {
         val pairNames: MutableList<String> = ArrayList()
-        tickers.forEach { ticker: TickerResponse -> pairNames.add(ticker.marketName) }
+        tickers.forEach { ticker: TickerResponse -> pairNames.add(ticker.tickerName) }
         return pairNames
     }
 
@@ -57,7 +56,7 @@ class AvailablePairsTask(pairsHolder: PairsHolder) : MarketTask<Int, MutableList
     }
 
     private fun updateVolumes(volumeMap: MutableMap<String, Double>, tickers: List<TickerResponse>) {
-        tickers.forEach { ticker: TickerResponse -> volumeMap[ticker.marketName] = ticker.volume }
+        tickers.forEach { ticker: TickerResponse -> volumeMap[ticker.tickerName] = ticker.volume }
     }
 
     override fun postMarketProcess(result: MutableList<String>?): MutableList<String>? {
@@ -70,7 +69,7 @@ class AvailablePairsTask(pairsHolder: PairsHolder) : MarketTask<Int, MutableList
 
     override fun doInPostExecute(result: MutableList<String>?, holder: ContextHolder) {
         val pairsHolder = holder as PairsHolder
-        pairsHolder.setAvailablePairs(excludePairs(result))
+        pairsHolder.setAvailablePairs(result)
         pairsHolder.setVolumes(bittrexVolumes, binanceVolumes, livecoinVolumes)
         pairsHolder.removeInvalidPairs()
         pairsHolder.updateAllItems()
@@ -78,10 +77,4 @@ class AvailablePairsTask(pairsHolder: PairsHolder) : MarketTask<Int, MutableList
 
     override fun doInOnCanceled(result: MutableList<String>?, holder: ContextHolder?) {}
 
-    private fun excludePairs(allPairNames: MutableList<String>?): MutableList<String>? {
-        val usdPairs: MutableList<String> = ArrayList()
-        allPairNames?.forEach { marketName: String? -> if (marketName?.startsWith("USD/") == true) usdPairs.add(marketName) }
-        allPairNames?.removeAll(usdPairs)
-        return allPairNames
-    }
 }

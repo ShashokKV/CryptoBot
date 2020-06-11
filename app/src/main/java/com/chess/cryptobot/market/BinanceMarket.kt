@@ -125,7 +125,9 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
         } catch (e: IOException) {
             throw BinanceException(e.message!!)
         }
-        return response.responsesList ?: ArrayList()
+        var tickerResponse = response.responsesList ?: ArrayList()
+        tickerResponse = tickerResponse.filter { ticker -> ticker.tickerAsk?:0.0>0.0 && ticker.tickerBid?:0.0>0.0 }
+        return tickerResponse
     }
 
     @Throws(MarketException::class)

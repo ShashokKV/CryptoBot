@@ -25,7 +25,7 @@ class Withdraw : HistoryResponse {
     @Expose
     override val historyAmount: Double = 0.0
 
-    override val historyPrice: Double = 0.0
+    override val historyPrice: Double? = null
 
     override val historyAction = "deposit"
 

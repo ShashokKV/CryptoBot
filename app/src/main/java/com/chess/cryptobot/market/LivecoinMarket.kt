@@ -12,7 +12,6 @@ import com.google.gson.GsonBuilder
 import retrofit2.Call
 import retrofit2.Retrofit
 import java.io.IOException
-import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
@@ -222,8 +221,9 @@ class LivecoinMarket internal constructor(url: String?, apiKey: String?, secretK
         val startTime = LocalDateTime.now().minusDays(29)
         val endTime = LocalDateTime.now()
         val params: MutableMap<String, String> = LinkedHashMap()
-        params["end"] = (endTime.toEpochSecond(ZoneOffset.systemDefault().rules.getOffset(Instant.now())) * 1000).toString()
-        params["start"] = (startTime.toEpochSecond(ZoneOffset.systemDefault().rules.getOffset(Instant.now())) * 1000).toString()
+        params["end"] = (endTime.toEpochSecond(ZoneOffset.UTC) * 1000).toString()
+        params["start"] = (startTime.toEpochSecond(ZoneOffset.UTC) * 1000).toString()
+
         val hash = makeHash(params)
         val headers: MutableMap<String, String> = HashMap()
         headers["API-key"] = apiKey

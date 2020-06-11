@@ -4,6 +4,7 @@ import com.chess.cryptobot.model.response.HistoryResponse
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 import java.time.*
+import kotlin.math.roundToLong
 
 class LivecoinOrdersResponse : LivecoinResponse() {
     @SerializedName("data")
@@ -35,8 +36,10 @@ class LivecoinOrdersResponse : LivecoinResponse() {
         @Expose
         var remainingQuantity: Double? = null
         override val historyTime: ZonedDateTime?
-            get() = ZonedDateTime.ofLocal(LocalDateTime.ofEpochSecond((issueTime!! / 1000.toFloat()).toLong(), 0,
-                    ZoneOffset.systemDefault().rules.getOffset(Instant.now())), ZoneId.of("Z"), ZoneOffset.UTC)
+            get() = ZonedDateTime.ofLocal(LocalDateTime.ofEpochSecond((issueTime!! / 1000.toFloat()).roundToLong(),
+                    0,
+                    ZoneOffset.UTC),
+                    ZoneId.of("Z"), ZoneOffset.UTC)
 
         override val historyName: String
             get() {

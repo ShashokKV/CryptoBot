@@ -20,7 +20,7 @@ class LivecoinTickerResponse : LivecoinResponse(), TickerResponse {
     @SerializedName("volume")
     @Expose
     override val volume: Double = 0.0
-    override val marketName: String
+    override val tickerName: String
         get() {
             val split = symbol!!.split("/".toRegex()).toTypedArray()
             return split[1] + "/" + split[0]

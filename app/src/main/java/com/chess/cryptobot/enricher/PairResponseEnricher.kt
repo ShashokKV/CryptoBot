@@ -32,12 +32,7 @@ class PairResponseEnricher(val pair: Pair) {
                 marketName = Market.LIVECOIN_MARKET
             }
         }
-        initMaps(marketName,
-                response,
-                response.bids()?.get(0)?.value ?: 0.0,
-                response.bids()?.get(0)?.quantity ?: 0.0,
-                response.asks()?.get(0)?.value ?: 0.0,
-                response.asks()?.get(0)?.quantity ?: 0.0)
+        initMaps(marketName, response)
     }
 
     fun enrichFromTicker(tickerResponse: TickerResponse, marketName: String): PairResponseEnricher {
@@ -47,21 +42,21 @@ class PairResponseEnricher(val pair: Pair) {
         return this
     }
 
-    private fun initMaps(marketName: String, response: OrderBookResponse, bid: Double, bidQuantity: Double, ask: Double, askQuantity: Double) {
+    private fun initMaps(marketName: String, response: OrderBookResponse) {
         responsesMap[marketName] = response
-        pair.bidMap[marketName] = bid
-        pair.askMap[marketName] = ask
-        pair.bidQuantityMap[marketName] = bidQuantity
-        pair.askQuantityMap[marketName] = askQuantity
+        pair.bidMap[marketName] = response.bids()?.get(0)?.value ?: 0.0
+        pair.askMap[marketName] = response.asks()?.get(0)?.value ?: Double.MAX_VALUE
+        pair.bidQuantityMap[marketName] = response.bids()?.get(0)?.quantity ?: 0.0
+        pair.askQuantityMap[marketName] = response.asks()?.get(0)?.quantity ?: 0.0
     }
 
     fun enrichWithMinPercent(minPercent: Float?): PairResponseEnricher {
         pair.bid = pair.bidMap.values.max()?:0.0
-        pair.ask = pair.askMap.values.min()?:0.0
+        pair.ask = pair.askMap.values.min()?:Double.MAX_VALUE
         pair.bidMarketName = pair.bidMap.filterValues {it == pair.bid }.keys.first()
         pair.askMarketName = pair.askMap.filterValues { it == pair.ask }.keys.first()
         if (minPercent==null) {
-            countPercent()
+            pair.percent = countPercent()
             return this
         }
         this.minPercent = minPercent

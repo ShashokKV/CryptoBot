@@ -120,7 +120,7 @@ open class BinanceResponse : MarketResponse, TickerResponse, HistoryResponse, Cu
     @Expose
     override val volume: Double = 0.0
 
-    override val marketName: String
+    override val tickerName: String
         get() {
             return symbolToPairName(symbol)
         }
@@ -167,7 +167,7 @@ open class BinanceResponse : MarketResponse, TickerResponse, HistoryResponse, Cu
 
     private fun symbolToPairName(symbol: String?) : String {
         if (symbol==null) return ""
-        for (baseName in listOf("BTC","ETH","USDT")) {
+        for (baseName in listOf("BTC","ETH","USDT","BNB","XRP","TRX")) {
             val index = symbol.indexOf(baseName, symbol.length - baseName.length)
             if (index>0) {
                 return "$baseName/" + symbol.substring(0, index)
