@@ -26,19 +26,19 @@ class CoinInfo(markets: List<Market?>) {
     }
 
     init {
-        for (market in markets) {
-            if (market==null) break
-            val currencies = market.getCurrencies()
-            val fees: MutableMap<String?, Double?> = HashMap()
-            val statuses: MutableMap<String?, Boolean?> = HashMap()
-            for (currency in currencies) {
-                val currencyName = currency.currencyName
-                statuses[currencyName] = currency.isActive
-                fees[currencyName] = currency.fee
-            }
+            markets.parallelStream().forEach {
+                it?:return@forEach
+                val currencies = it.getCurrencies()
+                val fees: MutableMap<String?, Double?> = HashMap()
+                val statuses: MutableMap<String?, Boolean?> = HashMap()
+                for (currency in currencies) {
+                    val currencyName = currency.currencyName
+                    statuses[currencyName] = currency.isActive
+                    fees[currencyName] = currency.fee
+                }
 
-            this.statuses[market.getMarketName()] = statuses
-            this.fees[market.getMarketName()] = fees
-        }
+                this.statuses[it.getMarketName()] = statuses
+                this.fees[it.getMarketName()] = fees
+            }
     }
 }

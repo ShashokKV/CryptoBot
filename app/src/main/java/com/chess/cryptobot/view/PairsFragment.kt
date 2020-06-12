@@ -50,7 +50,11 @@ class PairsFragment : MainFragment<PairsAdapter.PairsViewHolder>() {
         if (!hidden) {
             val pairsHolder = holder as PairsHolder
             pairsHolder.updateFromBalance()
-            pairsHolder.initAvailablePairs()
+            if (pairsHolder.hasAvailablePairs) {
+                pairsHolder.updateAllItems()
+            } else {
+                pairsHolder.initAvailablePairs()
+            }
         }
     }
 }

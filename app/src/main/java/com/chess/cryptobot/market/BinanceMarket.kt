@@ -91,7 +91,7 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
         }
 
         balances = HashMap()
-        response.responsesList?.forEach { balanceResponse ->
+        response.balances.forEach { balanceResponse ->
             balances[balanceResponse.coinName!!] = balanceResponse.amount
         }
         return balances[coinName] ?: 0.0
@@ -125,9 +125,8 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
         } catch (e: IOException) {
             throw BinanceException(e.message!!)
         }
-        var tickerResponse = response.responsesList ?: ArrayList()
-        tickerResponse = tickerResponse.filter { ticker -> ticker.tickerAsk?:0.0>0.0 && ticker.tickerBid?:0.0>0.0 }
-        return tickerResponse
+        val tickerResponse = response.tickers
+        return tickerResponse.filter { ticker -> ticker.tickerAsk?:0.0>0.0 && ticker.tickerBid?:0.0>0.0 }
     }
 
     @Throws(MarketException::class)
@@ -251,7 +250,7 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
         } catch (e: MarketException) {
             throw BinanceException(e.message!!)
         }
-        return HistoryResponseFactory(response.responsesList).history
+        return HistoryResponseFactory(response.orders).history
     }
 
     @Throws(MarketException::class)
@@ -293,7 +292,7 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
         } catch (e: MarketException) {
             throw BinanceException(e.message!!)
         }
-        return HistoryResponseFactory(response.responsesList?.filter { order -> order.status.equals("FILLED") }).history
+        return HistoryResponseFactory(response.orders.filter { order -> order.status.equals("FILLED") }).history
     }
 
     @Throws(BinanceException::class)

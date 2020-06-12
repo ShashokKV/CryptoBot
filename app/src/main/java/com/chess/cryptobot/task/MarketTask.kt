@@ -18,19 +18,21 @@ abstract class MarketTask<S, T>(holder: ContextHolder) : AsyncTask<S, Int?, T?>(
         preMarketProcess(param)
         if (holder == null) return null
         val markets = holder.markets
-        for (market in markets) {
-            result = try {
-                if (market == null) {
-                    cancel(true)
-                    return null
-                }
-                marketProcess(market, param)
-            } catch (e: MarketException) {
-                cancel(true)
-                return exceptionProcess(param, e.message)
-            }
-        }
+        markets.parallelStream().forEach { result = marketsLoop(it, param) }
         return postMarketProcess(result)
+    }
+
+    private fun marketsLoop(market: Market?, param: S):T? {
+        return try {
+            if (market == null) {
+                cancel(true)
+                return null
+            }
+            marketProcess(market, param)
+        } catch (e: MarketException) {
+            cancel(true)
+            return exceptionProcess(param, e.message)
+        }
     }
 
     protected abstract fun preMarketProcess(param: S)

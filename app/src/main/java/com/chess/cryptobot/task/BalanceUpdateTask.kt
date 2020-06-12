@@ -14,7 +14,8 @@ class BalanceUpdateTask(balanceHolder: BalanceHolder) : MarketTask<Balance, Bala
 
     @Throws(MarketException::class)
     override fun marketProcess(market: Market, param: Balance): Balance {
-        param.setAmount(market.getMarketName(), market.getAmount(param.name))
+        val amount = market.getAmount(param.name)
+        synchronized(this) {param.setAmount(market.getMarketName(), amount)}
         return param
     }
 

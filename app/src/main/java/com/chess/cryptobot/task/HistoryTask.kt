@@ -15,11 +15,12 @@ class HistoryTask(private val holder: ContextHolder, private val state: HistoryH
     @Throws(MarketException::class)
     override fun marketProcess(market: Market, param: Int): String? {
         if (market.keysIsEmpty()) return ""
-        if (state === HistoryHolder.State.HISTORY) {
-            historyList.addAll(market.getHistory(holder.context))
+        val marketHistory: List<History> = if (state === HistoryHolder.State.HISTORY) {
+            market.getHistory(holder.context)
         } else {
-            historyList.addAll(market.getOpenOrders())
+            market.getOpenOrders()
         }
+        synchronized(this) {historyList.addAll(marketHistory)}
         return ""
     }
 

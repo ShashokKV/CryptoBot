@@ -8,7 +8,7 @@ import com.chess.cryptobot.model.response.TickerResponse
 import java.util.*
 
 class AvailablePairsTask(pairsHolder: PairsHolder) : MarketTask<Int, MutableList<String>?>(pairsHolder) {
-    private var availablePairNames: MutableList<String>? = null
+    private  var availablePairNames: MutableList<String>? = null
     private var bittrexVolumes: MutableMap<String, Double> = HashMap()
     private var binanceVolumes: MutableMap<String, Double> = HashMap()
     private var livecoinVolumes: MutableMap<String, Double> = HashMap()
@@ -20,15 +20,18 @@ class AvailablePairsTask(pairsHolder: PairsHolder) : MarketTask<Int, MutableList
     override fun marketProcess(market: Market, param: Int): MutableList<String>? {
         val tickers = market.getTicker()
         val pairNames = getPairNames(tickers)
-        updateVolumesForMarket(market.getMarketName(), tickers)
-        if (availablePairNames == null) {
-            availablePairNames = LinkedList(pairNames)
-        } else {
-            availablePairNames?.retainAll(pairNames)
-            binanceVolumes.keys.retainAll(availablePairNames!!)
-            bittrexVolumes.keys.retainAll(availablePairNames!!)
-            livecoinVolumes.keys.retainAll(availablePairNames!!)
+        synchronized(this) {
+            updateVolumesForMarket(market.getMarketName(), tickers)
+            if (availablePairNames == null) {
+                availablePairNames = LinkedList(pairNames)
+            } else {
+                availablePairNames?.retainAll(pairNames)
+                binanceVolumes.keys.retainAll(availablePairNames!!)
+                bittrexVolumes.keys.retainAll(availablePairNames!!)
+                livecoinVolumes.keys.retainAll(availablePairNames!!)
+            }
         }
+
         return availablePairNames
     }
 
@@ -70,6 +73,7 @@ class AvailablePairsTask(pairsHolder: PairsHolder) : MarketTask<Int, MutableList
     override fun doInPostExecute(result: MutableList<String>?, holder: ContextHolder) {
         val pairsHolder = holder as PairsHolder
         pairsHolder.setAvailablePairs(result)
+        pairsHolder.hasAvailablePairs = true
         pairsHolder.setVolumes(bittrexVolumes, binanceVolumes, livecoinVolumes)
         pairsHolder.removeInvalidPairs()
         pairsHolder.updateAllItems()

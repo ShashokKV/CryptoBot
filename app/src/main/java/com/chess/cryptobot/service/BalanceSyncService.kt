@@ -11,19 +11,25 @@ import com.chess.cryptobot.exceptions.SyncServiceException
 import com.chess.cryptobot.market.Market
 import com.chess.cryptobot.market.WithdrawalMarketFactory
 import com.chess.cryptobot.model.Pair
+import com.chess.cryptobot.model.room.BalanceSyncTicker
+import com.chess.cryptobot.model.room.CryptoBotDatabase
 import com.chess.cryptobot.util.CoinInfo
 import com.chess.cryptobot.view.notification.NotificationBuilder
 import com.chess.cryptobot.view.notification.NotificationID
 import java.math.BigDecimal
 import java.math.RoundingMode
+import java.time.LocalDateTime
 
 class BalanceSyncService : IntentService("BalanceSyncService") {
     private var resultInfo = ""
     private var coinInfo: CoinInfo? = null
     private val marketsMap: MutableMap<String, Market?> = HashMap()
     private var minBalance = 0.0
+    private var minBtcAmount = 0.0005
     override fun onHandleIntent(intent: Intent?) {
         if (intent == null) return
+        val balancePreferences = BalancePreferences(this)
+        minBtcAmount = balancePreferences.getMinBtcAmount()
         val coinNames = intent.getStringArrayListExtra("coinNames")
         val marketFactory = WithdrawalMarketFactory()
         val markets = marketFactory.getMarkets(this, PreferenceManager.getDefaultSharedPreferences(this))
@@ -69,6 +75,10 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
 
     @Throws(MarketException::class)
     private fun initMinBalance(coinName: String, markets: List<Market?>) {
+        if (coinName == "BTC") {
+            minBalance = minBtcAmount
+            return
+        }
         var pair = Pair("BTC", coinName)
         val minBtcAmount = BalancePreferences(this).getMinBtcAmount()
         val minBalances = ArrayList<Double>(3)
@@ -145,15 +155,28 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
             var delta = getDelta(toAmount)
             if (needSync(delta)) {
                 checkAmount(fromAmount, fee)
+                checkHistory(moveToMarket)
                 delta = formatAmount(recalculateDelta(fromAmount, toAmount, fee))
                 return try {
                     moveBalances(moveFromMarket, moveToMarket, coinName, delta)
+                    createSyncTicker(delta)
                     true
                 } catch (e: MarketException) {
                     throw SyncServiceException(e.message)
                 }
             }
             return false
+        }
+
+        private fun createSyncTicker(amount: Double) {
+            val database = CryptoBotDatabase.getInstance(applicationContext)
+            val dao = database?.balanceSyncDao
+            val ticker = BalanceSyncTicker()
+            ticker.coinName = coinName
+            ticker.marketName = moveTo
+            ticker.dateCreated = LocalDateTime.now()
+            ticker.amount = amount
+            dao?.insert(ticker)
         }
 
         private fun needSync(delta: Double): Boolean {
@@ -185,6 +208,27 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
         @Throws(SyncServiceException::class)
         private fun checkAmount(fromAmount: Double, fee: Double) {
             if (fromAmount < fee) throw SyncServiceException("Not enough coins")
+        }
+
+        @Throws(SyncServiceException::class)
+        private fun checkHistory(moveToMarket: Market) {
+            val database = CryptoBotDatabase.getInstance(applicationContext)
+            val dao = database?.balanceSyncDao
+            val balanceSyncTickers: List<BalanceSyncTicker> =
+                    dao?.getByCoinNameAndMarket(coinName, moveToMarket.getMarketName())
+            ?.sortedByDescending { it.dateCreated } ?: return
+            val ticker = balanceSyncTickers[0]
+
+            val history = moveToMarket.getHistory(applicationContext)
+                    .filter { it.action.equals("deposit")
+                            && it.currencyName.equals(coinName)
+                            && it.amount==ticker.amount}
+
+            if (history.isNotEmpty()) {
+                dao.delete(ticker)
+            }else{
+                throw SyncServiceException("Deposit in progress")
+            }
         }
 
         @Throws(MarketException::class)

@@ -11,6 +11,7 @@ import com.chess.cryptobot.market.MarketFactory
 import com.chess.cryptobot.model.Pair
 import com.chess.cryptobot.view.notification.NotificationBuilder
 import com.chess.cryptobot.view.notification.NotificationID
+import kotlinx.coroutines.*
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.util.*
@@ -25,6 +26,8 @@ class TradingService : IntentService("TradingService") {
     private var minMarketQuantity: Double = 0.0
     private var minBtcAmount = 0.0005
     private var minEthAmount = 0.025
+    private val scope = CoroutineScope(Dispatchers.Default)
+
     override fun onHandleIntent(intent: Intent?) {
         if (intent == null) return
         initFromIntent(intent)
@@ -41,21 +44,19 @@ class TradingService : IntentService("TradingService") {
         }
         val trader = Trader(pair)
         if (trader.quantity <= minMarketQuantity) return
-        try {
-            trader.buy()
-            trader.sell()
-        } catch (e: MarketException) {
-            trader.updateInfo(String.format(Locale.US, "%.8f%s bid %.8f; ask %.8f; error: %s",
-                    trader.quantity,
-                    trader.buyPairName,
-                    trader.bidPrice,
-                    trader.askPrice,
-                    e.message))
+        val buyResult = scope.async { trader.buy() }
+        val sellResult = scope.async { trader.sell() }
+        runBlocking {
+            trader.updateInfo(buyResult.await())
+            trader.updateInfo(sellResult.await())
+        }
+        if (!trader.success) {
             makeNotification("Trade exception", resultInfo)
             return
+        } else {
+            makeNotification("Trading results", resultInfo)
+            trader.syncBalance()
         }
-        makeNotification("Trading results", resultInfo)
-        trader.syncBalance()
     }
 
     override fun onDestroy() {
@@ -72,16 +73,26 @@ class TradingService : IntentService("TradingService") {
     private fun initMarkets() {
         MarketFactory().getMarkets(this,
                 PreferenceManager.getDefaultSharedPreferences(this))
-                .forEach { market ->  if (market!=null) marketsMap[market.getMarketName()] = market }
+                .forEach { market -> if (market != null) marketsMap[market.getMarketName()] = market }
     }
 
     private val isApiKeysEmpty: Boolean
-        get() = marketsMap.values.stream().allMatch { market: Market? -> market?.keysIsEmpty()?:false }
+        get() = marketsMap.values.stream().allMatch { market: Market? ->
+            market?.keysIsEmpty() ?: false
+        }
 
     @Throws(MarketException::class)
     private fun initAmounts() {
-        askBaseAmount = marketsMap[pair.askMarketName]?.getAmount(pair.baseName)?:0.0
-        bidMarketAmount = marketsMap[pair.bidMarketName]?.getAmount(pair.marketName)?:0.0
+        val askBaseDeferred = scope.async {
+            marketsMap[pair.askMarketName]?.getAmount(pair.baseName) ?: 0.0
+        }
+        val bidMarketDeferred = scope.async {
+            marketsMap[pair.bidMarketName]?.getAmount(pair.marketName) ?: 0.0
+        }
+        runBlocking {
+            askBaseAmount = askBaseDeferred.await()
+            bidMarketAmount = bidMarketDeferred.await()
+        }
         val balancePreferences = BalancePreferences(this)
         minBtcAmount = balancePreferences.getMinBtcAmount()
         minEthAmount = balancePreferences.getMinEthAmount()
@@ -111,6 +122,7 @@ class TradingService : IntentService("TradingService") {
         private var marketAmount: Double = 0.0
         private var sellPairName: String? = null
         var buyPairName: String? = null
+        var success: Boolean = false
 
         init {
             bidPrice = pair.bid
@@ -138,20 +150,40 @@ class TradingService : IntentService("TradingService") {
             return quantity
         }
 
-        @Throws(MarketException::class)
-        fun buy() {
+        fun buy(): String {
             val price = formatAmount(askPrice)
-            buyMarket!!.buy(buyPairName!!, price, quantity)
-            updateInfo(String.format(Locale.getDefault(), "buy %.8f%s for %.8f on %s", quantity, buyPairName,
-                    price, buyMarket!!.getMarketName()))
+            try {
+                buyMarket!!.buy(buyPairName!!, price, quantity)
+            } catch (e: MarketException) {
+                success = false
+                return String.format(Locale.US, "%.8f%s bid %.8f; ask %.8f; error: %s",
+                        quantity,
+                        buyPairName,
+                        bidPrice,
+                        askPrice,
+                        e.message)
+            }
+            success = true
+            return String.format(Locale.getDefault(), "buy %.8f%s for %.8f on %s", quantity, buyPairName,
+                    price, buyMarket!!.getMarketName())
         }
 
-        @Throws(MarketException::class)
-        fun sell() {
+        fun sell(): String {
             val price = formatAmount(bidPrice)
-            sellMarket!!.sell(sellPairName!!, price, quantity)
-            updateInfo(String.format(Locale.getDefault(), "sell %.8f%s for %.8f on %s", quantity, sellPairName,
-                    price, sellMarket!!.getMarketName()))
+            try {
+                sellMarket!!.sell(sellPairName!!, price, quantity)
+            } catch (e: MarketException) {
+                success = false
+                return String.format(Locale.US, "%.8f%s bid %.8f; ask %.8f; error: %s",
+                        quantity,
+                        buyPairName,
+                        bidPrice,
+                        askPrice,
+                        e.message)
+            }
+            success = true
+            return String.format(Locale.getDefault(), "sell %.8f%s for %.8f on %s", quantity, sellPairName,
+                    price, sellMarket!!.getMarketName())
         }
 
         private fun formatAmount(amount: Double?): Double {

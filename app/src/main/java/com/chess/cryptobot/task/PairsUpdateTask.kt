@@ -17,7 +17,7 @@ class PairsUpdateTask(pairsHolder: PairsHolder) : MarketTask<Pair, Pair>(pairsHo
     @Throws(MarketException::class)
     override fun marketProcess(market: Market, param: Pair): Pair {
         val response = market.getOrderBook(param.getPairNameForMarket(market.getMarketName()))
-        enricher!!.enrichWithResponse(response)
+        synchronized(this) { enricher!!.enrichWithResponse(response)}
         return param
     }
 

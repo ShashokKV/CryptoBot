@@ -23,7 +23,7 @@ class LivecoinOrderBookResponse : LivecoinResponse(), OrderBookResponse {
 
     private fun parseValues(values: List<List<String>>?): List<Price?> {
         val prices: MutableList<Price?> = ArrayList()
-        values!!.forEach{ value: List<String> -> prices.add(Price(java.lang.Double.valueOf(value[0]), java.lang.Double.valueOf(value[1]))) }
+        values!!.forEach{ value: List<String> -> prices.add(Price((value[0].toDouble()), (value[1].toDouble()))) }
         return prices
     }
 }

@@ -39,6 +39,7 @@ class CoinStatusTask(holder: ContextHolder?) : MarketTask<Int, Int>(holder!!) {
         return 0
     }
 
+    @Synchronized
     private fun updateStatuses(statusMap: MutableMap<String, Boolean>, currencies: List<CurrenciesResponse>) {
         val marketCoins = ArrayList<String>()
         currencies.forEach{ currency: CurrenciesResponse ->

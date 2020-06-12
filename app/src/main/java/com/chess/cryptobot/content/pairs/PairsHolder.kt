@@ -17,6 +17,7 @@ import kotlin.collections.HashSet
 class PairsHolder(fr: Fragment) : ContextHolder(fr) {
     private var invalidPairs: MutableList<String> = ArrayList()
     private var availablePairs: MutableList<String> = ArrayList()
+    var hasAvailablePairs: Boolean = false
     private var bittrexVolumes: Map<String, Double> = HashMap()
     private var binanceVolumes: Map<String, Double> = HashMap()
     private var livecoinVolumes: Map<String, Double> = HashMap()
@@ -29,6 +30,7 @@ class PairsHolder(fr: Fragment) : ContextHolder(fr) {
     }
 
     fun initAvailablePairs() {
+        if (availablePairs.isNotEmpty()) return
         val availablePairsTask = AvailablePairsTask(this)
         availablePairsTask.executeOnExecutor(serialExecutor, 0)
     }

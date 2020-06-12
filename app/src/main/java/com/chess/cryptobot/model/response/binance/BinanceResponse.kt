@@ -9,7 +9,7 @@ import kotlin.math.roundToLong
 
 const val MIN_QTY_FILTER: String = "LOT_SIZE"
 
-open class BinanceResponse : MarketResponse, TickerResponse, HistoryResponse, CurrenciesListResponse,
+open class BinanceResponse : MarketResponse, CurrenciesListResponse,
         AddressResponse, OrderBookResponse, TradeLimitResponse {
     @SerializedName("success")
     @Expose
@@ -27,8 +27,6 @@ open class BinanceResponse : MarketResponse, TickerResponse, HistoryResponse, Cu
     @Expose
     private var code: Int? = null
 
-    var responsesList: List<BinanceResponse>? = null
-
     override fun success(): Boolean {
         return success ?: (code==null)
     }
@@ -37,13 +35,7 @@ open class BinanceResponse : MarketResponse, TickerResponse, HistoryResponse, Cu
         return msg?:message?:"No error message"
     }
 
-    @SerializedName("coin")
-    @Expose
-    val coinName: String? = null
-
-    @SerializedName("free")
-    @Expose
-    val amount: Double = 0.0
+    val balances: MutableList<BinanceBalance> = ArrayList()
 
     @SerializedName("withdrawList")
     @Expose
@@ -98,83 +90,15 @@ open class BinanceResponse : MarketResponse, TickerResponse, HistoryResponse, Cu
     @Expose
     override val address: String? = null
 
-    var assetDetails: MutableList<AssetDetail>? = null
+    var assetDetails: MutableList<AssetDetail> = ArrayList()
 
     override fun getCurrencies(): List<CurrenciesResponse> {
-        return assetDetails ?: ArrayList()
+        return assetDetails
     }
 
-    @SerializedName("symbol")
-    @Expose
-    private val symbol: String? = null
+    val tickers: MutableList<BinanceTicker> = ArrayList()
 
-    @SerializedName("bidPrice")
-    @Expose
-    override val tickerBid: Double? = null
-
-    @SerializedName("askPrice")
-    @Expose
-    override val tickerAsk: Double? = null
-
-    @SerializedName("volume")
-    @Expose
-    override val volume: Double = 0.0
-
-    override val tickerName: String
-        get() {
-            return symbolToPairName(symbol)
-        }
-
-    @SerializedName("side")
-    @Expose
-    override var historyAction: String? = null
-
-    @SerializedName("time")
-    @Expose
-    var time: Long = 0
-
-    @SerializedName("price")
-    @Expose
-    override var historyPrice: Double = 0.0
-
-    @SerializedName("origQty")
-    @Expose
-    override var historyAmount: Double = 0.0
-
-    @SerializedName("executedQty")
-    @Expose
-    var executedQuantity: Double = 0.0
-
-    override val historyTime: ZonedDateTime
-        get() = longToTime(time)
-
-    override val historyName: String
-        get() {
-            return symbolToPairName(symbol)
-        }
-
-    override val historyMarket = "binance"
-
-    override val progress: Int
-        get() {
-            if (historyAmount == 0.0) return 0
-            return (((historyAmount - executedQuantity) / (historyAmount)) * 100).toInt()
-        }
-
-    @SerializedName("status")
-    @Expose
-    val status: String? = null
-
-    private fun symbolToPairName(symbol: String?) : String {
-        if (symbol==null) return ""
-        for (baseName in listOf("BTC","ETH","USDT","BNB","XRP","TRX")) {
-            val index = symbol.indexOf(baseName, symbol.length - baseName.length)
-            if (index>0) {
-                return "$baseName/" + symbol.substring(0, index)
-            }
-        }
-        return symbol
-    }
+    val orders: MutableList<BinanceOrder> = ArrayList()
 
     companion object {
         fun longToTime(longTime: Long) : ZonedDateTime {
