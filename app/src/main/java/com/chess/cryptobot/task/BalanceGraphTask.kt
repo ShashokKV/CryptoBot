@@ -43,7 +43,7 @@ class BalanceGraphTask(balanceGraphFragment: BalanceGraphFragment) : AsyncTask<V
     override fun onPostExecute(param: Void?) {
         val lineChart = createChart() ?: return
         lineChart.invalidate()
-
+        lineChart.fitScreen()
     }
 
     private fun createDataSets(balances: List<BtcBalance>?): List<ILineDataSet?> {

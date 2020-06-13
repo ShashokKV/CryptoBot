@@ -5,7 +5,6 @@ import com.chess.cryptobot.content.pairs.PairsHolder
 import com.chess.cryptobot.exceptions.MarketException
 import com.chess.cryptobot.market.Market
 import com.chess.cryptobot.model.response.TickerResponse
-import java.util.*
 
 class AvailablePairsTask(pairsHolder: PairsHolder) : MarketTask<Int, MutableList<String>?>(pairsHolder) {
     private  var availablePairNames: MutableList<String>? = null
@@ -23,7 +22,7 @@ class AvailablePairsTask(pairsHolder: PairsHolder) : MarketTask<Int, MutableList
         synchronized(this) {
             updateVolumesForMarket(market.getMarketName(), tickers)
             if (availablePairNames == null) {
-                availablePairNames = LinkedList(pairNames)
+                availablePairNames = ArrayList(pairNames)
             } else {
                 availablePairNames?.retainAll(pairNames)
                 binanceVolumes.keys.retainAll(availablePairNames!!)

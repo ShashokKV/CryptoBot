@@ -14,7 +14,7 @@ class CoinInfo(markets: List<Market?>) {
         val bittrexStatus = bittrexStatuses[coinName]
         val binanceStatus = binanceStatuses[coinName]
         val livecoinStatus = livecoinStatuses[coinName]
-        return if (bittrexStatus == null || binanceStatus == null || livecoinStatus == null ) true
+        return if (bittrexStatus == null || binanceStatus == null || livecoinStatus == null) true
         else bittrexStatus && binanceStatus && livecoinStatus
     }
 
@@ -26,9 +26,10 @@ class CoinInfo(markets: List<Market?>) {
     }
 
     init {
-            markets.parallelStream().forEach {
-                it?:return@forEach
-                val currencies = it.getCurrencies()
+        markets.parallelStream().forEach {
+            it ?: return@forEach
+            val currencies = it.getCurrencies()
+            synchronized(this) {
                 val fees: MutableMap<String?, Double?> = HashMap()
                 val statuses: MutableMap<String?, Boolean?> = HashMap()
                 for (currency in currencies) {
@@ -40,5 +41,6 @@ class CoinInfo(markets: List<Market?>) {
                 this.statuses[it.getMarketName()] = statuses
                 this.fees[it.getMarketName()] = fees
             }
+        }
     }
 }

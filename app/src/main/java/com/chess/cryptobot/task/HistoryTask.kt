@@ -20,7 +20,7 @@ class HistoryTask(private val holder: ContextHolder, private val state: HistoryH
         } else {
             market.getOpenOrders()
         }
-        synchronized(this) {historyList.addAll(marketHistory)}
+        synchronized(historyList) {historyList.addAll(marketHistory)}
         return ""
     }
 

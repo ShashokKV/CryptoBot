@@ -14,5 +14,5 @@ interface BalanceSyncDao {
     fun getByCoinNameAndMarket(coinName: String, marketName: String): List<BalanceSyncTicker>
 
     @Delete
-    fun delete(balanceSyncTicker: BalanceSyncTicker)
+    fun deleteAll(balanceSyncTickers: List<BalanceSyncTicker>)
 }

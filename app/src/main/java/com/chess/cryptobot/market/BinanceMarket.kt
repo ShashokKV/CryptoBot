@@ -27,7 +27,7 @@ import kotlin.collections.LinkedHashMap
 
 
 class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey: String?,
-                                              private val proxySelector: BinanceProxySelector?) : MarketRequest(url, apiKey, secretKey) {
+                                         private val proxySelector: BinanceProxySelector?) : MarketRequest(url, apiKey, secretKey) {
 
     private val service: BinanceMarketService
     var balances: MutableMap<String, Double> = HashMap()
@@ -45,13 +45,13 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
                 .readTimeout(45, TimeUnit.SECONDS)
                 .writeTimeout(20, TimeUnit.SECONDS)
 
-        if (proxySelector!=null) {
+        if (proxySelector != null) {
             clientBuilder = clientBuilder
                     .proxySelector(proxySelector)
                     .proxyAuthenticator(proxySelector.proxyAuthenticator)
         }
 
-        return  clientBuilder.build()
+        return clientBuilder.build()
     }
 
     override fun getMarketName(): String {
@@ -76,6 +76,7 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
         if (balance != null) return balance
 
         val params: MutableMap<String, String> = LinkedHashMap()
+        params["recvWindow"] = "10000"
         addTimestamp(params)
         val headers: MutableMap<String, String> = HashMap()
         val hash = makeHash(params)
@@ -126,13 +127,14 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
             throw BinanceException(e.message!!)
         }
         val tickerResponse = response.tickers
-        return tickerResponse.filter { ticker -> ticker.tickerAsk?:0.0>0.0 && ticker.tickerBid?:0.0>0.0 }
+        return tickerResponse.filter { it.tickerAsk ?: 0.0 > 0.0 && it.tickerBid ?: 0.0 > 0.0 }
     }
 
     @Throws(MarketException::class)
     override fun getCurrencies(): List<CurrenciesResponse> {
         if (keysIsEmpty()) return ArrayList()
         val params: MutableMap<String, String> = LinkedHashMap()
+        params["recvWindow"] = "10000"
         addTimestamp(params)
         val headers: MutableMap<String, String> = HashMap()
         val hash = makeHash(params)
@@ -165,6 +167,7 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
         if (keysIsEmpty()) return null
         val params: MutableMap<String, String> = LinkedHashMap()
         params["asset"] = coinName
+        params["recvWindow"] = "10000"
         addTimestamp(params)
         val hash = makeHash(params)
         val headers: MutableMap<String, String> = HashMap()
@@ -188,6 +191,7 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
         params["amount"] = String.format(Locale.US, "%.8f", amount)
         params["asset"] = coinName
         params["address"] = address
+        params["recvWindow"] = "10000"
         addTimestamp(params)
         val hash = makeHash(params)
         val headers: MutableMap<String, String> = HashMap()
@@ -221,6 +225,7 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
         params["quantity"] = String.format(Locale.US, "%.8f", amount)
         params["price"] = String.format(Locale.US, "%.8f", price)
         params["newOrderRespType"] = "ACK"
+        params["recvWindow"] = "10000"
         addTimestamp(params)
         val hash = makeHash(params)
         val headers: MutableMap<String, String> = HashMap()
@@ -238,6 +243,7 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
     override fun getOpenOrders(): List<History> {
         if (keysIsEmpty()) return listOf(History())
         val params: MutableMap<String, String> = LinkedHashMap()
+        params["recvWindow"] = "10000"
         addTimestamp(params)
         val hash = makeHash(params)
         val headers: MutableMap<String, String> = HashMap()
@@ -260,7 +266,7 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
                 .toEpochSecond(ZoneOffset.systemDefault().rules.getOffset(Instant.now())) * 1000).toString()
 
         val historyList: MutableList<History> = ArrayList()
-        getAllPairs(context).forEach{pair -> historyList.addAll(getOrdersHistory(pair, startTime))}
+        getAllPairs(context).forEach { pair -> historyList.addAll(getOrdersHistory(pair, startTime)) }
 
         historyList.addAll(getWithdrawHistory(startTime))
         historyList.addAll(getDepositHistory(startTime))
@@ -276,10 +282,11 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
         return pairsList.map { pair: Pair -> pair.getPairNameForMarket(Market.BINANCE_MARKET) }
     }
 
-    private fun getOrdersHistory(pairName: String, startTime: String) : List<History>{
+    private fun getOrdersHistory(pairName: String, startTime: String): List<History> {
         val params: MutableMap<String, String> = LinkedHashMap()
         params["symbol"] = pairName
         params["startTime"] = startTime
+        params["recvWindow"] = "10000"
         addTimestamp(params)
         val hash = makeHash(params)
         val headers: MutableMap<String, String> = HashMap()
@@ -298,6 +305,7 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
     @Throws(BinanceException::class)
     private fun getDepositHistory(startTime: String): List<History> {
         val params: MutableMap<String, String> = LinkedHashMap()
+        params["recvWindow"] = "10000"
         addTimestamp(params)
         params["startTime"] = startTime
         val hash = makeHash(params)
@@ -317,6 +325,7 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
     @Throws(BinanceException::class)
     private fun getWithdrawHistory(startTime: String): List<History> {
         val params: MutableMap<String, String> = LinkedHashMap()
+        params["recvWindow"] = "10000"
         addTimestamp(params)
         params["startTime"] = startTime
         val hash = makeHash(params)

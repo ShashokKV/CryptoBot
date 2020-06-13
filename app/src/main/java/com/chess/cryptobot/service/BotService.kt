@@ -22,9 +22,9 @@ import com.chess.cryptobot.model.response.TradeLimitResponse
 import com.chess.cryptobot.util.CoinInfo
 import com.chess.cryptobot.view.notification.NotificationBuilder
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import java.util.stream.Collectors
 import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
 class BotService : Service() {
     private var botTimer: Timer? = null
@@ -32,6 +32,7 @@ class BotService : Service() {
     private var minPercent: Float = 3.0F
     private val botBinder: IBinder = BotBinder()
     private var autoTrade = false
+
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
         Toast.makeText(this, "Bot starting", Toast.LENGTH_SHORT).show()
@@ -49,7 +50,8 @@ class BotService : Service() {
 
     private fun initFieldsFromPrefs() {
         val preferences = PreferenceManager.getDefaultSharedPreferences(this)
-        minPercent = preferences.getString(getString(R.string.min_profit_percent), "3")?.toFloat() ?: 3.0f
+        minPercent = preferences.getString(getString(R.string.min_profit_percent), "3")?.toFloat()
+                ?: 3.0f
         runPeriod = preferences.getString(getString(R.string.service_run_period), "5")?.toInt() ?: 5
         autoTrade = preferences.getBoolean(getString(R.string.auto_trade), false)
     }
@@ -103,7 +105,7 @@ class BotService : Service() {
 
     private inner class BotTimerTask internal constructor(private val markets: List<Market?>) : TimerTask() {
         private var pairs: MutableList<Pair>? = null
-        private val minQuantities: MutableMap<String, TradeLimitResponse?> = HashMap()
+        private val minQuantities: MutableMap<String, TradeLimitResponse?> = ConcurrentHashMap()
         private var coinInfo: CoinInfo? = null
         override fun run() {
             Log.d(TAG, "timer running")
@@ -151,9 +153,18 @@ class BotService : Service() {
         @Synchronized
         @Throws(MarketException::class)
         private fun initMinQuantities() {
-            for (market in markets) {
-                minQuantities[market!!.getMarketName()] = market.getMinQuantity()
-            }
+            var exception: MarketException? = null
+            markets.parallelStream().forEach { market ->
+                        var minQuantity: TradeLimitResponse? = null
+                        try {
+                            minQuantity  = market!!.getMinQuantity()
+                        } catch (e: MarketException) {
+                            exception = e
+                        }
+                        minQuantities[market!!.getMarketName()] = minQuantity
+
+                    }
+            if (exception!=null) throw exception as MarketException
         }
 
         @Synchronized
@@ -175,16 +186,24 @@ class BotService : Service() {
         private fun profitPercentForPair(pair: Pair, markets: List<Market?>): Pair? {
             val enricher = PairResponseEnricher(pair)
             if (isTradingNow(pair.name)) return null
-            for (market in markets) {
-                var response: OrderBookResponse?
-                response = try {
-                    market!!.getOrderBook(pair.getPairNameForMarket(market.getMarketName()))
-                } catch (e: MarketException) {
-                    if (!isNotificationShown) makeNotification("Get order book exception", e.message)
-                    return null
-                }
-                enricher.enrichWithResponse(response)
-            }
+            var isError = false
+
+            markets.parallelStream()
+                    .forEach { market ->
+                        val response: OrderBookResponse?
+                        response = try {
+                            market!!.getOrderBook(pair.getPairNameForMarket(market.getMarketName()))
+                        } catch (e: MarketException) {
+                            if (!isNotificationShown) makeNotification("Get order book exception", e.message)
+                            isError = true
+                            return@forEach
+                        }
+                        synchronized(enricher) {
+                            enricher.enrichWithResponse(response)
+                        }
+                    }
+
+            if (isError) return null
             return enricher.enrichWithMinPercent(minPercent).pair
         }
 
