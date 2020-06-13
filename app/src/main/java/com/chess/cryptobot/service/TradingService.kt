@@ -24,6 +24,7 @@ class TradingService : IntentService("TradingService") {
     private var bidMarketAmount: Double = 0.0
     private var askBaseAmount: Double = 0.0
     private var minMarketQuantity: Double = 0.0
+    private var stepSize: Double = 0.0
     private var minBtcAmount = 0.0005
     private var minEthAmount = 0.025
     private val scope = CoroutineScope(Dispatchers.Default)
@@ -68,6 +69,7 @@ class TradingService : IntentService("TradingService") {
         pair = intent.getSerializableExtra(Pair::class.java.name) as Pair
         workingOnPair = pair.name
         minMarketQuantity = intent.getDoubleExtra("minQuantity", 0.0)
+        stepSize = intent.getDoubleExtra("stepSize", 0.0)
     }
 
     private fun initMarkets() {
@@ -147,7 +149,20 @@ class TradingService : IntentService("TradingService") {
             } else if (pair.baseName == "ETH") {
                 if (quantity * askPrice < minEthAmount) quantity = 0.0
             }
+            if (stepSize>0.0) {
+                quantity = quantity.toBigDecimal().setScale(computeScale(), RoundingMode.HALF_DOWN).toDouble()
+            }
             return quantity
+        }
+
+        private fun computeScale(): Int {
+            var scale = 0
+            var testStep = 1.00000000
+            while (scale<=8 && testStep!=stepSize) {
+                testStep /= 10
+                scale++
+            }
+            return scale
         }
 
         fun buy(): String {

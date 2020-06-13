@@ -20,5 +20,9 @@ class Symbols {
         @SerializedName("minQty")
         @Expose
         val minQty: Double = 0.0
+
+        @SerializedName("stepSize")
+        @Expose
+        val stepSize: Double = 0.0
     }
 }

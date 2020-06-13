@@ -60,6 +60,21 @@ open class BinanceResponse : MarketResponse, CurrenciesListResponse,
         return null
     }
 
+    fun getStepSizeByName(pairName: String?): Double? {
+        if (symbols == null) return null
+        for (symbol in symbols) {
+            if (symbol.symbol.equals(pairName)) {
+                if (symbol.filters == null) return null
+                for (filter in symbol.filters) {
+                    if (filter.filterType.equals(MIN_QTY_FILTER)) {
+                        return filter.stepSize
+                    }
+                }
+            }
+        }
+        return null
+    }
+
     @SerializedName("asks")
     @Expose
     private val asks: List<List<String>>? = null

@@ -95,7 +95,6 @@ class BalanceGraphTask(balanceGraphFragment: BalanceGraphFragment) : AsyncTask<V
         description.text = ""
         lineChart.description = description
         lineChart.extraBottomOffset = 20f
-        lineChart.setVisibleXRangeMaximum(MAX_X_RANGE)
         lineChart.enableScroll()
     }
 
@@ -126,9 +125,4 @@ class BalanceGraphTask(balanceGraphFragment: BalanceGraphFragment) : AsyncTask<V
         legend.textColor = textColor
         legend.isWordWrapEnabled = true
     }
-
-    companion object {
-        private const val MAX_X_RANGE = 100000f
-    }
-
 }

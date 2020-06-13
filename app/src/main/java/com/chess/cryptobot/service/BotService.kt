@@ -19,6 +19,7 @@ import com.chess.cryptobot.market.MarketFactory
 import com.chess.cryptobot.model.Pair
 import com.chess.cryptobot.model.response.OrderBookResponse
 import com.chess.cryptobot.model.response.TradeLimitResponse
+import com.chess.cryptobot.model.response.binance.BinanceResponse
 import com.chess.cryptobot.util.CoinInfo
 import com.chess.cryptobot.view.notification.NotificationBuilder
 import java.util.*
@@ -105,7 +106,7 @@ class BotService : Service() {
 
     private inner class BotTimerTask internal constructor(private val markets: List<Market?>) : TimerTask() {
         private var pairs: MutableList<Pair>? = null
-        private val minQuantities: MutableMap<String, TradeLimitResponse?> = ConcurrentHashMap()
+        private val tradeLimits: MutableMap<String, TradeLimitResponse?> = ConcurrentHashMap()
         private var coinInfo: CoinInfo? = null
         override fun run() {
             Log.d(TAG, "timer running")
@@ -161,7 +162,7 @@ class BotService : Service() {
                         } catch (e: MarketException) {
                             exception = e
                         }
-                        minQuantities[market!!.getMarketName()] = minQuantity
+                        tradeLimits[market!!.getMarketName()] = minQuantity
 
                     }
             if (exception!=null) throw exception as MarketException
@@ -226,6 +227,9 @@ class BotService : Service() {
             val intent = Intent(this@BotService, TradingService::class.java)
             intent.putExtra(Pair::class.java.name, pair)
             intent.putExtra("minQuantity", getMinQuantity(pair))
+            if (pair.askMarketName == Market.BINANCE_MARKET || pair.bidMarketName==Market.BINANCE_MARKET) {
+                intent.putExtra("stepSize", getStepSize(pair))
+            }
             startService(intent)
         }
 
@@ -233,7 +237,7 @@ class BotService : Service() {
             var resultQuantity: Double? = null
             for (market in markets) {
                 val marketName = market!!.getMarketName()
-                val response = minQuantities[marketName]
+                val response = tradeLimits[marketName]
                 if (response != null) {
                     val quantity = response.getTradeLimitByName(pair.getPairNameForMarket(marketName))
                     if (resultQuantity == null) {
@@ -246,6 +250,11 @@ class BotService : Service() {
                 }
             }
             return resultQuantity
+        }
+
+        private fun getStepSize(pair: Pair): Double? {
+            val binanceResponse = tradeLimits[Market.BINANCE_MARKET] as BinanceResponse
+            return binanceResponse.getStepSizeByName(pair.getPairNameForMarket(Market.BINANCE_MARKET))
         }
 
         private val isNotificationShown: Boolean
