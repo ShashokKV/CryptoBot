@@ -21,6 +21,9 @@ import com.chess.cryptobot.view.notification.NotificationID
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.LocalDateTime
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 class BalanceSyncService : IntentService("BalanceSyncService") {
     private var resultInfo = ""
@@ -84,25 +87,31 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
             minBalance = minBtcAmount
             return
         }
-        var pair = Pair("BTC", coinName)
+        var pair: Pair
+        pair = if (coinName == "USDT") {
+            Pair("USDT", "BTC")
+        } else {
+            Pair("BTC", coinName)
+        }
         val minBalances = ArrayList<Double>(3)
         markets.forEach { market ->
             if (market != null) {
                 val marketName = market.getMarketName()
-                if (minQuantityMap[marketName]==null) {
+                if (minQuantityMap[marketName] == null) {
                     minQuantityMap[marketName] = market.getMinQuantity()
                 }
-                if (tickersMap[marketName]==null) {
+                if (tickersMap[marketName] == null) {
                     tickersMap[marketName] = market.getTicker()
                 }
                 val pairName = pair.name
-                minBalances.add(minQuantityMap[marketName]?.getTradeLimitByName(pair.getPairNameForMarket(marketName))?: 0.0)
+                minBalances.add(minQuantityMap[marketName]?.getTradeLimitByName(pair.getPairNameForMarket(marketName))
+                        ?: 0.0)
                 pair = PairResponseEnricher(pair).enrichFromTicker(tickersMap[marketName]!!
                         .filter { it.tickerName == pairName }[0], marketName).pair
             }
         }
 
-        val minBalanceByTicker = pair.bidMap.values.max() ?: 0.0 * minBtcAmount
+        val minBalanceByTicker = (pair.bidMap.values.max() ?: 0.0) * minBtcAmount
         val minBalanceByMarket = minBalances.max() ?: 0.0
         minBalance = if (minBalanceByTicker > minBalanceByMarket) {
             minBalanceByTicker
@@ -167,7 +176,7 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
                 delta = formatAmount(recalculateDelta(fromAmount, toAmount, fee))
                 return try {
                     moveBalances(moveFromMarket, moveToMarket, coinName, delta)
-                    createSyncTicker(delta)
+                    createSyncTicker(delta - fee)
                     true
                 } catch (e: MarketException) {
                     throw SyncServiceException(e.message)
@@ -224,18 +233,20 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
             val dao = database?.balanceSyncDao
             val balanceSyncTickers: List<BalanceSyncTicker> =
                     dao?.getByCoinNameAndMarket(coinName, moveToMarket.getMarketName())
-            ?.sortedByDescending { it.dateCreated } ?: return
+                            ?.sortedByDescending { it.dateCreated } ?: return
             if (balanceSyncTickers.isEmpty()) return
             val ticker = balanceSyncTickers[0]
 
             val history = moveToMarket.getHistory(applicationContext)
-                    .filter { it.action.equals("deposit")
-                            && it.currencyName.equals(coinName)
-                            && it.amount==ticker.amount}
+                    .filter {
+                        it.action?.toLowerCase(Locale.ROOT) == "deposit"
+                                && it.currencyName.equals(coinName)
+                                && it.amount == ticker.amount
+                    }
 
             if (history.isNotEmpty()) {
                 dao.deleteAll(balanceSyncTickers)
-            }else{
+            } else {
                 throw SyncServiceException("Deposit in progress")
             }
         }
@@ -243,7 +254,7 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
         @Throws(MarketException::class)
         private fun moveBalances(moveFrom: Market, moveTo: Market, coinName: String, amount: Double) {
             val address = moveTo.getAddress(coinName)
-                    ?: throw SyncServiceException("Could not get address for "+moveTo.getMarketName())
+                    ?: throw SyncServiceException("Could not get address for " + moveTo.getMarketName())
             moveFrom.sendCoins(coinName, amount, address)
             updateInfo(coinName, "$amount sent from ${moveFrom.getMarketName()} to ${moveTo.getMarketName()}")
         }

@@ -11,7 +11,7 @@ class HistoryResponseFactory(private val historyResponseList: List<HistoryRespon
             for (historyResponse in historyResponseList) {
 
                 val history =  History()
-                history.action = historyResponse.historyAction
+                history.action = historyResponse.historyAction?.replace("market_", "")
                 history.amount = historyResponse.historyAmount
                 history.currencyName = historyResponse.historyName
                 history.dateTime = historyResponse.historyTime?.withZoneSameInstant(ZoneId.systemDefault())?.toLocalDateTime()

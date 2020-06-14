@@ -10,6 +10,9 @@ interface BalanceSyncDao {
     @Insert
     fun insert(balanceSyncTicker: BalanceSyncTicker)
 
+    @Query("SELECT * FROM BalanceSyncTicker")
+    fun getAll(): List<BalanceSyncTicker>
+
     @Query("SELECT * FROM BalanceSyncTicker WHERE coinName=:coinName AND marketName=:marketName")
     fun getByCoinNameAndMarket(coinName: String, marketName: String): List<BalanceSyncTicker>
 
