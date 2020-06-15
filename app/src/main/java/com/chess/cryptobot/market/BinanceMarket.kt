@@ -2,11 +2,11 @@ package com.chess.cryptobot.market
 
 import android.content.Context
 import com.chess.cryptobot.api.BinanceMarketService
-import com.chess.cryptobot.content.pairs.PairsPreferences
+import com.chess.cryptobot.content.balance.BalancePreferences
+import com.chess.cryptobot.content.pairs.AllPairsPreferences
 import com.chess.cryptobot.exceptions.BinanceException
 import com.chess.cryptobot.exceptions.MarketException
 import com.chess.cryptobot.model.History
-import com.chess.cryptobot.model.Pair
 import com.chess.cryptobot.model.response.*
 import com.chess.cryptobot.model.response.binance.BinanceDeserializer
 import com.chess.cryptobot.model.response.binance.BinanceResponse
@@ -275,11 +275,21 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
     }
 
     private fun getAllPairs(context: Context?): List<String> {
-        val prefs = PairsPreferences(context)
-        val pairsList = ArrayList<Pair>()
-        prefs.items?.forEach { item -> pairsList.add(Pair.fromPairName(item)) }
-
-        return pairsList.map { pair: Pair -> pair.getPairNameForMarket(Market.BINANCE_MARKET) }
+        val allPairs = AllPairsPreferences(context).items ?: return ArrayList()
+        val balancePrefs = BalancePreferences(context)
+        val pairsList = ArrayList<String>()
+        balancePrefs.items?.forEach { baseName ->
+            balancePrefs.items?.forEach { marketName ->
+                if (baseName!=marketName) {
+                    var pairName = "${baseName}/${marketName}"
+                    if (allPairs.contains(pairName)) {
+                        pairName = "$marketName$baseName"
+                        pairsList.add(pairName)
+                    }
+                }
+            }
+        }
+        return pairsList
     }
 
     private fun getOrdersHistory(pairName: String, startTime: String): List<History> {

@@ -13,6 +13,10 @@ class PairResponseEnricher(val pair: Pair) {
     private var responsesMap = HashMap<String, OrderBookResponse>(3)
     private var bids: List<Price?>? = null
     private var asks: List<Price?>? = null
+    private var bid = 0.0
+    private var ask = Double.MAX_VALUE
+    private var bidQuantity = 0.0
+    private var askQuantity = 0.0
     private var minPercent: Float = 0.0F
     private var feeMap = hashMapOf(
             Market.BITTREX_MARKET to bittrexFee,
@@ -51,21 +55,22 @@ class PairResponseEnricher(val pair: Pair) {
     }
 
     fun enrichWithMinPercent(minPercent: Float?): PairResponseEnricher {
-        pair.bid = pair.bidMap.values.max()?:0.0
-        pair.ask = pair.askMap.values.min()?:Double.MAX_VALUE
-        pair.bidMarketName = pair.bidMap.filterValues {it == pair.bid }.keys.first()
-        pair.askMarketName = pair.askMap.filterValues { it == pair.ask }.keys.first()
+        bid = pair.bidMap.values.max()?:0.0
+        ask = pair.askMap.values.min()?:Double.MAX_VALUE
+        pair.bidMarketName = pair.bidMap.filterValues {it == bid }.keys.first()
+        pair.askMarketName = pair.askMap.filterValues { it == ask }.keys.first()
+        bidQuantity = pair.bidQuantityMap[pair.bidMarketName]?:0.0
+        askQuantity = pair.askQuantityMap[pair.askMarketName]?:0.0
         if (minPercent==null) {
+            updatePair()
             pair.percent = countPercent()
             return this
         }
         this.minPercent = minPercent
-        pair.bidQuantity = pair.bidQuantityMap[pair.bidMarketName]?:0.0
-        pair.askQuantity = pair.askQuantityMap[pair.askMarketName]?:0.0
         bids = responsesMap[pair.bidMarketName]?.bids()
         asks = responsesMap[pair.askMarketName]?.asks()
 
-        val increaseAsks = pair.bidQuantity > pair.askQuantity
+        val increaseAsks = bidQuantity > askQuantity
         val maxPriceSize = if (bids?.size ?: 0 > asks?.size ?: 0) asks?.size ?: 0 else bids?.size?: 0
         for (i in 1 until maxPriceSize) {
             if (!enrichedFromStack(i, increaseAsks)) {
@@ -81,11 +86,11 @@ class PairResponseEnricher(val pair: Pair) {
             updatePair()
             pair.percent = percent
             if (increaseAsks) {
-                pair.askQuantity += asks?.get(i)?.quantity ?: 0.0
-                pair.ask = asks?.get(i)?.value ?: 0.0
+                askQuantity += asks?.get(i)?.quantity ?: 0.0
+                ask = asks?.get(i)?.value ?: 0.0
             } else {
-                pair.bidQuantity += bids?.get(i)?.quantity ?: 0.0
-                pair.bid = bids?.get(i)?.value ?: 0.0
+                bidQuantity += bids?.get(i)?.quantity ?: 0.0
+                bid = bids?.get(i)?.value ?: 0.0
             }
             true
         } else {
@@ -96,21 +101,25 @@ class PairResponseEnricher(val pair: Pair) {
     private fun countPercent(): Float {
         val bidFee = feeMap[pair.bidMarketName]?:1.0
         val askFee = feeMap[pair.askMarketName]?:1.0
-        val percentBid = (pair.bid - pair.bid / 100 * bidFee).toFloat()
-        val percentAsk = (pair.ask + pair.ask / 100 * askFee).toFloat()
+        val percentBid = (bid - bid / 100 * bidFee).toFloat()
+        val percentAsk = (ask + ask / 100 * askFee).toFloat()
         return (percentBid - percentAsk) / percentBid * 100
     }
 
     private fun updatePair() {
-        pair.bidMap[pair.bidMarketName] = pair.bid
-        pair.bidQuantityMap[pair.bidMarketName] = pair.bidQuantity
-        pair.askMap[pair.askMarketName] = pair.ask
-        pair.askQuantityMap[pair.askMarketName] = pair.askQuantity
+        pair.bidMap[pair.bidMarketName] = bid
+        pair.bidQuantityMap[pair.bidMarketName] = bidQuantity
+        pair.askMap[pair.askMarketName] = ask
+        pair.askQuantityMap[pair.askMarketName] = askQuantity
+        pair.bid = bid
+        pair.bidQuantity = bidQuantity
+        pair.ask = ask
+        pair.askQuantity
     }
 
     companion object {
-        private const val bittrexFee = 0.25
-        private const val binanceFee = 0.18
-        private const val livecoinFee = 0.25
+        private const val bittrexFee = 0.2
+        private const val binanceFee = 0.1
+        private const val livecoinFee = 0.18
     }
 }

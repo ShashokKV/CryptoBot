@@ -91,10 +91,16 @@ class TradingService : IntentService("TradingService") {
         val bidMarketDeferred = scope.async {
             marketsMap[pair.bidMarketName]?.getAmount(pair.marketName) ?: 0.0
         }
+        var exception: MarketException? = null
         runBlocking {
-            askBaseAmount = askBaseDeferred.await()
-            bidMarketAmount = bidMarketDeferred.await()
+            try {
+                askBaseAmount = askBaseDeferred.await()
+                bidMarketAmount = bidMarketDeferred.await()
+            }catch (e: MarketException) {
+                exception = e
+            }
         }
+        if (exception!=null) {throw exception as MarketException }
         val balancePreferences = BalancePreferences(this)
         minBtcAmount = balancePreferences.getMinBtcAmount()
         minEthAmount = balancePreferences.getMinEthAmount()

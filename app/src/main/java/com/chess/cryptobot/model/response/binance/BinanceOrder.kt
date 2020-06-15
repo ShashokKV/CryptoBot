@@ -47,6 +47,6 @@ class BinanceOrder: HistoryResponse {
     override val progress: Int
         get() {
             if (historyAmount == 0.0) return 0
-            return (((historyAmount - executedQuantity) / (historyAmount)) * 100).toInt()
+            return ((executedQuantity / historyAmount) * 100).toInt()
         }
 }

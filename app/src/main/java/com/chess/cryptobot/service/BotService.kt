@@ -34,7 +34,7 @@ class BotService : Service() {
     private val botBinder: IBinder = BotBinder()
     private var autoTrade = false
 
-    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
         Toast.makeText(this, "Bot starting", Toast.LENGTH_SHORT).show()
         initFields()
@@ -106,7 +106,7 @@ class BotService : Service() {
 
     private inner class BotTimerTask internal constructor(private val markets: List<Market?>) : TimerTask() {
         private var pairs: MutableList<Pair>? = null
-        private val tradeLimits: MutableMap<String, TradeLimitResponse?> = ConcurrentHashMap()
+        private val tradeLimits: MutableMap<String, TradeLimitResponse?> = ConcurrentHashMap(3)
         private var coinInfo: CoinInfo? = null
         override fun run() {
             Log.d(TAG, "timer running")

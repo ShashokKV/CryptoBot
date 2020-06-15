@@ -27,7 +27,7 @@ class Withdraw : HistoryResponse {
 
     override val historyPrice: Double? = null
 
-    override val historyAction = "deposit"
+    override val historyAction = "withdraw"
 
     override val progress = 0
 }
