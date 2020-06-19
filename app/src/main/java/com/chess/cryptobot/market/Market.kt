@@ -45,6 +45,12 @@ interface Market {
     @Throws(MarketException::class)
     fun getHistory(context: Context?): List<History>
 
+    @Throws(MarketException::class)
+    fun getDepositHistory(): List<History>
+
+    @Throws(MarketException::class)
+    fun getWithdrawHistory(): List<History>
+
     companion object {
         const val LIVECOIN_MARKET = "livecoin"
         const val BITTREX_MARKET = "bittrex"

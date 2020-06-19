@@ -162,8 +162,7 @@ class BotService : Service() {
                         } catch (e: MarketException) {
                             exception = e
                         }
-                        tradeLimits[market!!.getMarketName()] = minQuantity
-
+                        if (minQuantity!=null) tradeLimits[market!!.getMarketName()] = minQuantity
                     }
             if (exception!=null) throw exception as MarketException
         }

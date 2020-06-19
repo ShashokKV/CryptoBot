@@ -114,7 +114,7 @@ class PairResponseEnricher(val pair: Pair) {
         pair.bid = bid
         pair.bidQuantity = bidQuantity
         pair.ask = ask
-        pair.askQuantity
+        pair.askQuantity = askQuantity
     }
 
     companion object {

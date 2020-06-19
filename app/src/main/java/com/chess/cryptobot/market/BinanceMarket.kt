@@ -61,6 +61,7 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
     override fun initGson(): Gson {
         return GsonBuilder()
                 .registerTypeAdapter(BinanceResponse::class.java, BinanceDeserializer())
+                .excludeFieldsWithoutExposeAnnotation()
                 .create()
     }
 
@@ -262,14 +263,12 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
     @Throws(MarketException::class)
     override fun getHistory(context: Context?): List<History> {
         if (keysIsEmpty()) return listOf(History())
-        val startTime = (LocalDateTime.now().minusDays(29)
-                .toEpochSecond(ZoneOffset.systemDefault().rules.getOffset(Instant.now())) * 1000).toString()
-
+        val startTime = getStartTime()
         val historyList: MutableList<History> = ArrayList()
         getAllPairs(context).forEach { pair -> historyList.addAll(getOrdersHistory(pair, startTime)) }
 
-        historyList.addAll(getWithdrawHistory(startTime))
-        historyList.addAll(getDepositHistory(startTime))
+        historyList.addAll(getWithdrawHistory())
+        historyList.addAll(getDepositHistory())
 
         return historyList
     }
@@ -313,11 +312,11 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
     }
 
     @Throws(BinanceException::class)
-    private fun getDepositHistory(startTime: String): List<History> {
+    override fun getDepositHistory(): List<History> {
         val params: MutableMap<String, String> = LinkedHashMap()
         params["recvWindow"] = "10000"
         addTimestamp(params)
-        params["startTime"] = startTime
+        params["startTime"] = getStartTime()
         val hash = makeHash(params)
         val headers: MutableMap<String, String> = HashMap()
         headers["X-MBX-APIKEY"] = apiKey
@@ -333,11 +332,11 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
     }
 
     @Throws(BinanceException::class)
-    private fun getWithdrawHistory(startTime: String): List<History> {
+    override fun getWithdrawHistory(): List<History> {
         val params: MutableMap<String, String> = LinkedHashMap()
         params["recvWindow"] = "10000"
         addTimestamp(params)
-        params["startTime"] = startTime
+        params["startTime"] = getStartTime()
         val hash = makeHash(params)
         val headers: MutableMap<String, String> = HashMap()
         headers["X-MBX-APIKEY"] = apiKey
@@ -350,6 +349,11 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
             throw BinanceException(e.message!!)
         } as BinanceResponse
         return HistoryResponseFactory(response.withdrawList).history
+    }
+
+    private fun getStartTime(): String {
+        return (LocalDateTime.now().minusDays(29)
+                .toEpochSecond(ZoneOffset.systemDefault().rules.getOffset(Instant.now())) * 1000).toString()
     }
 
     private fun addTimestamp(params: MutableMap<String, String>) {

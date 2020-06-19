@@ -34,6 +34,7 @@ class BittrexMarket internal constructor(url: String, apiKey: String?, secretKey
     override fun initGson(): Gson {
         return GsonBuilder()
                 .registerTypeAdapter(BittrexResponse::class.java, BittrexTypeAdapter())
+                .excludeFieldsWithoutExposeAnnotation()
                 .create()
     }
 
@@ -263,59 +264,55 @@ class BittrexMarket internal constructor(url: String, apiKey: String?, secretKey
         try {
             response = execute(call) as BittrexResponse
             historyList = ArrayList(response.history)
-            historyList.addAll(withdrawHistory)
-            historyList.addAll(depositHistory)
+            historyList.addAll(getWithdrawHistory())
+            historyList.addAll(getDepositHistory())
         } catch (e: MarketException) {
             throw BittrexException(e.message!!)
         }
         return historyList
     }
 
-    @get:Throws(BittrexException::class)
-    private val withdrawHistory: List<History>
-        get() {
-            if (keysIsEmpty()) return ArrayList()
-            path = url + "account/getwithdrawalhistory?"
-            val params: MutableMap<String, String> = LinkedHashMap()
-            params["apikey"] = apiKey
-            params["nonce"] = System.currentTimeMillis().toString()
-            val hash = makeHash(params)
-            val headers: MutableMap<String?, String?> = HashMap()
-            headers["apisign"] = hash
-            val response: BittrexResponse
-            val call = service.getWithdrawHistory(
-                    params["apikey"],
-                    params["nonce"],
-                    headers)
-            response = try {
-                execute(call) as BittrexResponse
-            } catch (e: MarketException) {
-                throw BittrexException(e.message!!)
-            }
-            return response.history
+    override fun getDepositHistory(): List<History> {
+        if (keysIsEmpty()) return ArrayList()
+        path = url + "account/getdeposithistory?"
+        val params: MutableMap<String, String> = LinkedHashMap()
+        params["apikey"] = apiKey
+        params["nonce"] = System.currentTimeMillis().toString()
+        val hash = makeHash(params)
+        val headers: MutableMap<String?, String?> = HashMap()
+        headers["apisign"] = hash
+        val response: BittrexResponse
+        val call = service.getDepositHistory(
+                params["apikey"],
+                params["nonce"],
+                headers)
+        response = try {
+            execute(call) as BittrexResponse
+        } catch (e: MarketException) {
+            throw BittrexException(e.message!!)
         }
+        return response.history
+    }
 
-    @get:Throws(BittrexException::class)
-    private val depositHistory: List<History>
-        get() {
-            if (keysIsEmpty()) return ArrayList()
-            path = url + "account/getdeposithistory?"
-            val params: MutableMap<String, String> = LinkedHashMap()
-            params["apikey"] = apiKey
-            params["nonce"] = System.currentTimeMillis().toString()
-            val hash = makeHash(params)
-            val headers: MutableMap<String?, String?> = HashMap()
-            headers["apisign"] = hash
-            val response: BittrexResponse
-            val call = service.getDepositHistory(
-                    params["apikey"],
-                    params["nonce"],
-                    headers)
-            response = try {
-                execute(call) as BittrexResponse
-            } catch (e: MarketException) {
-                throw BittrexException(e.message!!)
-            }
-            return response.history
+    override fun getWithdrawHistory(): List<History> {
+        if (keysIsEmpty()) return ArrayList()
+        path = url + "account/getwithdrawalhistory?"
+        val params: MutableMap<String, String> = LinkedHashMap()
+        params["apikey"] = apiKey
+        params["nonce"] = System.currentTimeMillis().toString()
+        val hash = makeHash(params)
+        val headers: MutableMap<String?, String?> = HashMap()
+        headers["apisign"] = hash
+        val response: BittrexResponse
+        val call = service.getWithdrawHistory(
+                params["apikey"],
+                params["nonce"],
+                headers)
+        response = try {
+            execute(call) as BittrexResponse
+        } catch (e: MarketException) {
+            throw BittrexException(e.message!!)
         }
+        return response.history
+    }
 }

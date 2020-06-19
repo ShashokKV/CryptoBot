@@ -26,7 +26,9 @@ class LivecoinMarket internal constructor(url: String?, apiKey: String?, secretK
     }
 
     override fun initGson(): Gson {
-        return GsonBuilder().create()
+        return GsonBuilder()
+                .excludeFieldsWithoutExposeAnnotation()
+                .create()
     }
 
     override fun initService(retrofit: Retrofit): Any {
@@ -217,12 +219,29 @@ class LivecoinMarket internal constructor(url: String?, apiKey: String?, secretK
 
     @Throws(MarketException::class)
     override fun getHistory(context: Context?): List<History>    {
+        return getHistoryByType(null)
+    }
+
+    @Throws(MarketException::class)
+    override fun getDepositHistory(): List<History> {
+        return getHistoryByType("DEPOSIT")
+    }
+
+    @Throws(MarketException::class)
+    override fun getWithdrawHistory(): List<History> {
+        return getHistoryByType("WITHDRAWAL")
+    }
+
+    private fun getHistoryByType(historyType: String?) : List<History> {
         if (keysIsEmpty()) return ArrayList()
         val startTime = LocalDateTime.now().minusDays(29)
         val endTime = LocalDateTime.now()
         val params: MutableMap<String, String> = LinkedHashMap()
         params["end"] = (endTime.toEpochSecond(ZoneOffset.UTC) * 1000).toString()
         params["start"] = (startTime.toEpochSecond(ZoneOffset.UTC) * 1000).toString()
+        if (historyType!=null) {
+            params["types"] = historyType
+        }
 
         val hash = makeHash(params)
         val headers: MutableMap<String, String> = HashMap()

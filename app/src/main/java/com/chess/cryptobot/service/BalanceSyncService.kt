@@ -176,7 +176,7 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
                 delta = formatAmount(recalculateDelta(fromAmount, toAmount, fee))
                 return try {
                     moveBalances(moveFromMarket, moveToMarket, coinName, delta)
-                    createSyncTicker(delta - fee)
+                    createSyncTicker(moveFromMarket)
                     true
                 } catch (e: MarketException) {
                     throw SyncServiceException(e.message)
@@ -185,14 +185,17 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
             return false
         }
 
-        private fun createSyncTicker(amount: Double) {
+        @Throws(MarketException::class)
+        private fun createSyncTicker(moveFromMarket: Market) {
+            val history = moveFromMarket.getWithdrawHistory()
+            if (history.isEmpty()) return
             val database = CryptoBotDatabase.getInstance(applicationContext)
             val dao = database?.balanceSyncDao
             val ticker = BalanceSyncTicker()
             ticker.coinName = coinName
             ticker.marketName = moveTo
             ticker.dateCreated = LocalDateTime.now()
-            ticker.amount = amount
+            ticker.amount = history[0].amount
             dao?.insert(ticker)
         }
 
@@ -237,7 +240,7 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
             if (balanceSyncTickers.isEmpty()) return
             val ticker = balanceSyncTickers[0]
 
-            val history = moveToMarket.getHistory(applicationContext)
+            val history = moveToMarket.getDepositHistory()
                     .filter {
                         it.action?.toLowerCase(Locale.ROOT) == "deposit"
                                 && it.currencyName.equals(coinName)

@@ -27,7 +27,7 @@ class TradingService : IntentService("TradingService") {
     private var stepSize: Double = 0.0
     private var minBtcAmount = 0.0005
     private var minEthAmount = 0.025
-    private val scope = CoroutineScope(Dispatchers.Default)
+    private val scope = CoroutineScope(SupervisorJob())
 
     override fun onHandleIntent(intent: Intent?) {
         if (intent == null) return
