@@ -10,6 +10,7 @@ import com.chess.cryptobot.exceptions.MarketException
 import com.chess.cryptobot.exceptions.SyncServiceException
 import com.chess.cryptobot.market.Market
 import com.chess.cryptobot.market.WithdrawalMarketFactory
+import com.chess.cryptobot.model.History
 import com.chess.cryptobot.model.Pair
 import com.chess.cryptobot.model.response.TickerResponse
 import com.chess.cryptobot.model.response.TradeLimitResponse
@@ -240,14 +241,15 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
             if (balanceSyncTickers.isEmpty()) return
             val ticker = balanceSyncTickers[0]
 
-            val history = moveToMarket.getDepositHistory()
-                    .filter {
+            val history = ArrayList<History>()
+            marketsMap.values.forEach { history.addAll(it!!.getDepositHistory()) }
+            val filteredHistory = history.filter {
                         it.action?.toLowerCase(Locale.ROOT) == "deposit"
                                 && it.currencyName.equals(coinName)
                                 && it.amount == ticker.amount
                     }
 
-            if (history.isNotEmpty()) {
+            if (filteredHistory.isNotEmpty()) {
                 dao.deleteAll(balanceSyncTickers)
             } else {
                 throw SyncServiceException("Deposit in progress")
