@@ -14,9 +14,11 @@ abstract class MarketTask<S, T>(holder: ContextHolder) : AsyncTask<S, Int?, T?>(
         val param = params[0]
         var result: T? = null
         val holder = holder
+
         publishProgress()
         preMarketProcess(param)
         if (holder == null) return null
+
         val markets = holder.markets
         markets.parallelStream().forEach { result = marketsLoop(it, param) }
         return postMarketProcess(result)

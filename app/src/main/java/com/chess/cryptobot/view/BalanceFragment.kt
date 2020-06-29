@@ -75,6 +75,7 @@ class BalanceFragment : MainFragment<BalanceAdapter.BalanceViewHolder>() {
                             val intent = Intent(activity, BalanceSyncService::class.java)
                             intent.putStringArrayListExtra("coinNames",
                                     holder.prefs.items?.let { it1 -> ArrayList(it1) })
+                            intent.putExtra("makeNotifications", true)
                             activity.startService(intent)
                         }
                     }

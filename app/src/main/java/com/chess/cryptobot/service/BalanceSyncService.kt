@@ -18,7 +18,6 @@ import com.chess.cryptobot.model.room.BalanceSyncTicker
 import com.chess.cryptobot.model.room.CryptoBotDatabase
 import com.chess.cryptobot.util.CoinInfo
 import com.chess.cryptobot.view.notification.NotificationBuilder
-import com.chess.cryptobot.view.notification.NotificationID
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.LocalDateTime
@@ -34,9 +33,12 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
     private var minBtcAmount = 0.0005
     private var minQuantityMap: MutableMap<String, TradeLimitResponse?> = HashMap()
     private var tickersMap: MutableMap<String, List<TickerResponse>> = HashMap()
+    private var makeNotifications = false
 
     override fun onHandleIntent(intent: Intent?) {
         if (intent == null) return
+        makeNotifications = intent.getBooleanExtra("makeNotifications", false)
+        if (makeNotifications) makeNotification("Balance sync in progress...")
         val balancePreferences = BalancePreferences(this)
         minBtcAmount = balancePreferences.getMinBtcAmount()
         val coinNames = intent.getStringArrayListExtra("coinNames")
@@ -47,21 +49,27 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
             CoinInfo(markets)
         } catch (e: MarketException) {
             updateInfo("BalanceSync", "Can't init coinInfo: " + e.message)
-            makeNotification()
+            makeNotification(resultInfo)
             return
         }
+        var syncExecuted = false
         coinNames?.forEach { coinName: String ->
             try {
-                sync(coinName, markets)
+                if (sync(coinName, markets)) {
+                    syncExecuted = true
+                }
             } catch (e: SyncServiceException) {
                 updateInfo(coinName, e.message)
             }
         }
-        makeNotification()
+        if (!syncExecuted && makeNotifications) {
+            resultInfo = "No sync needed"
+        }
+        makeNotification(resultInfo)
     }
 
     @Throws(SyncServiceException::class)
-    private fun sync(coinName: String, markets: List<Market?>) {
+    private fun sync(coinName: String, markets: List<Market?>): Boolean {
         try {
             initMinBalance(coinName, markets)
         } catch (e: MarketException) {
@@ -79,7 +87,7 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
         val coinMover = CoinMover(coinName)
         coinMover.setAmounts(marketAmounts)
         coinMover.computeDirection()
-        coinMover.checkAndMove()
+        return coinMover.checkAndMove()
     }
 
     @Throws(MarketException::class)
@@ -134,15 +142,15 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
         resultInfo += String.format("%s: %s%s", coinName, message, System.lineSeparator())
     }
 
-    private fun makeNotification() {
-        if (resultInfo.isEmpty()) return
+    private fun makeNotification(notificationText: String) {
+        if (notificationText.isEmpty()) return
         NotificationBuilder(this)
-                .setNotificationId(NotificationID.id)
+                .setNotificationId(NOTIFICATION_ID)
                 .setChannelId(CHANNEL_ID)
-                .setNotificationText(resultInfo)
+                .setNotificationText(notificationText)
                 .setChannelName("Balance sync service")
                 .setImportance(NotificationManager.IMPORTANCE_DEFAULT)
-                .setTitle("Balance sync result")
+                .setTitle("Balance synchronization")
                 .buildAndNotify()
         resultInfo = ""
     }
@@ -268,5 +276,6 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
 
     companion object {
         private const val CHANNEL_ID = "balance_sync_channel"
+        private const val NOTIFICATION_ID: Int = 12385264
     }
 }

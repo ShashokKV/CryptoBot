@@ -77,7 +77,7 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
         if (balance != null) return balance
 
         val params: MutableMap<String, String> = LinkedHashMap()
-        params["recvWindow"] = "10000"
+        params["recvWindow"] = "15000"
         addTimestamp(params)
         val headers: MutableMap<String, String> = HashMap()
         val hash = makeHash(params)
@@ -135,7 +135,7 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
     override fun getCurrencies(): List<CurrenciesResponse> {
         if (keysIsEmpty()) return ArrayList()
         val params: MutableMap<String, String> = LinkedHashMap()
-        params["recvWindow"] = "10000"
+        params["recvWindow"] = "15000"
         addTimestamp(params)
         val headers: MutableMap<String, String> = HashMap()
         val hash = makeHash(params)
@@ -192,7 +192,7 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
         params["amount"] = String.format(Locale.US, "%.8f", amount)
         params["asset"] = coinName
         params["address"] = address
-        params["recvWindow"] = "10000"
+        params["recvWindow"] = "15000"
         addTimestamp(params)
         val hash = makeHash(params)
         val headers: MutableMap<String, String> = HashMap()
@@ -226,7 +226,7 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
         params["quantity"] = String.format(Locale.US, "%.8f", amount)
         params["price"] = String.format(Locale.US, "%.8f", price)
         params["newOrderRespType"] = "ACK"
-        params["recvWindow"] = "10000"
+        params["recvWindow"] = "15000"
         addTimestamp(params)
         val hash = makeHash(params)
         val headers: MutableMap<String, String> = HashMap()
@@ -244,7 +244,7 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
     override fun getOpenOrders(): List<History> {
         if (keysIsEmpty()) return listOf(History())
         val params: MutableMap<String, String> = LinkedHashMap()
-        params["recvWindow"] = "10000"
+        params["recvWindow"] = "15000"
         addTimestamp(params)
         val hash = makeHash(params)
         val headers: MutableMap<String, String> = HashMap()
@@ -295,7 +295,7 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
         val params: MutableMap<String, String> = LinkedHashMap()
         params["symbol"] = pairName
         params["startTime"] = startTime
-        params["recvWindow"] = "10000"
+        params["recvWindow"] = "15000"
         addTimestamp(params)
         val hash = makeHash(params)
         val headers: MutableMap<String, String> = HashMap()
@@ -314,7 +314,7 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
     @Throws(BinanceException::class)
     override fun getDepositHistory(): List<History> {
         val params: MutableMap<String, String> = LinkedHashMap()
-        params["recvWindow"] = "10000"
+        params["recvWindow"] = "15000"
         addTimestamp(params)
         params["startTime"] = getStartTime()
         val hash = makeHash(params)
@@ -334,7 +334,7 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
     @Throws(BinanceException::class)
     override fun getWithdrawHistory(): List<History> {
         val params: MutableMap<String, String> = LinkedHashMap()
-        params["recvWindow"] = "10000"
+        params["recvWindow"] = "15000"
         addTimestamp(params)
         params["startTime"] = getStartTime()
         val hash = makeHash(params)

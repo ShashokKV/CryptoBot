@@ -108,6 +108,7 @@ class TradingService : IntentService("TradingService") {
 
     private fun makeNotification(title: String, message: String?) {
         if (message!!.isEmpty()) return
+        
         NotificationBuilder(this)
                 .setNotificationId(NotificationID.id)
                 .setChannelId(CHANNEL_ID)
