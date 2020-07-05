@@ -20,7 +20,6 @@ import com.chess.cryptobot.util.CoinInfo
 import com.chess.cryptobot.view.notification.NotificationBuilder
 import java.math.BigDecimal
 import java.math.RoundingMode
-import java.time.LocalDateTime
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
@@ -62,7 +61,7 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
                 updateInfo(coinName, e.message)
             }
         }
-        if (!syncExecuted && makeNotifications) {
+        if (!syncExecuted && resultInfo.isEmpty() && makeNotifications) {
             resultInfo = "No sync needed"
         }
         makeNotification(resultInfo)
@@ -198,13 +197,14 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
         private fun createSyncTicker(moveFromMarket: Market) {
             val history = moveFromMarket.getWithdrawHistory()
             if (history.isEmpty()) return
+            val historyItem = history.sortedByDescending { it.dateTime }[0]
             val database = CryptoBotDatabase.getInstance(applicationContext)
             val dao = database?.balanceSyncDao
             val ticker = BalanceSyncTicker()
-            ticker.coinName = coinName
+            ticker.coinName = historyItem.currencyName
             ticker.marketName = moveTo
-            ticker.dateCreated = LocalDateTime.now()
-            ticker.amount = history[0].amount
+            ticker.dateCreated = historyItem.dateTime
+            ticker.amount = historyItem.amount
             dao?.insert(ticker)
         }
 
