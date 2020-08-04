@@ -40,6 +40,7 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
         if (makeNotifications) makeNotification("Balance sync in progress...")
         val balancePreferences = BalancePreferences(this)
         minBtcAmount = balancePreferences.getMinBtcAmount()
+        minBtcAmount += minBtcAmount / 100
         val coinNames = intent.getStringArrayListExtra("coinNames")
         val marketFactory = WithdrawalMarketFactory()
         val markets = marketFactory.getMarkets(this, PreferenceManager.getDefaultSharedPreferences(this))
@@ -126,6 +127,7 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
         } else {
             minBalanceByMarket
         }
+        minBalance+=minBalance/100
     }
 
     @Throws(MarketException::class)
@@ -218,7 +220,8 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
 
         @Throws(SyncServiceException::class)
         private fun getAmount(amounts: Map<String, Double>?, marketName: String?): Double {
-            return amounts!![marketName] ?: throw SyncServiceException("Can't get amount")
+            val amount = amounts!![marketName] ?: throw SyncServiceException("Can't get amount")
+            return (amount - (amount/100))
         }
 
         private fun recalculateDelta(fromAmount: Double, toAmount: Double, fee: Double): Double {

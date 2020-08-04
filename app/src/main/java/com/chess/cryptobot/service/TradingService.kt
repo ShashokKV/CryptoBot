@@ -146,7 +146,8 @@ class TradingService : IntentService("TradingService") {
         }
 
         private fun countMinQuantity(bidQuantity: Double, askQuantity: Double): Double {
-            val minAvailableAmount = if (baseAmount < marketAmount) baseAmount else marketAmount
+            var minAvailableAmount = if (baseAmount < marketAmount) baseAmount else marketAmount
+            minAvailableAmount -= minAvailableAmount / 100
             quantity = if (bidQuantity < askQuantity) bidQuantity else askQuantity
             if (quantity > minAvailableAmount) quantity = minAvailableAmount
             //-1% for trading fee
