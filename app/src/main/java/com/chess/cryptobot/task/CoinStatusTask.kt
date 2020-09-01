@@ -6,8 +6,7 @@ import com.chess.cryptobot.exceptions.MarketException
 import com.chess.cryptobot.market.BittrexMarket
 import com.chess.cryptobot.market.Market
 import com.chess.cryptobot.model.response.CurrenciesResponse
-import com.chess.cryptobot.model.response.bittrex.BittrexGenericResponse
-import com.chess.cryptobot.model.response.bittrex.BittrexResponse
+import com.chess.cryptobot.model.response.bittrex.BittrexCurrency
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -27,7 +26,7 @@ class CoinStatusTask(holder: ContextHolder?) : MarketTask<Int, Int>(holder!!) {
             market.getMarketName() == Market.BITTREX_MARKET -> {
                 updateStatuses(bittrexStatuses, market.getCurrencies())
                 val bittrexMarket = market as BittrexMarket
-                updateIcons(bittrexMarket.markets)
+                updateIcons(bittrexMarket.getCurrencies())
             }
             market.getMarketName() == Market.BINANCE_MARKET -> {
                 updateStatuses(binanceStatuses, market.getCurrencies())
@@ -53,8 +52,11 @@ class CoinStatusTask(holder: ContextHolder?) : MarketTask<Int, Int>(holder!!) {
         }
     }
 
-    private fun updateIcons(response: BittrexResponse) {
-       response.results.forEach { result: BittrexGenericResponse? -> if (result!=null) coinIcons[result.marketCurrency!!] = result.logoUrl!! }
+    private fun updateIcons(response: List<CurrenciesResponse>) {
+       response.forEach { result: CurrenciesResponse ->
+           result as BittrexCurrency
+           coinIcons[result.currencyName!!] = result.logoUrl!!
+       }
     }
 
     public override fun postMarketProcess(result: Int?): Int {

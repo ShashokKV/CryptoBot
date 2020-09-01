@@ -58,7 +58,6 @@
     <string name="min_profit_percent">min_profit_percent</string>
     <string name="profit_graph">Profit Graph</string>
     <string name="sync_balances_title">Sync all balances?</string>
-    <string name="volume">volume</string>
     <string name="auto_trade">auto_trade</string>
     <string name="History">History</string>
     <string name="action">Action</string>

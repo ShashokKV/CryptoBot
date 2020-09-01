@@ -17,7 +17,6 @@ import retrofit2.Retrofit
 import java.io.IOException
 import java.time.Instant
 import java.time.LocalDateTime
-import java.time.ZoneId
 import java.time.ZoneOffset
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -128,7 +127,7 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
             throw BinanceException(e.message!!)
         }
         val tickerResponse = response.tickers
-        return tickerResponse.filter { it.tickerAsk ?: 0.0 > 0.0 && it.tickerBid ?: 0.0 > 0.0 }
+        return tickerResponse.filter { it.tickerAsk > 0.0 && it.tickerBid > 0.0 }
     }
 
     @Throws(MarketException::class)
@@ -357,6 +356,6 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
     }
 
     private fun addTimestamp(params: MutableMap<String, String>) {
-        params["timestamp"] = Instant.now().atZone(ZoneId.of("Z")).toInstant().toEpochMilli().toString()
+        params["timestamp"] = timestamp()
     }
 }

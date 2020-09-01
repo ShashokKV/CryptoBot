@@ -146,8 +146,7 @@ class TradingService : IntentService("TradingService") {
         }
 
         private fun countMinQuantity(bidQuantity: Double, askQuantity: Double): Double {
-            var minAvailableAmount = if (baseAmount < marketAmount) baseAmount else marketAmount
-            minAvailableAmount -= minAvailableAmount / 100
+            val minAvailableAmount = if (baseAmount < marketAmount) baseAmount else marketAmount
             quantity = if (bidQuantity < askQuantity) bidQuantity else askQuantity
             if (quantity > minAvailableAmount) quantity = minAvailableAmount
             //-1% for trading fee
@@ -158,7 +157,7 @@ class TradingService : IntentService("TradingService") {
                 if (quantity * askPrice < minEthAmount) quantity = 0.0
             }
             if (stepSize>0.0) {
-                quantity = quantity.toBigDecimal().setScale(computeScale(), RoundingMode.HALF_DOWN).toDouble()
+                quantity = quantity.toBigDecimal().setScale(computeScale(), RoundingMode.DOWN).toDouble()
             }
             return quantity
         }
@@ -210,7 +209,7 @@ class TradingService : IntentService("TradingService") {
         }
 
         private fun formatAmount(amount: Double?): Double {
-            val bd = BigDecimal(amount!!).setScale(8, RoundingMode.HALF_UP)
+            val bd = BigDecimal(amount!!).setScale(8, RoundingMode.DOWN)
             return bd.toDouble()
         }
 

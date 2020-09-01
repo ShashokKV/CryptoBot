@@ -14,7 +14,6 @@ class Pair(val baseName: String, val marketName: String) : ViewItem, Serializabl
     var askQuantityMap = HashMap<String, Double>()
     var bidMap = HashMap<String, Double>()
     var bidQuantityMap = HashMap<String, Double>()
-    var volumeMap = HashMap<String, Double>()
     var percent = 0.0f
     var message: String? = null
 

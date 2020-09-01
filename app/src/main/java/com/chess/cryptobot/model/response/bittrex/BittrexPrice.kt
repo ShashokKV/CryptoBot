@@ -4,11 +4,11 @@ import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 
 class BittrexPrice {
-    @SerializedName("Quantity")
+    @SerializedName("quantity")
     @Expose
-    val quantity: Double? = null
-    @SerializedName("Rate")
+    val quantity: Double = 0.0
+    @SerializedName("rate")
     @Expose
-    val rate: Double? = null
+    val rate: Double = 0.0
 
 }

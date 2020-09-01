@@ -27,17 +27,14 @@ class PairsAdapter(pairsHolder: ContextHolder) : RecyclerViewAdapter<PairsViewHo
         holder.binanceBidQuantityView.text = String.format(Locale.getDefault(), "%.8f", pair.bidQuantityMap[Market.BINANCE_MARKET])
         holder.binanceAskView.text = String.format(Locale.getDefault(), "%.8f", pair.askMap[Market.BINANCE_MARKET])
         holder.binanceAskQuantityView.text = String.format(Locale.getDefault(), "%.8f", pair.askQuantityMap[Market.BINANCE_MARKET])
-        holder.binanceVolumeView.text = String.format(Locale.getDefault(), "%.10f", pair.volumeMap[Market.BINANCE_MARKET])
         holder.bittrexBidView.text = String.format(Locale.getDefault(), "%.8f", pair.bidMap[Market.BITTREX_MARKET])
         holder.bittrexBidQuantityView.text = String.format(Locale.getDefault(), "%.8f", pair.bidQuantityMap[Market.BITTREX_MARKET])
         holder.bittrexAskView.text = String.format(Locale.getDefault(), "%.8f", pair.askMap[Market.BITTREX_MARKET])
         holder.bittrexAskQuantityView.text = String.format(Locale.getDefault(), "%.8f", pair.askQuantityMap[Market.BITTREX_MARKET])
-        holder.bittrexVolumeView.text = String.format(Locale.getDefault(), "%.8f", pair.volumeMap[Market.BITTREX_MARKET])
         holder.livecoinBidView.text = String.format(Locale.getDefault(), "%.8f", pair.bidMap[Market.LIVECOIN_MARKET])
         holder.livecoinBidQuantityView.text = String.format(Locale.getDefault(), "%.8f", pair.bidQuantityMap[Market.LIVECOIN_MARKET])
         holder.livecoinAskView.text = String.format(Locale.getDefault(), "%.8f", pair.askMap[Market.LIVECOIN_MARKET])
         holder.livecoinAskQuantityView.text = String.format(Locale.getDefault(), "%.8f", pair.askQuantityMap[Market.LIVECOIN_MARKET])
-        holder.livecoinVolumeView.text = String.format(Locale.getDefault(), "%.8f", pair.volumeMap[Market.LIVECOIN_MARKET])
         holder.percent.text = pair.percent.toString()
     }
 
@@ -47,18 +44,14 @@ class PairsAdapter(pairsHolder: ContextHolder) : RecyclerViewAdapter<PairsViewHo
         val bittrexAskQuantityView: TextView = itemView.findViewById(R.id.bittrex_ask_quantity)
         val bittrexBidView: TextView = itemView.findViewById(R.id.bittrex_bid)
         val bittrexBidQuantityView: TextView = itemView.findViewById(R.id.bittrex_bid_quantity)
-        val bittrexVolumeView: TextView = itemView.findViewById(R.id.bittrex_volume)
         val binanceAskView: TextView = itemView.findViewById(R.id.binance_ask)
         val binanceAskQuantityView: TextView = itemView.findViewById(R.id.binance_ask_quantity)
         val binanceBidView: TextView = itemView.findViewById(R.id.binance_bid)
         val binanceBidQuantityView: TextView = itemView.findViewById(R.id.binance_bid_quantity)
-        val binanceVolumeView: TextView = itemView.findViewById(R.id.binance_volume)
         val livecoinAskView: TextView = itemView.findViewById(R.id.livecoin_ask)
         val livecoinAskQuantityView: TextView = itemView.findViewById(R.id.livecoin_ask_quantity)
         val livecoinBidView: TextView = itemView.findViewById(R.id.livecoin_bid)
         val livecoinBidQuantityView: TextView = itemView.findViewById(R.id.livecoin_bid_quantity)
-        val livecoinVolumeView: TextView = itemView.findViewById(R.id.livecoin_volume)
         val percent: TextView = itemView.findViewById(R.id.pair_percent)
-
     }
 }

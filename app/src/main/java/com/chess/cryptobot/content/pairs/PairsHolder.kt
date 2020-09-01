@@ -5,7 +5,6 @@ import androidx.fragment.app.Fragment
 import com.chess.cryptobot.content.ContextHolder
 import com.chess.cryptobot.content.Preferences
 import com.chess.cryptobot.content.balance.BalancePreferences
-import com.chess.cryptobot.market.Market
 import com.chess.cryptobot.model.Pair
 import com.chess.cryptobot.model.ViewItem
 import com.chess.cryptobot.task.AvailablePairsTask
@@ -18,9 +17,6 @@ class PairsHolder(fr: Fragment) : ContextHolder(fr) {
     private var invalidPairs: MutableList<String> = ArrayList()
     private var availablePairs: MutableList<String> = ArrayList()
     var hasAvailablePairs: Boolean = false
-    private var bittrexVolumes: Map<String, Double> = HashMap()
-    private var binanceVolumes: Map<String, Double> = HashMap()
-    private var livecoinVolumes: Map<String, Double> = HashMap()
     private var negativePercentPairs: MutableList<String> = ArrayList()
     private var allPairsPrefs: AllPairsPreferences? = null
     private val serialExecutor: SerialExecutor = SerialExecutor()
@@ -93,17 +89,8 @@ class PairsHolder(fr: Fragment) : ContextHolder(fr) {
         this.retainAll(pairs)
     }
 
-    fun setVolumes(bittrexVolumes: Map<String, Double>, binanceVolumes: Map<String, Double>, livecoinVolumes: Map<String, Double>) {
-        this.bittrexVolumes = bittrexVolumes
-        this.binanceVolumes = binanceVolumes
-        this.livecoinVolumes = livecoinVolumes
-    }
-
     public override fun updateItem(item: ViewItem) {
         val pair = item as Pair
-        pair.volumeMap[Market.BINANCE_MARKET] = binanceVolumes[pair.name]?: 0.0
-        pair.volumeMap[Market.BITTREX_MARKET] = bittrexVolumes[pair.name]?: 0.0
-        pair.volumeMap[Market.LIVECOIN_MARKET] = livecoinVolumes[pair.name]?: 0.0
         val task = PairsUpdateTask(this)
         task.executeOnExecutor(serialExecutor, pair)
     }

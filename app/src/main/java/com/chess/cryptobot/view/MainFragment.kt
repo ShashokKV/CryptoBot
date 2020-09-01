@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.Toast
+import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -35,7 +36,7 @@ abstract class MainFragment<T : RecyclerView.ViewHolder> : Fragment(), OnRefresh
         recyclerView.setHasFixedSize(true)
         val dividerItemDecoration = DividerItemDecoration(recyclerView.context,
                 layoutManager.orientation)
-        dividerItemDecoration.setDrawable(resources.getDrawable(R.drawable.divider, null))
+        dividerItemDecoration.setDrawable(ResourcesCompat.getDrawable(resources, R.drawable.divider, null)!!)
         recyclerView.addItemDecoration(dividerItemDecoration)
         swipeRefreshLayout = initSwipeRefresh(view)
         swipeRefreshLayout!!.setOnRefreshListener(this)

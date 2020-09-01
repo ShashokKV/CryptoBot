@@ -11,15 +11,12 @@ class LivecoinTickerResponse : LivecoinResponse(), TickerResponse {
 
     @SerializedName("best_bid")
     @Expose
-    override val tickerBid: Double? = null
+    override val tickerBid: Double = 0.0
 
     @SerializedName("best_ask")
     @Expose
-    override val tickerAsk: Double? = null
+    override val tickerAsk: Double = 0.0
 
-    @SerializedName("volume")
-    @Expose
-    override val volume: Double = 0.0
     override val tickerName: String
         get() {
             val split = symbol!!.split("/".toRegex()).toTypedArray()

@@ -28,6 +28,7 @@ class LivecoinMarket internal constructor(url: String?, apiKey: String?, secretK
     override fun initGson(): Gson {
         return GsonBuilder()
                 .excludeFieldsWithoutExposeAnnotation()
+                .setLenient()
                 .create()
     }
 
@@ -51,7 +52,7 @@ class LivecoinMarket internal constructor(url: String?, apiKey: String?, secretK
         } catch (e: MarketException) {
             throw LivecoinException(e.message!!)
         }
-        return response.amount!!
+        return response.amount
     }
 
     @Throws(LivecoinException::class)

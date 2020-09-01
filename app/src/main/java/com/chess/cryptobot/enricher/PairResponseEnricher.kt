@@ -6,7 +6,7 @@ import com.chess.cryptobot.model.Price
 import com.chess.cryptobot.model.response.OrderBookResponse
 import com.chess.cryptobot.model.response.TickerResponse
 import com.chess.cryptobot.model.response.binance.BinanceResponse
-import com.chess.cryptobot.model.response.bittrex.BittrexResponse
+import com.chess.cryptobot.model.response.bittrex.BittrexOrderBook
 import com.chess.cryptobot.model.response.livecoin.LivecoinResponse
 
 class PairResponseEnricher(val pair: Pair) {
@@ -26,7 +26,7 @@ class PairResponseEnricher(val pair: Pair) {
     fun enrichWithResponse(response: OrderBookResponse) {
         var marketName  = ""
         when (response) {
-            is BittrexResponse -> {
+            is BittrexOrderBook -> {
                 marketName = Market.BITTREX_MARKET
             }
             is BinanceResponse -> {
@@ -40,9 +40,8 @@ class PairResponseEnricher(val pair: Pair) {
     }
 
     fun enrichFromTicker(tickerResponse: TickerResponse, marketName: String): PairResponseEnricher {
-        pair.askMap[marketName] = tickerResponse.tickerAsk!!
-        pair.bidMap[marketName] = tickerResponse.tickerBid!!
-        pair.volumeMap[marketName] = tickerResponse.volume
+        pair.askMap[marketName] = tickerResponse.tickerAsk
+        pair.bidMap[marketName] = tickerResponse.tickerBid
         return this
     }
 

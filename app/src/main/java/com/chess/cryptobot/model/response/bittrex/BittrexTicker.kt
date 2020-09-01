@@ -1,24 +1,22 @@
-package com.chess.cryptobot.model.response.binance
+package com.chess.cryptobot.model.response.bittrex
 
 import com.chess.cryptobot.model.response.TickerResponse
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 
-class BinanceTicker: TickerResponse {
+class BittrexTicker : TickerResponse, BittrexMarketResponse() {
     @SerializedName("symbol")
     @Expose
-    private val symbol: String? = null
-
-    @SerializedName("bidPrice")
+    val pairName: String? = null
+    @SerializedName("bidRate")
     @Expose
     override val tickerBid: Double = 0.0
-
-    @SerializedName("askPrice")
+    @SerializedName("askRate")
     @Expose
     override val tickerAsk: Double = 0.0
 
     override val tickerName: String
-        get() {
-            return BinanceDeserializer.symbolToPairName(symbol)
-        }
+        get() = pairName?.replace("-", "/") ?: ""
+
+
 }

@@ -5,19 +5,12 @@ import com.chess.cryptobot.api.BittrexMarketService
 import com.chess.cryptobot.exceptions.BittrexException
 import com.chess.cryptobot.exceptions.MarketException
 import com.chess.cryptobot.model.History
-import com.chess.cryptobot.model.response.CurrenciesResponse
-import com.chess.cryptobot.model.response.OrderBookResponse
-import com.chess.cryptobot.model.response.TickerResponse
-import com.chess.cryptobot.model.response.TradeLimitResponse
-import com.chess.cryptobot.model.response.bittrex.BittrexResponse
-import com.chess.cryptobot.model.response.bittrex.BittrexTypeAdapter
+import com.chess.cryptobot.model.response.*
+import com.chess.cryptobot.model.response.bittrex.*
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.google.gson.JsonObject
 import retrofit2.Retrofit
-import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
-import kotlin.collections.LinkedHashMap
 
 class BittrexMarket internal constructor(url: String, apiKey: String?, secretKey: String?) : MarketRequest(url, apiKey, secretKey) {
     private val service: BittrexMarketService
@@ -33,7 +26,6 @@ class BittrexMarket internal constructor(url: String, apiKey: String?, secretKey
 
     override fun initGson(): Gson {
         return GsonBuilder()
-                .registerTypeAdapter(BittrexResponse::class.java, BittrexTypeAdapter())
                 .excludeFieldsWithoutExposeAnnotation()
                 .create()
     }
@@ -45,18 +37,11 @@ class BittrexMarket internal constructor(url: String, apiKey: String?, secretKey
     @Throws(BittrexException::class)
     override fun getAmount(coinName: String): Double {
         if (keysIsEmpty()) return 0.0
-        path = url + "account/getbalance?"
-        val params: MutableMap<String, String> = LinkedHashMap()
-        params["currency"] = coinName
-        params["apikey"] = apiKey
-        params["nonce"] = System.currentTimeMillis().toString()
-        val hash = makeHash(params)
-        val headers: MutableMap<String?, String?> = HashMap()
-        headers["apisign"] = hash
-        val response: BittrexResponse
+        path = url + "balances/" + coinName
+        val response: BittrexBalance
         response = try {
-            val call = service.getBalance(params, headers)
-            execute(call) as BittrexResponse
+            val call = service.getBalance(coinName, signHeaders("", "GET"))
+            execute(call) as BittrexBalance
         } catch (e: MarketException) {
             throw BittrexException(e.message!!)
         }
@@ -66,18 +51,11 @@ class BittrexMarket internal constructor(url: String, apiKey: String?, secretKey
     @Throws(MarketException::class)
     override fun getAddress(coinName: String): String? {
         if (keysIsEmpty()) return null
-        path = url + "account/getdepositaddress?"
-        val params: MutableMap<String, String> = LinkedHashMap()
-        params["currency"] = coinName
-        params["apikey"] = apiKey
-        params["nonce"] = System.currentTimeMillis().toString()
-        val hash = makeHash(params)
-        val headers: MutableMap<String?, String?> = HashMap()
-        headers["apisign"] = hash
-        val response: BittrexResponse
+        path = url + "addresses/" + coinName
+        val response: BittrexAddress
         response = try {
-            val call = service.getAddress(params, headers)
-            execute(call) as BittrexResponse
+            val call = service.getAddress(coinName, signHeaders("", "GET"))
+            execute(call) as BittrexAddress
         } catch (e: MarketException) {
             throw BittrexException(e.message!!)
         }
@@ -86,13 +64,10 @@ class BittrexMarket internal constructor(url: String, apiKey: String?, secretKey
 
     @Throws(BittrexException::class)
     override fun getOrderBook(pairName: String): OrderBookResponse {
-        val response: BittrexResponse
-        val params: MutableMap<String, String> = LinkedHashMap()
-        params["market"] = pairName
-        params["type"] = "both"
+        val response: BittrexOrderBook
         response = try {
-            val call = service.getOrderBook(params)
-            execute(call) as BittrexResponse
+            val call = service.getOrderBook(pairName)
+            execute(call) as BittrexOrderBook
         } catch (e: MarketException) {
             throw BittrexException(e.message!!)
         }
@@ -101,122 +76,83 @@ class BittrexMarket internal constructor(url: String, apiKey: String?, secretKey
 
     @Throws(MarketException::class)
     override fun getTicker(): List<TickerResponse> {
-        val response: BittrexResponse
+        val response: List<*>
         val call = service.getTicker()
         response = try {
-            execute(call) as BittrexResponse
+            executeList(call)
         } catch (e: MarketException) {
             throw BittrexException(e.message!!)
         }
-        return response.tickers
+        return response.filterIsInstance<TickerResponse>().filter { it.tickerAsk > 0.0 && it.tickerBid > 0.0 }
     }
 
     @Throws(MarketException::class)
     override fun getCurrencies(): List<CurrenciesResponse> {
-        val response: BittrexResponse
+        val response: List<*>
         val call = service.getCurrencies()
         response = try {
-            execute(call) as BittrexResponse
+            executeList(call)
         } catch (e: MarketException) {
             throw BittrexException(e.message!!)
         }
-        return response.getCurrencies()
+        return response.filterIsInstance<CurrenciesResponse>()
     }
 
     @Throws(MarketException::class)
     override fun getMinQuantity(): TradeLimitResponse {
-        return markets
-    }
-
-    @get:Throws(BittrexException::class)
-    val markets: BittrexResponse
-        get() {
-            val response: BittrexResponse
-            val call = service.getMarkets()
-            response = try {
-                execute(call) as BittrexResponse
-            } catch (e: MarketException) {
-                throw BittrexException(e.message!!)
-            }
-            return response
+        val response: List<*>
+        val call = service.getMarkets()
+        response = try {
+            executeList(call)
+        } catch (e: MarketException) {
+            throw BittrexException(e.message!!)
         }
+        val limit = BittrexTradeLimit()
+        limit.limits = response.filterIsInstance<BittrexLimits>()
+        return limit
+    }
 
     @Throws(MarketException::class)
     override fun sendCoins(coinName: String, amount: Double, address: String) {
         if (keysIsEmpty()) return
-        path = url + "account/withdraw?"
-        val params: MutableMap<String, String> = LinkedHashMap()
-        params["currency"] = coinName
-        params["quantity"] = String.format(Locale.US, "%.8f", amount)
-        params["address"] = address
-        params["apikey"] = apiKey
-        params["nonce"] = System.currentTimeMillis().toString()
-        val hash = makeHash(params)
-        val headers: MutableMap<String?, String?> = HashMap()
-        headers["apisign"] = hash
-        val call = service.payment(
-                params["currency"],
-                params["quantity"],
-                params["address"],
-                params["apikey"],
-                params["nonce"],
-                headers)
-        try {
-            execute(call)
+        path = url + "withdrawals"
+        val body = JsonObject()
+        body.addProperty("currency", coinName)
+        body.addProperty("quantity", amount)
+        body.addProperty("address", address)
+        val call = service.payment(body, signHeaders(body.asString, "POST"))
+        val response: BittrexWithdraw
+        response = try {
+            execute(call) as BittrexWithdraw
         } catch (e: MarketException) {
             throw BittrexException(e.message!!)
         }
+        if (response.status == "ERROR_INVALID_ADDRESS") throw BittrexException("invalid address")
     }
 
     @Throws(MarketException::class)
     override fun buy(pairName: String, price: Double, amount: Double) {
-        if (keysIsEmpty()) return
-        path = url + "market/buylimit?"
-        val params: MutableMap<String, String> = LinkedHashMap()
-        params["market"] = pairName
-        params["quantity"] = String.format(Locale.US, "%.5f", amount)
-        params["rate"] = String.format(Locale.US, "%.8f", price)
-        params["apikey"] = apiKey
-        params["nonce"] = System.currentTimeMillis().toString()
-        val hash = makeHash(params)
-        val headers: MutableMap<String?, String?> = HashMap()
-        headers["apisign"] = hash
-        val call = service.buy(
-                params["market"],
-                params["quantity"],
-                params["rate"],
-                params["apikey"],
-                params["nonce"],
-                headers)
-        try {
-            execute(call)
-        } catch (e: MarketException) {
-            throw BittrexException(e.message!!)
-        }
+        order("BUY", pairName, price, amount)
     }
 
     @Throws(MarketException::class)
     override fun sell(pairName: String, price: Double, amount: Double) {
+        order("SELL", pairName, price, amount)
+    }
+
+    private fun order(direction: String, pairName: String, price: Double, amount: Double) {
         if (keysIsEmpty()) return
-        path = url + "market/selllimit?"
-        val params: MutableMap<String, String> = LinkedHashMap()
-        params["market"] = pairName
-        params["quantity"] = String.format(Locale.US, "%.5f", amount)
-        params["rate"] = String.format(Locale.US, "%.8f", price)
-        params["apikey"] = apiKey
-        params["nonce"] = System.currentTimeMillis().toString()
-        val hash = makeHash(params)
-        val headers: MutableMap<String?, String?> = HashMap()
-        headers["apisign"] = hash
-        val call = service.sell(
-                params["market"],
-                params["quantity"],
-                params["rate"],
-                params["apikey"],
-                params["nonce"],
-                headers)
+        path = url + "orders"
+        val body = JsonObject()
+        body.addProperty("marketSymbol", pairName)
+        body.addProperty("direction", direction)
+        body.addProperty("type", "LIMIT")
+        body.addProperty("quantity", amount)
+        body.addProperty("limit", price)
+        body.addProperty("useAwards", true)
+        val call = service.order(body, signHeaders(body.asString, "POST"))
         try {
-            execute(call)
+            execute(call) as BittrexWithdraw
         } catch (e: MarketException) {
             throw BittrexException(e.message!!)
         }
@@ -225,45 +161,27 @@ class BittrexMarket internal constructor(url: String, apiKey: String?, secretKey
     @Throws(MarketException::class)
     override fun getOpenOrders(): List<History> {
         if (keysIsEmpty()) return listOf(History())
-        path = url + "market/getopenorders?"
-        val params: MutableMap<String, String> = LinkedHashMap()
-        params["apikey"] = apiKey
-        params["nonce"] = System.currentTimeMillis().toString()
-        val hash = makeHash(params)
-        val headers: MutableMap<String?, String?> = HashMap()
-        headers["apisign"] = hash
-        val response: BittrexResponse
-        val call = service.getOpenOrders(
-                params["apikey"],
-                params["nonce"],
-                headers)
+        path = url + "orders/open"
+        val response: List<*>
+        val call = service.getOpenOrders(signHeaders("", "GET"))
         response = try {
-            execute(call) as BittrexResponse
+            executeList(call)
         } catch (e: MarketException) {
             throw BittrexException(e.message!!)
         }
-        return response.history
+        return HistoryResponseFactory(response.filterIsInstance<BittrexHistory>()).history
     }
 
     @Throws(MarketException::class)
     override fun getHistory(context: Context?): List<History> {
         if (keysIsEmpty()) return listOf(History())
-        path = url + "account/getorderhistory?"
-        val params: MutableMap<String, String> = LinkedHashMap()
-        params["apikey"] = apiKey
-        params["nonce"] = System.currentTimeMillis().toString()
-        val hash = makeHash(params)
-        val headers: MutableMap<String?, String?> = HashMap()
-        headers["apisign"] = hash
-        val historyList: MutableList<History>
-        val response: BittrexResponse
-        val call = service.getOrderHistory(
-                params["apikey"],
-                params["nonce"],
-                headers)
+        path = url + "orders/closed"
+        val response: List<*>
+        val call = service.getOrderHistory(signHeaders("", "GET"))
+        val historyList = ArrayList<History>()
         try {
-            response = execute(call) as BittrexResponse
-            historyList = ArrayList(response.history)
+            response = executeList(call)
+            historyList.addAll(HistoryResponseFactory(response.filterIsInstance<BittrexHistory>()).history)
             historyList.addAll(getWithdrawHistory())
             historyList.addAll(getDepositHistory())
         } catch (e: MarketException) {
@@ -274,45 +192,38 @@ class BittrexMarket internal constructor(url: String, apiKey: String?, secretKey
 
     override fun getDepositHistory(): List<History> {
         if (keysIsEmpty()) return ArrayList()
-        path = url + "account/getdeposithistory?"
-        val params: MutableMap<String, String> = LinkedHashMap()
-        params["apikey"] = apiKey
-        params["nonce"] = System.currentTimeMillis().toString()
-        val hash = makeHash(params)
-        val headers: MutableMap<String?, String?> = HashMap()
-        headers["apisign"] = hash
-        val response: BittrexResponse
-        val call = service.getDepositHistory(
-                params["apikey"],
-                params["nonce"],
-                headers)
+        path = url + "deposits/closed"
+        val response: List<*>
+        val call = service.getDepositHistory(signHeaders("", "GET"))
         response = try {
-            execute(call) as BittrexResponse
+            executeList(call)
         } catch (e: MarketException) {
             throw BittrexException(e.message!!)
         }
-        return response.history
+        return HistoryResponseFactory(response.filterIsInstance<BittrexHistory>()).history
     }
 
     override fun getWithdrawHistory(): List<History> {
         if (keysIsEmpty()) return ArrayList()
-        path = url + "account/getwithdrawalhistory?"
-        val params: MutableMap<String, String> = LinkedHashMap()
-        params["apikey"] = apiKey
-        params["nonce"] = System.currentTimeMillis().toString()
-        val hash = makeHash(params)
-        val headers: MutableMap<String?, String?> = HashMap()
-        headers["apisign"] = hash
-        val response: BittrexResponse
-        val call = service.getWithdrawHistory(
-                params["apikey"],
-                params["nonce"],
-                headers)
+        path = url + "withdrawals/closed"
+        val response: List<*>
+        val call = service.getWithdrawHistory(signHeaders("", "GET"))
         response = try {
-            execute(call) as BittrexResponse
+            executeList(call)
         } catch (e: MarketException) {
             throw BittrexException(e.message!!)
         }
-        return response.history
+        return HistoryResponseFactory(response.filterIsInstance<BittrexHistory>()).history
+    }
+
+    private fun signHeaders(body: String, method: String): MutableMap<String, String> {
+        val headers: MutableMap<String, String> = HashMap()
+        headers["Api-Key"] = apiKey
+        val timestamp = timestamp()
+        headers["Api-Timestamp"] = timestamp
+        val contentHash = encode(body)
+        headers["Api-Content-Hash"] = contentHash
+        headers["Api-Signature"] = encode(timestamp+path+method+contentHash)
+        return headers
     }
 }

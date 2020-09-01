@@ -27,6 +27,7 @@ class HistoryHolder(fragment: Fragment, private val state: State) : ContextHolde
     }
 
     override fun updateAllItems() {
+        viewItems = ArrayList()
         val task = HistoryTask(this, state)
         task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, 0)
     }
