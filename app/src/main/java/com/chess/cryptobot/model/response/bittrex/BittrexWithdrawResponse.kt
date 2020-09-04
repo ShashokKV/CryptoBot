@@ -3,7 +3,7 @@ package com.chess.cryptobot.model.response.bittrex
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 
-class BittrexWithdraw : BittrexMarketResponse() {
+class BittrexWithdrawResponse : BittrexMarketResponse() {
 
     @SerializedName("status")
     @Expose

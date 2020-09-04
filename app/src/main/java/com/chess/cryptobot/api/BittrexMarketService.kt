@@ -6,7 +6,7 @@ import retrofit2.Call
 import retrofit2.http.*
 
 interface BittrexMarketService {
-    @GET("balance/{coinName}")
+    @GET("balances/{coinName}")
     fun getBalance(@Path("coinName") coinName: String, @HeaderMap headers: Map<String, String>): Call<BittrexBalance>
 
     @GET("markets/{marketSymbol}/orderbook")
@@ -26,11 +26,11 @@ interface BittrexMarketService {
 
     @Headers("Content-Type: application/json; charset=UTF-8")
     @POST("withdrawals")
-    fun payment(@Body body: JsonObject, @HeaderMap headers: Map<String, String>): Call<BittrexWithdraw>
+    fun payment(@Body body: BittrexWithdrawRequest, @HeaderMap headers: Map<String, String>): Call<BittrexWithdrawResponse>
 
     @Headers("Content-Type: application/json; charset=UTF-8")
     @POST("orders")
-    fun order(@Body body: JsonObject, @HeaderMap headers: Map<String, String>): Call<BittrexMarketResponse>
+    fun order(@Body body: BittrexOrder, @HeaderMap headers: Map<String, String>): Call<BittrexMarketResponse>
 
     @GET("orders/open")
     fun getOpenOrders(@HeaderMap headers: Map<String, String>): Call<List<BittrexHistory>>

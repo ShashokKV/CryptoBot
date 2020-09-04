@@ -35,7 +35,7 @@
 
     <!--    <string name="bittrex_url">http://10.0.2.2:8888/crypt/bittrex/</string>-->
     <!--    <string name="binance_url">http://10.0.2.2:8888/crypt/binance/</string>-->
-    <string name="bittrex_url">https://api.bittrex.com/api/v1.1/</string>
+    <string name="bittrex_url">https://api.bittrex.com/v3/</string>
     <string name="binance_url">https://api.binance.com/</string>
     <string name="livecoin_url">https://api.livecoin.net/</string>
 

@@ -45,6 +45,7 @@ class CoinImageTask(balanceHolder: BalanceHolder) : AsyncTask<Balance, Int?, Bal
         try {
             bitmap = loadImage(coinName)
         } catch (e: IOException) {
+            if (balance.coinUrl==null) return null
             bitmap = downloadImage(balance.coinUrl)
             saveImage(bitmap, fileName(coinName))
         }

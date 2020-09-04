@@ -7,13 +7,21 @@ import com.chess.cryptobot.exceptions.MarketException
 import com.chess.cryptobot.model.History
 import com.chess.cryptobot.model.response.*
 import com.chess.cryptobot.model.response.bittrex.*
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonObject
+import com.google.gson.*
+import com.google.gson.reflect.TypeToken
 import retrofit2.Retrofit
+import java.lang.reflect.Type
+import java.math.BigDecimal
+import java.math.BigInteger
+import java.security.MessageDigest
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
+
 
 class BittrexMarket internal constructor(url: String, apiKey: String?, secretKey: String?) : MarketRequest(url, apiKey, secretKey) {
     private val service: BittrexMarketService
+    private lateinit var gson: Gson
 
     init {
         algorithm = "HmacSHA512"
@@ -25,9 +33,16 @@ class BittrexMarket internal constructor(url: String, apiKey: String?, secretKey
     }
 
     override fun initGson(): Gson {
-        return GsonBuilder()
+        gson = GsonBuilder()
                 .excludeFieldsWithoutExposeAnnotation()
+                .registerTypeAdapter(object : TypeToken<Double>() {}.type, object : JsonSerializer<Double> {
+                    override fun serialize(src: Double, typeOfSrc: Type, context: JsonSerializationContext): JsonElement {
+                        val value = BigDecimal.valueOf(src)
+                        return JsonPrimitive(value)
+                    }
+                })
                 .create()
+        return gson
     }
 
     override fun initService(retrofit: Retrofit): Any {
@@ -116,14 +131,14 @@ class BittrexMarket internal constructor(url: String, apiKey: String?, secretKey
     override fun sendCoins(coinName: String, amount: Double, address: String) {
         if (keysIsEmpty()) return
         path = url + "withdrawals"
-        val body = JsonObject()
-        body.addProperty("currency", coinName)
-        body.addProperty("quantity", amount)
-        body.addProperty("address", address)
-        val call = service.payment(body, signHeaders(body.asString, "POST"))
-        val response: BittrexWithdraw
+        val withdraw = BittrexWithdrawRequest()
+        withdraw.currencySymbol = coinName
+        withdraw.quantity = amount
+        withdraw.cryptoAddress = address
+        val call = service.payment(withdraw, signHeaders(gson.toJson(withdraw), "POST"))
+        val response: BittrexWithdrawResponse
         response = try {
-            execute(call) as BittrexWithdraw
+            execute(call) as BittrexWithdrawResponse
         } catch (e: MarketException) {
             throw BittrexException(e.message!!)
         }
@@ -143,16 +158,14 @@ class BittrexMarket internal constructor(url: String, apiKey: String?, secretKey
     private fun order(direction: String, pairName: String, price: Double, amount: Double) {
         if (keysIsEmpty()) return
         path = url + "orders"
-        val body = JsonObject()
-        body.addProperty("marketSymbol", pairName)
-        body.addProperty("direction", direction)
-        body.addProperty("type", "LIMIT")
-        body.addProperty("quantity", amount)
-        body.addProperty("limit", price)
-        body.addProperty("useAwards", true)
-        val call = service.order(body, signHeaders(body.asString, "POST"))
+        val order = BittrexOrder()
+        order.direction = direction
+        order.marketSymbol = pairName
+        order.limit = price
+        order.quantity = amount
+        val call = service.order(order, signHeaders(gson.toJson(order), "POST"))
         try {
-            execute(call) as BittrexWithdraw
+            execute(call) as BittrexWithdrawResponse
         } catch (e: MarketException) {
             throw BittrexException(e.message!!)
         }
@@ -221,9 +234,25 @@ class BittrexMarket internal constructor(url: String, apiKey: String?, secretKey
         headers["Api-Key"] = apiKey
         val timestamp = timestamp()
         headers["Api-Timestamp"] = timestamp
-        val contentHash = encode(body)
+        val contentHash = contentHash(body)
         headers["Api-Content-Hash"] = contentHash
-        headers["Api-Signature"] = encode(timestamp+path+method+contentHash)
+        headers["Api-Signature"] = encode(timestamp + path + method + contentHash).toLowerCase(Locale.ROOT)
         return headers
+    }
+
+    override fun timestamp(): String {
+        val date = Date()
+        return date.time.toString()
+    }
+
+    private fun contentHash(value: String): String {
+        val md: MessageDigest = MessageDigest.getInstance("SHA-512")
+        val messageDigest: ByteArray = md.digest(value.toByteArray())
+        val no = BigInteger(1, messageDigest)
+        var hashtext: String = no.toString(16)
+        while (hashtext.length < 128) {
+            hashtext = "0$hashtext"
+        }
+        return hashtext
     }
 }

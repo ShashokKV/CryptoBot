@@ -23,6 +23,7 @@ import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 import kotlin.collections.ArrayList
 
+
 private const val DEFAULT_ENCODING = "UTF-8"
 
 abstract class MarketRequest(val url: String, apiKey: String?, secretKey: String?) : Market {
@@ -66,8 +67,7 @@ abstract class MarketRequest(val url: String, apiKey: String?, secretKey: String
 
     private fun encodeToBytes(value: String): ByteArray {
         return try {
-            val keySpec = SecretKeySpec(
-                    secretKey.toByteArray(charset(DEFAULT_ENCODING)), algorithm)
+            val keySpec = SecretKeySpec(secretKey.toByteArray(charset(DEFAULT_ENCODING)), algorithm)
             val mac = Mac.getInstance(algorithm)
             mac.init(keySpec)
             mac.doFinal(value.toByteArray(charset(DEFAULT_ENCODING)))
@@ -81,11 +81,11 @@ abstract class MarketRequest(val url: String, apiKey: String?, secretKey: String
     }
 
     private fun asString(bytes: ByteArray): String {
-        val sb = StringBuilder()
+        val formatter = Formatter()
         for (b in bytes) {
-            sb.append(String.format("%02x", b))
+            formatter.format("%02x", b)
         }
-        return sb.toString().toUpperCase(Locale.getDefault())
+        return formatter.toString().toUpperCase(Locale.ROOT)
     }
 
     private fun buildQueryString(args: Map<String, String>): String {
@@ -107,7 +107,7 @@ abstract class MarketRequest(val url: String, apiKey: String?, secretKey: String
         return encode(String.format(Locale.US, "%s%s", path, buildQueryString(queryParams)))
     }
 
-    fun timestamp(): String {
+    open fun timestamp(): String {
         return Instant.now().atZone(ZoneId.of("Z")).toInstant().toEpochMilli().toString()
     }
 

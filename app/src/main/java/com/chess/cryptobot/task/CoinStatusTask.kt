@@ -14,7 +14,7 @@ class CoinStatusTask(holder: ContextHolder?) : MarketTask<Int, Int>(holder!!) {
     private var bittrexStatuses: MutableMap<String, Boolean> = HashMap()
     private var binanceStatuses: MutableMap<String, Boolean> = HashMap()
     private var livecoinStatuses: MutableMap<String, Boolean> = HashMap()
-    private var coinIcons: MutableMap<String, String> = HashMap()
+    private var coinIcons: MutableMap<String, String?> = HashMap()
     private var availableCoins = ArrayList<String>()
 
     override fun preMarketProcess(param: Int) {
@@ -55,7 +55,10 @@ class CoinStatusTask(holder: ContextHolder?) : MarketTask<Int, Int>(holder!!) {
     private fun updateIcons(response: List<CurrenciesResponse>) {
        response.forEach { result: CurrenciesResponse ->
            result as BittrexCurrency
-           coinIcons[result.currencyName!!] = result.logoUrl!!
+           val currencyName = result.currencyName
+           val logoUrl = result.logoUrl
+           if (currencyName!=null)
+           coinIcons[currencyName] = logoUrl
        }
     }
 

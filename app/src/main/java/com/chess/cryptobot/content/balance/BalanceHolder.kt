@@ -18,7 +18,7 @@ class BalanceHolder(fragment: Fragment) : ContextHolder(fragment) {
     private var bittrexStatuses: Map<String, Boolean> = HashMap()
     private var binanceStatuses: Map<String, Boolean> = HashMap()
     private var livecoinStatuses: Map<String, Boolean> = HashMap()
-    private var iconUrls: Map<String, String>? = null
+    private var iconUrls: Map<String, String?> = HashMap()
     var availableCoins = ArrayList<String>()
     private val serialExecutor: SerialExecutor = SerialExecutor()
 
@@ -55,13 +55,7 @@ class BalanceHolder(fragment: Fragment) : ContextHolder(fragment) {
 
     override fun add(viewItem: ViewItem) {
         super.add(viewItem)
-        val balance = viewItem as Balance
-        balance.setStatuses(binanceStatuses[balance.name]?: true,
-                bittrexStatuses[balance.name]?: true,
-                livecoinStatuses[balance.name]?: true)
-        if (iconUrls != null) balance.coinUrl = iconUrls!![balance.name]
-        updateImage(balance)
-        if (hasKeys) updateAmount(balance)
+        updateItem(viewItem)
     }
 
     public override fun updateItem(item: ViewItem) {
@@ -69,7 +63,7 @@ class BalanceHolder(fragment: Fragment) : ContextHolder(fragment) {
         balance.setStatuses(binanceStatuses[balance.name]?: true,
                 bittrexStatuses[balance.name]?: true,
                 livecoinStatuses[balance.name]?: true)
-        if (iconUrls != null) balance.coinUrl = iconUrls!![balance.name]
+        balance.coinUrl = iconUrls[balance.name]
         updateImage(balance)
         if (hasKeys) updateAmount(balance)
     }
@@ -104,7 +98,7 @@ class BalanceHolder(fragment: Fragment) : ContextHolder(fragment) {
         this.livecoinStatuses = livecoinStatuses
     }
 
-    fun setIconUrls(urls: Map<String, String>) {
+    fun setIconUrls(urls: Map<String, String?>) {
         this.iconUrls = urls
     }
 }
