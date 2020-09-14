@@ -12,7 +12,6 @@ import com.chess.cryptobot.R
 import com.chess.cryptobot.content.history.HistoryHolder
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
-import com.google.android.material.tabs.TabLayoutMediator.TabConfigurationStrategy
 
 class HistoryPagerFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -22,9 +21,9 @@ class HistoryPagerFragment : Fragment() {
         val pagerAdapter: FragmentStateAdapter = PagerAdapter(this.activity as FragmentActivity)
         viewPager.adapter = pagerAdapter
         val tabs: TabLayout = view.findViewById(R.id.pager_header)
-        TabLayoutMediator(tabs, viewPager,
-                TabConfigurationStrategy { tab: TabLayout.Tab, position: Int -> tab.text = if (position == 0) "History" else "Orders" }
-        ).attach()
+        TabLayoutMediator(tabs, viewPager) { tab: TabLayout.Tab, position: Int ->
+            tab.text = if (position == 0) "History" else "Orders"
+        }.attach()
         return view
     }
 

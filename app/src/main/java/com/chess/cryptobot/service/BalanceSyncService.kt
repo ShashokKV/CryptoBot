@@ -2,8 +2,11 @@ package com.chess.cryptobot.service
 
 import android.app.IntentService
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Intent
+import android.graphics.drawable.Icon
 import androidx.preference.PreferenceManager
+import com.chess.cryptobot.R
 import com.chess.cryptobot.content.balance.BalancePreferences
 import com.chess.cryptobot.enricher.PairResponseEnricher
 import com.chess.cryptobot.exceptions.MarketException
@@ -33,6 +36,8 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
     private var minQuantityMap: MutableMap<String, TradeLimitResponse?> = HashMap()
     private var tickersMap: MutableMap<String, List<TickerResponse>> = HashMap()
     private var makeNotifications = false
+    private var actionIntent: PendingIntent? = null
+    private var forceUpdate = false
 
     override fun onHandleIntent(intent: Intent?) {
         if (intent == null) return
@@ -42,6 +47,7 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
         minBtcAmount = balancePreferences.getMinBtcAmount()
         minBtcAmount += minBtcAmount / 100
         val coinNames = intent.getStringArrayListExtra("coinNames")
+        forceUpdate = intent.getBooleanExtra("forceUpdate", false)
         val marketFactory = WithdrawalMarketFactory()
         val markets = marketFactory.getMarkets(this, PreferenceManager.getDefaultSharedPreferences(this))
         markets.forEach { marketsMap[it!!.getMarketName()] = it }
@@ -120,8 +126,8 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
             }
         }
 
-        val minBalanceByTicker = (pair.bidMap.values.max() ?: 0.0) * minBtcAmount
-        val minBalanceByMarket = minBalances.max() ?: 0.0
+        val minBalanceByTicker = (pair.bidMap.values.maxOrNull() ?: 0.0) * minBtcAmount
+        val minBalanceByMarket = minBalances.maxOrNull() ?: 0.0
         minBalance = if (minBalanceByTicker > minBalanceByMarket) {
             minBalanceByTicker
         } else {
@@ -145,14 +151,18 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
 
     private fun makeNotification(notificationText: String) {
         if (notificationText.isEmpty()) return
-        NotificationBuilder(this)
+        val builder = NotificationBuilder(this)
                 .setNotificationId(NOTIFICATION_ID)
                 .setChannelId(CHANNEL_ID)
                 .setNotificationText(notificationText)
                 .setChannelName("Balance sync service")
                 .setImportance(NotificationManager.IMPORTANCE_DEFAULT)
                 .setTitle("Balance synchronization")
-                .buildAndNotify()
+
+        if (notificationText.contains(DEPOSIT_IN_PROGRESS) && actionIntent!=null) {
+            builder.addAction(Icon.createWithResource("", R.drawable.baseline_sync_24),"Force sync", actionIntent!!)
+        }
+        builder.buildAndNotify()
         resultInfo = ""
     }
 
@@ -165,8 +175,8 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
         }
 
         internal fun computeDirection() {
-            val maxValue = amounts?.values?.max()
-            val minValue = amounts?.values?.min()
+            val maxValue = amounts?.values?.maxOrNull()
+            val minValue = amounts?.values?.minOrNull()
             moveFrom = amounts?.filterValues { amount -> amount == maxValue }?.keys?.first()
             moveTo = amounts?.filterValues { amount -> amount == minValue }?.keys?.first()
         }
@@ -252,18 +262,29 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
             if (balanceSyncTickers.isEmpty()) return
             val ticker = balanceSyncTickers[0]
 
-            val history = ArrayList<History>()
-            marketsMap.values.forEach { history.addAll(it!!.getDepositHistory()) }
-            val filteredHistory = history.filter {
-                        it.action?.toLowerCase(Locale.ROOT) == "deposit"
-                                && it.currencyName.equals(coinName)
-                                && it.amount == ticker.amount
-                    }
-
-            if (filteredHistory.isNotEmpty()) {
+            if (forceUpdate) {
                 dao.deleteAll(balanceSyncTickers)
-            } else {
-                throw SyncServiceException("Deposit in progress")
+            } else{
+                val history = ArrayList<History>()
+                marketsMap.values.forEach { history.addAll(it!!.getDepositHistory()) }
+                val filteredHistory = history.filter {
+                    it.action?.toLowerCase(Locale.ROOT) == "deposit"
+                            && it.currencyName.equals(coinName)
+                            && it.amount == ticker.amount
+                }
+
+                if (filteredHistory.isNotEmpty()) {
+                    dao.deleteAll(balanceSyncTickers)
+                } else {
+                    val coinNames = ArrayList<String>()
+                    coinNames.add(coinName)
+                    val intent = Intent(this@BalanceSyncService, BalanceSyncService::class.java)
+                    intent.putExtra("coinNames", coinNames)
+                    intent.putExtra("forceUpdate", true)
+                    intent.putExtra("makeNotifications", true)
+                    actionIntent = PendingIntent.getService(this@BalanceSyncService, 0, intent, 0)
+                    throw SyncServiceException(DEPOSIT_IN_PROGRESS)
+                }
             }
         }
 
@@ -280,5 +301,6 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
     companion object {
         private const val CHANNEL_ID = "balance_sync_channel"
         private const val NOTIFICATION_ID: Int = 12385264
+        private const val DEPOSIT_IN_PROGRESS = "Deposit in progress"
     }
 }

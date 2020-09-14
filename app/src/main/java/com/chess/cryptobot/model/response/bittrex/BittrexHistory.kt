@@ -3,9 +3,6 @@ package com.chess.cryptobot.model.response.bittrex
 import com.chess.cryptobot.model.response.HistoryResponse
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
 class BittrexHistory : HistoryResponse, BittrexMarketResponse() {
@@ -57,7 +54,7 @@ class BittrexHistory : HistoryResponse, BittrexMarketResponse() {
     override val historyTime: ZonedDateTime?
         get() {
             val timeString = closed ?: created ?: completed ?: updated
-            return ZonedDateTime.ofLocal(LocalDateTime.parse(timeString), ZoneId.of("Z"), ZoneOffset.UTC)
+            return ZonedDateTime.parse(timeString)
         }
 
     override val historyName: String?

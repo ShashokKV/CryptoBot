@@ -16,7 +16,10 @@ class BittrexTicker : TickerResponse, BittrexMarketResponse() {
     override val tickerAsk: Double = 0.0
 
     override val tickerName: String
-        get() = pairName?.replace("-", "/") ?: ""
+        get() {
+            val split = pairName!!.split("-".toRegex()).toTypedArray()
+            return split[1] + "/" + split[0]
+        }
 
 
 }

@@ -84,6 +84,11 @@
             android:key="@string/min_eth_amount"
             android:title="Minimum ETH trade value" />
         <androidx.preference.EditTextPreference
+            android:defaultValue="10.0"
+            android:dialogLayout="@layout/number_dialog"
+            android:key="@string/min_usdt_amount"
+            android:title="Minimum USDT trade value" />
+        <androidx.preference.EditTextPreference
             android:defaultValue="5"
             android:dialogLayout="@layout/number_dialog"
             android:key="@string/service_run_period"

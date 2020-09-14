@@ -54,8 +54,8 @@ class PairResponseEnricher(val pair: Pair) {
     }
 
     fun enrichWithMinPercent(minPercent: Float?): PairResponseEnricher {
-        bid = pair.bidMap.values.max()?:0.0
-        ask = pair.askMap.values.min()?:Double.MAX_VALUE
+        bid = pair.bidMap.values.maxOrNull() ?:0.0
+        ask = pair.askMap.values.minOrNull() ?:Double.MAX_VALUE
         pair.bidMarketName = pair.bidMap.filterValues {it == bid }.keys.first()
         pair.askMarketName = pair.askMap.filterValues { it == ask }.keys.first()
         bidQuantity = pair.bidQuantityMap[pair.bidMarketName]?:0.0

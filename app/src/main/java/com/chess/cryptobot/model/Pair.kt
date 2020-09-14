@@ -53,7 +53,7 @@ class Pair(val baseName: String, val marketName: String) : ViewItem, Serializabl
     }
 
     private val bittrexPairName: String
-        get() = "$baseName-$marketName"
+        get() = "$marketName-$baseName"
 
     private val binancePairName: String
         get() = "$marketName$baseName"

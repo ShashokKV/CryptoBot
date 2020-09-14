@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.graphics.drawable.Icon
 import com.chess.cryptobot.R
 import com.chess.cryptobot.view.MainActivity
 
@@ -18,6 +19,9 @@ class NotificationBuilder(private val context: Context) {
     private var importance = 0
     private var title: String? = null
     private var color: Int? = null
+    private var actionIcon: Icon? = null
+    private var actionText: String? = null
+    private var actionIntent: PendingIntent? = null
     private val notificationManager: NotificationManager = context.getSystemService(NotificationManager::class.java)
 
     fun setNotificationId(id: Int): NotificationBuilder {
@@ -60,6 +64,13 @@ class NotificationBuilder(private val context: Context) {
         return this
     }
 
+    fun addAction(icon: Icon, text: String, intent: PendingIntent): NotificationBuilder {
+        this.actionIcon = icon
+        this.actionText = text
+        this.actionIntent = intent
+        return this
+    }
+
     fun buildAndNotify() {
         notificationManager.notify(notificationId, build())
     }
@@ -92,6 +103,9 @@ class NotificationBuilder(private val context: Context) {
         if (color != null) {
             builder.setColorized(true)
                     .setColor(context.resources.getColor(R.color.colorPrimary, null))
+        }
+        if (actionIntent!=null) {
+            builder.addAction(Notification.Action.Builder(actionIcon, actionText, actionIntent).build())
         }
         return builder.build()
     }

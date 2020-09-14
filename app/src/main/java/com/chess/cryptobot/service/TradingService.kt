@@ -27,6 +27,7 @@ class TradingService : IntentService("TradingService") {
     private var stepSize: Double = 0.0
     private var minBtcAmount = 0.0005
     private var minEthAmount = 0.025
+    private var minUsdtAmount = 10.0
     private val scope = CoroutineScope(SupervisorJob())
 
     override fun onHandleIntent(intent: Intent?) {
@@ -104,6 +105,8 @@ class TradingService : IntentService("TradingService") {
         val balancePreferences = BalancePreferences(this)
         minBtcAmount = balancePreferences.getMinBtcAmount()
         minEthAmount = balancePreferences.getMinEthAmount()
+        minUsdtAmount = balancePreferences.getMinUsdtAmount()
+
     }
 
     private fun makeNotification(title: String, message: String?) {
@@ -121,7 +124,7 @@ class TradingService : IntentService("TradingService") {
         resultInfo = ""
     }
 
-    private inner class Trader internal constructor(pair: Pair) {
+    private inner class Trader(pair: Pair) {
         var bidPrice: Double = 0.0
         var askPrice: Double = 0.0
         var quantity: Double = 0.0
@@ -151,11 +154,15 @@ class TradingService : IntentService("TradingService") {
             if (quantity > minAvailableAmount) quantity = minAvailableAmount
             //-1% for trading fee
             quantity = formatAmount(quantity - quantity / 100)
-            if (pair.baseName == "BTC") {
-                if (quantity * askPrice < minBtcAmount) quantity = 0.0
-            } else if (pair.baseName == "ETH") {
-                if (quantity * askPrice < minEthAmount) quantity = 0.0
+            val minBaseAmount = when(pair.baseName) {
+                "BTC" -> minBtcAmount
+                "ETH" -> minEthAmount
+                "USDT" -> minUsdtAmount
+                else -> 0.0
             }
+
+            if (quantity * askPrice < minBaseAmount) quantity = 0.0
+
             if (stepSize>0.0) {
                 quantity = quantity.toBigDecimal().setScale(computeScale(), RoundingMode.DOWN).toDouble()
             }

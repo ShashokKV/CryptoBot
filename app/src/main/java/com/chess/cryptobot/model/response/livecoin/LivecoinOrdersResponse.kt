@@ -11,7 +11,7 @@ class LivecoinOrdersResponse : LivecoinResponse() {
     @Expose
     val data: List<Datum>? = null
 
-    inner class Datum : HistoryResponse {
+    class Datum : HistoryResponse {
         @SerializedName("currencyPair")
         @Expose
         var currencyPair: String? = null

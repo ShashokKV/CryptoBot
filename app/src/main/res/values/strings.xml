@@ -74,4 +74,5 @@
     <string name="binance_withdrawal_secret_key">binance_withdrawal_secret_key</string>
     <string name="min_btc_amount">min_btc_amount</string>
     <string name="min_eth_amount">min_eth_amount</string>
+    <string name="min_usdt_amount">min_usdt_amount</string>
 </resources>

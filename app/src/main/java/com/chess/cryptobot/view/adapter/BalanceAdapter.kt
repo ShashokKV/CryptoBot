@@ -42,7 +42,7 @@ class BalanceAdapter(balanceHolder: BalanceHolder) : RecyclerViewAdapter<Balance
         if (bitmap != null) balanceViewHolder.cryptoImageView.setImageBitmap(bitmap)
     }
 
-    inner class BalanceViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    class BalanceViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val binanceBalanceView: TextView = itemView.findViewById(R.id.BinanceBalanceView)
         val bittrexBalanceView: TextView = itemView.findViewById(R.id.BittrexBalanceView)
         val livecoinBalanceView: TextView = itemView.findViewById(R.id.LivecoinBalanceView)

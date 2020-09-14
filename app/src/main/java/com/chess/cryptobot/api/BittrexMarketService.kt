@@ -1,7 +1,6 @@
 package com.chess.cryptobot.api
 
 import com.chess.cryptobot.model.response.bittrex.*
-import com.google.gson.JsonObject
 import retrofit2.Call
 import retrofit2.http.*
 

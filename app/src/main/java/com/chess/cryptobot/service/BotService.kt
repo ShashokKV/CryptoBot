@@ -104,7 +104,7 @@ class BotService : Service() {
         return botBinder
     }
 
-    private inner class BotTimerTask internal constructor(private val markets: List<Market?>) : TimerTask() {
+    private inner class BotTimerTask(private val markets: List<Market?>) : TimerTask() {
         private var pairs: MutableList<Pair>? = null
         private val tradeLimits: MutableMap<String, TradeLimitResponse?> = ConcurrentHashMap(3)
         private var coinInfo: CoinInfo? = null
@@ -156,15 +156,15 @@ class BotService : Service() {
         private fun initMinQuantities() {
             var exception: MarketException? = null
             markets.parallelStream().forEach { market ->
-                        var minQuantity: TradeLimitResponse? = null
-                        try {
-                            minQuantity  = market!!.getMinQuantity()
-                        } catch (e: MarketException) {
-                            exception = e
-                        }
-                        if (minQuantity!=null) tradeLimits[market!!.getMarketName()] = minQuantity
-                    }
-            if (exception!=null) throw exception as MarketException
+                var minQuantity: TradeLimitResponse? = null
+                try {
+                    minQuantity = market!!.getMinQuantity()
+                } catch (e: MarketException) {
+                    exception = e
+                }
+                if (minQuantity != null) tradeLimits[market!!.getMarketName()] = minQuantity
+            }
+            if (exception != null) throw exception as MarketException
         }
 
         @Synchronized
@@ -190,7 +190,7 @@ class BotService : Service() {
 
             markets.parallelStream()
                     .forEach { market ->
-                        val response: OrderBookResponse?
+                        val response: OrderBookResponse
                         response = try {
                             market!!.getOrderBook(pair.getPairNameForMarket(market.getMarketName()))
                         } catch (e: MarketException) {
@@ -209,9 +209,9 @@ class BotService : Service() {
 
         private fun isTradingNow(pairName: String): Boolean {
             for (i in 0..9) {
-                if (TradingService.workingOnPair != null && TradingService.workingOnPair == pairName) {
+                if (TradingService.workingOnPair == pairName) {
                     try {
-                        Thread.sleep(5000)
+                        Thread.sleep(1000)
                     } catch (ignored: InterruptedException) {
                         return false
                     }
@@ -226,7 +226,7 @@ class BotService : Service() {
             val intent = Intent(this@BotService, TradingService::class.java)
             intent.putExtra(Pair::class.java.name, pair)
             intent.putExtra("minQuantity", getMinQuantity(pair))
-            if (pair.askMarketName == Market.BINANCE_MARKET || pair.bidMarketName==Market.BINANCE_MARKET) {
+            if (pair.askMarketName == Market.BINANCE_MARKET || pair.bidMarketName == Market.BINANCE_MARKET) {
                 intent.putExtra("stepSize", getStepSize(pair))
             }
             startService(intent)

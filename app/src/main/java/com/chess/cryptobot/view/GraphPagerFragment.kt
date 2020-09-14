@@ -11,7 +11,6 @@ import androidx.viewpager2.widget.ViewPager2
 import com.chess.cryptobot.R
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
-import com.google.android.material.tabs.TabLayoutMediator.TabConfigurationStrategy
 
 class GraphPagerFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -22,9 +21,9 @@ class GraphPagerFragment : Fragment() {
         viewPager.adapter = pagerAdapter
         viewPager.isUserInputEnabled = false
         val tabs: TabLayout = view.findViewById(R.id.graph_pager_header)
-        TabLayoutMediator(tabs, viewPager,
-                TabConfigurationStrategy { tab: TabLayout.Tab, position: Int -> tab.text = if (position == 0) "Balance" else "Pairs" }
-        ).attach()
+        TabLayoutMediator(tabs, viewPager) {
+            tab: TabLayout.Tab, position: Int ->
+            tab.text = if (position == 0) "Balance" else "Pairs" }.attach()
         return view
     }
 

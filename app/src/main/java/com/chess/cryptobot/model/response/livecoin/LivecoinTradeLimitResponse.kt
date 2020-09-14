@@ -17,7 +17,7 @@ class LivecoinTradeLimitResponse : LivecoinResponse(), TradeLimitResponse {
         return null
     }
 
-    internal inner class Restriction {
+    internal class Restriction {
         @SerializedName("currencyPair")
         @Expose
         val currencyPair: String? = null

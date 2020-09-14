@@ -38,7 +38,7 @@ class PairsAdapter(pairsHolder: ContextHolder) : RecyclerViewAdapter<PairsViewHo
         holder.percent.text = pair.percent.toString()
     }
 
-    inner class PairsViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    class PairsViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val pairNameView: TextView = itemView.findViewById(R.id.pair_name)
         val bittrexAskView: TextView = itemView.findViewById(R.id.bittrex_ask)
         val bittrexAskQuantityView: TextView = itemView.findViewById(R.id.bittrex_ask_quantity)

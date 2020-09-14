@@ -38,7 +38,7 @@ class HistoryAdapter(holder: ContextHolder, private val state: HistoryHolder.Sta
         }
     }
 
-    inner class HistoryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    class HistoryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val timeView: TextView = itemView.findViewById(R.id.history_time)
         val marketView: TextView = itemView.findViewById(R.id.history_market)
         val nameView: TextView = itemView.findViewById(R.id.history_currency_name)
