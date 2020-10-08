@@ -2,7 +2,6 @@ package com.chess.cryptobot.view
 
 import android.graphics.Color
 import android.os.Bundle
-import androidx.preference.PreferenceManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,9 +9,11 @@ import android.widget.*
 import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.SeekBar.OnSeekBarChangeListener
 import androidx.fragment.app.Fragment
+import androidx.preference.PreferenceManager
 import com.chess.cryptobot.R
 import com.chess.cryptobot.task.PairsGraphTask
 import com.chess.cryptobot.task.SerialExecutor
+import com.chess.cryptobot.task.SinglePairGraphTask
 import com.github.mikephil.charting.charts.HorizontalBarChart
 import java.util.*
 
@@ -36,13 +37,12 @@ class PairsGraphFragment : Fragment() {
         return view
     }
 
-    override fun onResume() {
-        super.onResume()
-        updateGraph(daysToShow, pairName)
-    }
-
     private fun updateGraph(daysToShow: Int, pairName: String?) {
-        val task = PairsGraphTask(this, daysToShow, pairName, minPercent)
+        val task = if (pairName==null) {
+            PairsGraphTask(this, daysToShow, minPercent)
+        } else {
+            SinglePairGraphTask(this, daysToShow, pairName, minPercent)
+        }
         task.executeOnExecutor(serialExecutor)
     }
 

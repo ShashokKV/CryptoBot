@@ -13,10 +13,20 @@ interface ProfitPairDao {
 
     @Query("SELECT pairName, SUM(percent) AS percent, COUNT(id) AS id, dateCreated " +
             "FROM ProfitPair " +
-            "WHERE (dateCreated BETWEEN :dateStart AND :dateEnd) AND percent > :minPercent AND (pairName = :pairName OR :pairName IS NULL) " +
+            "WHERE (dateCreated BETWEEN :dateStart AND :dateEnd) AND percent > :minPercent " +
             "GROUP BY pairName " +
             "ORDER BY percent DESC")
-    fun getPairsByDayAndMinPercent(pairName: String?, dateStart: LocalDateTime?, dateEnd: LocalDateTime?, minPercent: Float?): List<ProfitPair?>?
+    fun getAllPairsByDayAndMinPercent(dateStart: LocalDateTime?, dateEnd: LocalDateTime?, minPercent: Float?): List<ProfitPair?>
+
+    @Query("SELECT pairName, SUM(percent) AS percent, COUNT(id) AS id, dateCreated " +
+            "FROM ProfitPair " +
+            "WHERE (dateCreated BETWEEN :dateStart AND :dateEnd) AND percent > :minPercent AND pairName = :pairName")
+    fun getPairByDayAndMinPercent(pairName: String?, dateStart: LocalDateTime?, dateEnd: LocalDateTime?, minPercent: Float?): ProfitPair
+
+    @Query("SELECT COUNT(id) as count " +
+            "FROM ProfitPair " +
+            "WHERE (dateCreated > :date) AND percent > :minPercent")
+    fun getCountByDate(date: LocalDateTime?, minPercent: Float?): Int
 
     @Query("SELECT pairName FROM ProfitPair " +
             "WHERE (dateCreated > :date) AND percent > :minPercent " +

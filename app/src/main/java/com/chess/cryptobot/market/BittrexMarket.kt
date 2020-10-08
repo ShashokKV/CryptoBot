@@ -165,7 +165,7 @@ class BittrexMarket internal constructor(url: String, apiKey: String?, secretKey
         order.quantity = amount
         val call = service.order(order, signHeaders(gson.toJson(order), "POST"))
         try {
-            execute(call) as BittrexWithdrawResponse
+            execute(call)
         } catch (e: MarketException) {
             throw BittrexException(e.message!!)
         }

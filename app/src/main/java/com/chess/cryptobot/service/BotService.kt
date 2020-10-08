@@ -66,7 +66,7 @@ class BotService : Service() {
     private fun runTimer(markets: List<Market?>) {
         val period = runPeriod * 1000 * 60.toLong()
         val botTimerTask = BotTimerTask(markets)
-        botTimer!!.scheduleAtFixedRate(botTimerTask, period, period)
+        botTimer!!.schedule(botTimerTask, period, period)
         Log.d(TAG, "timer started")
     }
 
@@ -108,6 +108,7 @@ class BotService : Service() {
         private var pairs: MutableList<Pair>? = null
         private val tradeLimits: MutableMap<String, TradeLimitResponse?> = ConcurrentHashMap(3)
         private var coinInfo: CoinInfo? = null
+
         override fun run() {
             Log.d(TAG, "timer running")
             initPairsFromPrefs()
