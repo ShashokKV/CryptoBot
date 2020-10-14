@@ -39,14 +39,15 @@ abstract class MainFragment<T : RecyclerView.ViewHolder> : Fragment(), OnRefresh
         dividerItemDecoration.setDrawable(ResourcesCompat.getDrawable(resources, R.drawable.divider, null)!!)
         recyclerView.addItemDecoration(dividerItemDecoration)
         swipeRefreshLayout = initSwipeRefresh(view)
-        swipeRefreshLayout!!.setOnRefreshListener(this)
-        swipeRefreshLayout!!.setColorSchemeResources(R.color.colorSecondary, R.color.colorSecondaryDark)
+        swipeRefreshLayout?.setOnRefreshListener(this)
+        swipeRefreshLayout?.setColorSchemeResources(R.color.colorSecondary, R.color.colorSecondaryDark)
         return view
     }
 
     override fun onRefresh() {
         beforeRefresh()
-        swipeRefreshLayout!!.isRefreshing = false
+        adapter?.notifyDataSetChanged()
+        swipeRefreshLayout?.isRefreshing = false
         holder.updateAllItems()
     }
 
@@ -57,7 +58,7 @@ abstract class MainFragment<T : RecyclerView.ViewHolder> : Fragment(), OnRefresh
     protected abstract fun initAdapter(holder: ContextHolder?): RecyclerViewAdapter<T>
     protected abstract fun initSwipeRefresh(view: View): SwipeRefreshLayout
     fun addItem() {
-        adapter!!.notifyItemInserted()
+        adapter?.notifyItemInserted()
     }
 
     fun updateItem(item: ViewItem?) {
@@ -73,7 +74,7 @@ abstract class MainFragment<T : RecyclerView.ViewHolder> : Fragment(), OnRefresh
     }
 
     fun updateAllItems() {
-        adapter!!.notifyDataSetChanged()
+        adapter?.notifyDataSetChanged()
     }
 
     fun makeToast(message: String?) {

@@ -111,15 +111,16 @@ class PairsGraphTask(pairsGraphFragment: PairsGraphFragment, private val daysToS
         barChart.setFitBars(true)
         barChart.extraBottomOffset = 20f
         barChart.setVisibleYRange(maxPercent, 1f, YAxis.AxisDependency.LEFT)
-        barChart.setVisibleXRangeMaximum(1f)
+        barChart.setVisibleXRangeMaximum(allPairNames?.size?.toFloat()?:1f)
         barChart.enableScroll()
         barChart.legend.isEnabled = false
     }
 
     private fun customizeXAxis(xAxis: XAxis, textColor: Int) {
+        val maxSize = allPairNames?.size?.toFloat()?:1f
         xAxis.mAxisMinimum=0f
-        xAxis.mAxisMaximum=1f
-        xAxis.calculate(0f,1f)
+        xAxis.mAxisMaximum=maxSize
+        xAxis.calculate(0f,maxSize)
         xAxis.granularity = 1f
         xAxis.setDrawAxisLine(false)
         xAxis.valueFormatter = IndexAxisValueFormatter(labels)
