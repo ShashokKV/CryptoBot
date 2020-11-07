@@ -6,6 +6,7 @@ import com.chess.cryptobot.content.balance.BalancePreferences
 import com.chess.cryptobot.content.pairs.AllPairsPreferences
 import com.chess.cryptobot.exceptions.BinanceException
 import com.chess.cryptobot.exceptions.MarketException
+import com.chess.cryptobot.market.sockets.BinanceWebSocket
 import com.chess.cryptobot.model.History
 import com.chess.cryptobot.model.response.*
 import com.chess.cryptobot.model.response.binance.BinanceDeserializer
@@ -25,8 +26,8 @@ import kotlin.collections.HashMap
 import kotlin.collections.LinkedHashMap
 
 
-class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey: String?,
-                                         private val proxySelector: BinanceProxySelector?) : MarketRequest(url, apiKey, secretKey) {
+class BinanceMarketClient internal constructor(url: String, apiKey: String?, secretKey: String?,
+                                               private val proxySelector: BinanceProxySelector?) : MarketClient(url, apiKey, secretKey) {
 
     private val service: BinanceMarketService
     var balances: MutableMap<String, Double> = HashMap()
@@ -35,6 +36,7 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
         algorithm = "HmacSHA256"
         path = ""
         service = initService(initRetrofit(initGson())) as BinanceMarketService
+        webSocket = BinanceWebSocket()
     }
 
     override fun initHttpClient(): OkHttpClient {
@@ -66,6 +68,10 @@ class BinanceMarket internal constructor(url: String, apiKey: String?, secretKey
 
     override fun initService(retrofit: Retrofit): Any {
         return retrofit.create(BinanceMarketService::class.java)
+    }
+
+    override fun initWebSocket() {
+        this.webSocket = BinanceWebSocket()
     }
 
     @Throws(BinanceException::class)

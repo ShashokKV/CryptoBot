@@ -19,7 +19,7 @@ import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.collections.LinkedHashMap
 
-class LivecoinMarket internal constructor(url: String?, apiKey: String?, secretKey: String?) : MarketRequest(url!!, apiKey, secretKey) {
+class LivecoinMarketClient internal constructor(url: String?, apiKey: String?, secretKey: String?) : MarketClient(url!!, apiKey, secretKey) {
     private val service: LivecoinMarketService
     override fun getMarketName(): String {
         return Market.LIVECOIN_MARKET

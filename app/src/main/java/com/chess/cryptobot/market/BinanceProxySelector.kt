@@ -12,8 +12,8 @@ class BinanceProxySelector(proxyUrl: String?,
                            private val proxyPassword: String?): ProxySelector() {
 
     val proxyAuthenticator = Authenticator { _, response ->
-        val builder = response.request().newBuilder()
-        if (response.request().header("Proxy-Authorization") == null
+        val builder = response.request.newBuilder()
+        if (response.request.header("Proxy-Authorization") == null
                 && proxyUserName!=null && proxyPassword != null) {
             val credential: String = Credentials.basic(proxyUserName, proxyPassword)
             builder.header("Proxy-Authorization", credential)

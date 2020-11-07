@@ -5,7 +5,7 @@ import androidx.fragment.app.Fragment
 import com.chess.cryptobot.content.ContextHolder
 import com.chess.cryptobot.content.Preferences
 import com.chess.cryptobot.exceptions.ItemNotFoundException
-import com.chess.cryptobot.market.BinanceMarket
+import com.chess.cryptobot.market.BinanceMarketClient
 import com.chess.cryptobot.market.MarketFactory
 import com.chess.cryptobot.model.Balance
 import com.chess.cryptobot.model.ViewItem
@@ -81,7 +81,7 @@ class BalanceHolder(fragment: Fragment) : ContextHolder(fragment) {
     override fun updateAllItems() {
         super.updateAllItems()
         for (market in markets) {
-            if (market is BinanceMarket) market.balances = HashMap()
+            if (market is BinanceMarketClient) market.balances = HashMap()
         }
     }
 

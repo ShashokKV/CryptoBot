@@ -2,6 +2,7 @@ package com.chess.cryptobot.market
 
 //import okhttp3.logging.HttpLoggingInterceptor
 import com.chess.cryptobot.exceptions.MarketException
+import com.chess.cryptobot.market.sockets.MarketWebSocket
 import com.chess.cryptobot.model.response.ErrorResponse
 import com.chess.cryptobot.model.response.MarketResponse
 import com.google.gson.Gson
@@ -26,11 +27,12 @@ import kotlin.collections.ArrayList
 
 private const val DEFAULT_ENCODING = "UTF-8"
 
-abstract class MarketRequest(val url: String, apiKey: String?, secretKey: String?) : Market {
+abstract class MarketClient(val url: String, apiKey: String?, secretKey: String?) : Market {
     var path: String? = null
     var algorithm: String? = null
     val apiKey: String = apiKey ?: ""
     private val secretKey: String = secretKey ?: ""
+    var webSocket: MarketWebSocket? = null
 
     abstract fun initGson(): Gson
 
@@ -54,9 +56,10 @@ abstract class MarketRequest(val url: String, apiKey: String?, secretKey: String
                 .build()
     }
 
-
-
     abstract fun initService(retrofit: Retrofit): Any
+
+    abstract fun initWebSocket()
+
     override fun keysIsEmpty(): Boolean {
         return apiKey.isEmpty() || secretKey.isEmpty()
     }

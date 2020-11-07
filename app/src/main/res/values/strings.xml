@@ -77,4 +77,5 @@
     <string name="min_usdt_amount">min_usdt_amount</string>
     <string name="add_new_coin">Add new coin</string>
     <string name="sync_all_balances">Sync all balances</string>
+    <string name="web_socket_enabled">web_socket_enabled</string>
 </resources>

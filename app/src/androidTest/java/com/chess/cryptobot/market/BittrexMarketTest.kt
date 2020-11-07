@@ -11,7 +11,7 @@ class BittrexMarketTest {
     private val preferences = PreferenceManager.getDefaultSharedPreferences(mContext)
     private val bittrexApiKey = R.string.bittrex_api_key
     private val bittrexSecretKey = R.string.bittrex_secret_key
-    private var bittrexMarket = BittrexMarket(mContext.getString(R.string.bittrex_url),
+    private var bittrexMarket = BittrexMarketClient(mContext.getString(R.string.bittrex_url),
             preferences.getString(mContext.getString(bittrexApiKey), null),
             preferences.getString(mContext.getString(bittrexSecretKey), null))
 

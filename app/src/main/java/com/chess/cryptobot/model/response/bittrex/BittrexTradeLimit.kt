@@ -6,12 +6,12 @@ class BittrexTradeLimit: TradeLimitResponse {
 
     var limits: List<BittrexLimits> = ArrayList()
 
-    override fun getTradeLimitByName(pairName: String?): Double? {
+    override fun getTradeLimitByName(pairName: String?): Double {
         for (limit in limits) {
             if (limit.symbol == pairName) {
                 return limit.minTradeSize
             }
         }
-        return null
+        return 0.0
     }
 }

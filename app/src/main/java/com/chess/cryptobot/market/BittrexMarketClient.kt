@@ -19,13 +19,14 @@ import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 
-class BittrexMarket internal constructor(url: String, apiKey: String?, secretKey: String?) : MarketRequest(url, apiKey, secretKey) {
+class BittrexMarketClient internal constructor(url: String, apiKey: String?, secretKey: String?) : MarketClient(url, apiKey, secretKey) {
     private val service: BittrexMarketService
     private lateinit var gson: Gson
 
     init {
         algorithm = "HmacSHA512"
         service = initService(initRetrofit(initGson())) as BittrexMarketService
+        initWebSocket()
     }
 
     override fun getMarketName(): String {
@@ -48,6 +49,11 @@ class BittrexMarket internal constructor(url: String, apiKey: String?, secretKey
     override fun initService(retrofit: Retrofit): Any {
         return retrofit.create(BittrexMarketService::class.java)
     }
+
+    override fun initWebSocket() {
+
+    }
+
 
     @Throws(BittrexException::class)
     override fun getAmount(coinName: String): Double {

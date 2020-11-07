@@ -11,5 +11,5 @@ class BittrexLimits: BittrexMarketResponse() {
 
     @SerializedName("minTradeSize")
     @Expose
-    val minTradeSize: Double? = null
+    val minTradeSize: Double = 0.0
 }

@@ -8,13 +8,14 @@ class LivecoinTradeLimitResponse : LivecoinResponse(), TradeLimitResponse {
     @SerializedName("restrictions")
     @Expose
     private val restrictions: List<Restriction>? = null
-    override fun getTradeLimitByName(pairName: String?): Double? {
+
+    override fun getTradeLimitByName(pairName: String?): Double {
         for (restriction in restrictions!!) {
             if (restriction.currencyPair == pairName) {
                 return restriction.minLimitQuantity
             }
         }
-        return null
+        return 0.0
     }
 
     internal class Restriction {
@@ -24,7 +25,7 @@ class LivecoinTradeLimitResponse : LivecoinResponse(), TradeLimitResponse {
 
         @SerializedName("minLimitQuantity")
         @Expose
-        val minLimitQuantity: Double? = null
+        val minLimitQuantity: Double = 0.0
 
     }
 }

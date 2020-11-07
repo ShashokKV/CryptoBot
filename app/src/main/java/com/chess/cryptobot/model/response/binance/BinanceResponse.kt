@@ -45,11 +45,11 @@ open class BinanceResponse : MarketResponse, CurrenciesListResponse,
     @Expose
     private val symbols: List<Symbols>? = null
 
-    override fun getTradeLimitByName(pairName: String?): Double? {
-        if (symbols == null) return null
+    override fun getTradeLimitByName(pairName: String?): Double {
+        if (symbols == null) return 0.0
         for (symbol in symbols) {
             if (symbol.symbol.equals(pairName)) {
-                if (symbol.filters == null) return null
+                if (symbol.filters == null) return 0.0
                 for (filter in symbol.filters) {
                     if (filter.filterType.equals(MIN_QTY_FILTER)) {
                         return filter.minQty
@@ -57,7 +57,7 @@ open class BinanceResponse : MarketResponse, CurrenciesListResponse,
                 }
             }
         }
-        return null
+        return 0.0
     }
 
     fun getStepSizeByName(pairName: String?): Double? {

@@ -3,7 +3,7 @@ package com.chess.cryptobot.task
 import com.chess.cryptobot.content.ContextHolder
 import com.chess.cryptobot.content.balance.BalanceHolder
 import com.chess.cryptobot.exceptions.MarketException
-import com.chess.cryptobot.market.BittrexMarket
+import com.chess.cryptobot.market.BittrexMarketClient
 import com.chess.cryptobot.market.Market
 import com.chess.cryptobot.model.response.CurrenciesResponse
 import com.chess.cryptobot.model.response.bittrex.BittrexCurrency
@@ -25,7 +25,7 @@ class CoinStatusTask(holder: ContextHolder?) : MarketTask<Int, Int>(holder!!) {
         when {
             market.getMarketName() == Market.BITTREX_MARKET -> {
                 updateStatuses(bittrexStatuses, market.getCurrencies())
-                val bittrexMarket = market as BittrexMarket
+                val bittrexMarket = market as BittrexMarketClient
                 updateIcons(bittrexMarket.getCurrencies())
             }
             market.getMarketName() == Market.BINANCE_MARKET -> {

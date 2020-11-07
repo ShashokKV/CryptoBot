@@ -1,33 +1,27 @@
 package com.chess.cryptobot.model.room
 
 import androidx.room.ColumnInfo
-import androidx.room.Entity
 import androidx.room.PrimaryKey
-import java.time.LocalDateTime
 
-@Entity
-class ProfitPair {
+class PairMinTradeSize {
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id", typeAffinity = ColumnInfo.INTEGER)
-    var id = 0
+    var id: Int = 0
 
     @ColumnInfo(name = "pairName", typeAffinity = ColumnInfo.TEXT)
     var pairName: String? = null
 
-    @ColumnInfo(name = "percent", typeAffinity = ColumnInfo.REAL)
-    var percent: Float? = null
-
-    @ColumnInfo(name = "dateCreated")
-    var dateCreated: LocalDateTime? = null
-
     @ColumnInfo(name = "minTradeSize")
-    var minTradeSize: Double? = null
+    var minTradeSize: Double = 0.0
+
+    @ColumnInfo(name = "stepSize")
+    var stepSize: Double? = null
 
     override fun equals(other: Any?): Boolean {
         if (other == null) return false
         if (other == this) return true
         return when (other) {
-            is ProfitPair -> {
+            is PairMinTradeSize -> {
                 pairName == other.pairName
             }
             is String -> {
@@ -40,6 +34,6 @@ class ProfitPair {
     }
 
     override fun hashCode(): Int {
-        return pairName?.hashCode() ?: 0
+        return pairName.hashCode() ?: 0
     }
 }

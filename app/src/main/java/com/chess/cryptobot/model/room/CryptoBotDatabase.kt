@@ -13,6 +13,8 @@ abstract class CryptoBotDatabase : RoomDatabase() {
     abstract val profitPairDao: ProfitPairDao?
     abstract val btcBalanceDao: BtcBalanceDao?
     abstract val balanceSyncDao: BalanceSyncDao?
+    abstract val minTradeSizeDao: PairMinTradeSizeDao?
+    abstract val coinInfoDao: CoinInfoDao?
 
     companion object {
         private var database: CryptoBotDatabase? = null

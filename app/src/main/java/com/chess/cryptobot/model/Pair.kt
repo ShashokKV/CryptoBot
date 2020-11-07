@@ -15,6 +15,8 @@ class Pair(val baseName: String, val marketName: String) : ViewItem, Serializabl
     var bidMap = HashMap<String, Double>()
     var bidQuantityMap = HashMap<String, Double>()
     var percent = 0.0f
+    var minTradeSize = 0.0
+    var stepSize = 0.0
     var message: String? = null
 
     override fun equals(other: Any?): Boolean {

@@ -19,7 +19,7 @@ import com.chess.cryptobot.model.response.TickerResponse
 import com.chess.cryptobot.model.response.TradeLimitResponse
 import com.chess.cryptobot.model.room.BalanceSyncTicker
 import com.chess.cryptobot.model.room.CryptoBotDatabase
-import com.chess.cryptobot.util.CoinInfo
+import com.chess.cryptobot.util.MarketInfoReader
 import com.chess.cryptobot.view.notification.NotificationBuilder
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -29,7 +29,7 @@ import kotlin.collections.HashMap
 
 class BalanceSyncService : IntentService("BalanceSyncService") {
     private var resultInfo = ""
-    private var coinInfo: CoinInfo? = null
+    private val marketInfoReader = MarketInfoReader(this)
     private val marketsMap: MutableMap<String, Market?> = HashMap()
     private var minBalance = 0.0
     private var minBtcAmount = 0.0005
@@ -51,13 +51,6 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
         val marketFactory = WithdrawalMarketFactory()
         val markets = marketFactory.getMarkets(this, PreferenceManager.getDefaultSharedPreferences(this))
         markets.forEach { marketsMap[it!!.getMarketName()] = it }
-        coinInfo = try {
-            CoinInfo(markets)
-        } catch (e: MarketException) {
-            updateInfo("BalanceSync", "Can't init coinInfo: " + e.message)
-            makeNotification(resultInfo)
-            return
-        }
         var syncExecuted = false
         coinNames?.forEach { coinName: String ->
             try {
@@ -81,7 +74,7 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
         } catch (e: MarketException) {
             throw SyncServiceException(e.message)
         }
-        if (!coinInfo!!.checkCoinStatus(coinName)) {
+        if (!marketInfoReader.checkCoinStatus(coinName)) {
             throw SyncServiceException("Not active")
         }
         val marketAmounts: Map<String, Double>
@@ -186,7 +179,7 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
             if (moveFrom == null || moveTo == null) throw SyncServiceException("Init of coin move direction failed!")
             val fromAmount = getAmount(amounts, moveFrom)
             val toAmount = getAmount(amounts, moveTo)
-            val fee = coinInfo!!.getFee(moveFrom as String, coinName)
+            val fee = marketInfoReader.getFee(moveFrom as String, coinName)
             val moveFromMarket: Market = marketsMap[moveFrom as String]!!
             val moveToMarket: Market = marketsMap[moveTo as String]!!
             var delta = getDelta(toAmount)

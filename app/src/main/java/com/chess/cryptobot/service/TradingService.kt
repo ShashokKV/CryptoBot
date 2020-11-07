@@ -70,7 +70,7 @@ class TradingService : IntentService("TradingService") {
         pair = intent.getSerializableExtra(Pair::class.java.name) as Pair
         workingOnPair = pair.name
         minMarketQuantity = intent.getDoubleExtra("minQuantity", 0.0)
-        stepSize = intent.getDoubleExtra("stepSize", 0.0)
+        stepSize = intent.getDoubleExtra("stepSize", 1.00000000)
     }
 
     private fun initMarkets() {

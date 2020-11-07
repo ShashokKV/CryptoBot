@@ -18,16 +18,16 @@ open class MarketFactory {
         return getMarkets(contextHolder.context, contextHolder.prefs.sharedPreferences)
     }
 
-    fun getMarkets(context: Context?, preferences: SharedPreferences): List<Market?> {
+    fun getMarkets(context: Context?, preferences: SharedPreferences): List<MarketClient?> {
         val marketNames = arrayOf(Market.BITTREX_MARKET, Market.BINANCE_MARKET, Market.LIVECOIN_MARKET)
-        val markets: MutableList<Market?> = ArrayList()
+        val markets: MutableList<MarketClient?> = ArrayList()
         for (marketName in marketNames) {
             markets.add(getMarket(marketName, preferences, context))
         }
         return markets
     }
 
-    private fun getMarket(marketName: String, preferences: SharedPreferences, context: Context?): Market? {
+    private fun getMarket(marketName: String, preferences: SharedPreferences, context: Context?): MarketClient? {
         if (context == null) return null
         return when (marketName) {
             Market.BITTREX_MARKET -> {
@@ -45,21 +45,21 @@ open class MarketFactory {
         }
     }
 
-    private fun bittrexMarket(preferences: SharedPreferences, context: Context): BittrexMarket {
-        return BittrexMarket(context.getString(R.string.bittrex_url),
+    private fun bittrexMarket(preferences: SharedPreferences, context: Context): BittrexMarketClient {
+        return BittrexMarketClient(context.getString(R.string.bittrex_url),
                 preferences.getString(context.getString(bittrexApiKey), null),
                 preferences.getString(context.getString(bittrexSecretKey), null))
     }
 
-    open fun binanceMarket(preferences: SharedPreferences, context: Context): BinanceMarket {
-        return BinanceMarket(context.getString(R.string.binance_url),
+    open fun binanceMarket(preferences: SharedPreferences, context: Context): BinanceMarketClient {
+        return BinanceMarketClient(context.getString(R.string.binance_url),
                 preferences.getString(context.getString(binanceApiKey), null),
                 preferences.getString(context.getString(binanceSecretKey), null),
                 null)
     }
 
-    private fun livecoinMarket(preferences: SharedPreferences, context: Context): LivecoinMarket {
-        return LivecoinMarket(context.getString(R.string.livecoin_url),
+    private fun livecoinMarket(preferences: SharedPreferences, context: Context): LivecoinMarketClient {
+        return LivecoinMarketClient(context.getString(R.string.livecoin_url),
                 preferences.getString(context.getString(livecoinApiKey), null),
                 preferences.getString(context.getString(livecoinSecretKey), null))
     }
