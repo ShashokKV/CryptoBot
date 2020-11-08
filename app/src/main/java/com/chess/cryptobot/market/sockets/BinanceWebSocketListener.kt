@@ -2,12 +2,9 @@ package com.chess.cryptobot.market.sockets
 
 import android.util.Log
 import com.chess.cryptobot.exceptions.BinanceException
-import com.chess.cryptobot.model.Pair
 import com.chess.cryptobot.model.response.binance.BinanceDeserializer
-import com.google.gson.JsonParser
 import com.jayway.jsonpath.JsonPath
 import com.neovisionaries.ws.client.WebSocket
-import kotlin.jvm.Throws
 
 class BinanceWebSocketListener: MarketWebSocketListener() {
 

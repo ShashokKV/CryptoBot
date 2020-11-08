@@ -1,8 +1,10 @@
 package com.chess.cryptobot.model.room
 
 import androidx.room.ColumnInfo
+import androidx.room.Entity
 import androidx.room.PrimaryKey
 
+@Entity
 class PairMinTradeSize {
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id", typeAffinity = ColumnInfo.INTEGER)
@@ -34,6 +36,6 @@ class PairMinTradeSize {
     }
 
     override fun hashCode(): Int {
-        return pairName.hashCode() ?: 0
+        return pairName.hashCode()
     }
 }

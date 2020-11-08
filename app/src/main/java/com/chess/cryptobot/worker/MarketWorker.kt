@@ -11,6 +11,7 @@ import com.chess.cryptobot.enricher.PairResponseEnricher
 import com.chess.cryptobot.exceptions.MarketException
 import com.chess.cryptobot.market.Market
 import com.chess.cryptobot.market.Market.Companion.BINANCE_MARKET
+import com.chess.cryptobot.market.MarketClient
 import com.chess.cryptobot.market.MarketFactory
 import com.chess.cryptobot.model.Pair
 import com.chess.cryptobot.model.response.CurrenciesResponse
@@ -24,17 +25,22 @@ import com.chess.cryptobot.model.room.ProfitPair
 import com.chess.cryptobot.util.MarketInfoReader
 import java.time.LocalDateTime
 import java.util.concurrent.ConcurrentHashMap
+import java.util.stream.Collectors
 
 class MarketWorker(private val context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
-    private var allPairNames: HashSet<String>? = AllPairsPreferences(applicationContext).items
-    private val markets = MarketFactory().getMarkets(context, PreferenceManager.getDefaultSharedPreferences(context))
-    private val database = CryptoBotDatabase.getInstance(context)
-    private val marketInfoReader = MarketInfoReader(context)
+    private var allPairNames: HashSet<String>? = null
+    private lateinit var markets: List<MarketClient?>
+    private var database: CryptoBotDatabase? = null
+    private lateinit var marketInfoReader: MarketInfoReader
 
     override fun doWork(): Result {
-        cleanDatabase()
+        allPairNames = AllPairsPreferences(context).items
+        markets = MarketFactory().getMarkets(context, PreferenceManager.getDefaultSharedPreferences(context))
+        database = CryptoBotDatabase.getInstance(context)
+        marketInfoReader = MarketInfoReader(database)
 
         try {
+            cleanDatabase()
             infoOnCoins()
             infoOnProfitPairs()
             infoOnMinTradeSize()
@@ -47,8 +53,10 @@ class MarketWorker(private val context: Context, workerParams: WorkerParameters)
 
     private fun infoOnProfitPairs() {
         val pairs: MutableList<Pair> = getTickerPairs(markets)
-        pairs.forEach { pair: Pair -> PairResponseEnricher(pair).enrichWithMinPercent(null) }
-        saveProfitPairsToDatabase(pairs)
+        saveProfitPairsToDatabase(pairs.stream()
+                .peek{ pair -> PairResponseEnricher(pair).enrichWithMinPercent(null)}
+                .filter{pair -> pair.percent>0}
+                .collect(Collectors.toList()))
     }
 
     @Throws(MarketException::class)
@@ -201,7 +209,6 @@ class MarketWorker(private val context: Context, workerParams: WorkerParameters)
             profitPair.dateCreated = LocalDateTime.now()
             profitPair.pairName = pair.name
             profitPair.percent = pair.percent
-            profitPair.minTradeSize = pair.minTradeSize
             profitPairs.add(profitPair)
         }
         pairDao!!.insertAll(profitPairs)

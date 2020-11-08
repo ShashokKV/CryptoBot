@@ -29,7 +29,7 @@ public class MarketWorkerTest {
     public void setUp() {
         mContext = ApplicationProvider.getApplicationContext();
         mExecutor = Executors.newSingleThreadExecutor();
-        //initAvailablePairs();
+//        initAvailablePairs();
     }
 
     @Test

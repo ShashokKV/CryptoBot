@@ -3,6 +3,7 @@ package com.chess.cryptobot.service
 import android.app.IntentService
 import android.app.NotificationManager
 import android.content.Intent
+import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import com.chess.cryptobot.R
 import com.chess.cryptobot.content.balance.BalancePreferences
@@ -10,31 +11,35 @@ import com.chess.cryptobot.content.pairs.AllPairsPreferences
 import com.chess.cryptobot.enricher.PairResponseEnricher
 import com.chess.cryptobot.exceptions.MarketException
 import com.chess.cryptobot.market.Market
+import com.chess.cryptobot.market.MarketClient
 import com.chess.cryptobot.market.MarketFactory
 import com.chess.cryptobot.model.Pair
 import com.chess.cryptobot.model.response.OrderBookResponse
-import com.chess.cryptobot.model.response.TradeLimitResponse
-import com.chess.cryptobot.model.response.binance.BinanceResponse
 import com.chess.cryptobot.util.MarketInfoReader
 import com.chess.cryptobot.view.notification.NotificationBuilder
 import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 import java.util.stream.Collectors
 import kotlin.collections.ArrayList
 
 
 class ProfitPairService : IntentService("ProfitPairService") {
-    private val markets = MarketFactory().getMarkets(this, PreferenceManager.getDefaultSharedPreferences(this))
-    private val marketInfoReader: MarketInfoReader = MarketInfoReader(this)
-    private val preferences = PreferenceManager.getDefaultSharedPreferences(this)
-    private val autoTrade = preferences.getBoolean(getString(R.string.auto_trade), false)
-    private val tradeLimits: MutableMap<String, TradeLimitResponse?> = ConcurrentHashMap(3)
-    private val pairs: MutableList<Pair>? = initPairsFromPrefs()
-    private val minPercent = preferences.getString(getString(R.string.min_profit_percent), "3")?.toFloat()
-            ?: 3.0f
+    private lateinit var markets: List<MarketClient?>
+    private lateinit var marketInfoReader: MarketInfoReader
+    private lateinit var preferences: SharedPreferences
+    private var autoTrade = false
+    private lateinit var pairs: MutableList<Pair>
+    private var minPercent = 0.0f
 
     override fun onHandleIntent(intent: Intent?) {
         if (intent == null) return
+
+        preferences = PreferenceManager.getDefaultSharedPreferences(this)
+        marketInfoReader = MarketInfoReader(this)
+        markets = MarketFactory().getMarkets(this, preferences)
+        autoTrade = preferences.getBoolean(getString(R.string.auto_trade), false)
+        pairs = initPairsFromPrefs()
+        minPercent = preferences.getString(getString(R.string.min_profit_percent), "3")?.toFloat()
+                ?: 3.0f
 
         val profitPairs = getProfitPairs(pairs, markets)
         if (profitPairs.isNotEmpty() && !autoTrade) {
@@ -124,14 +129,9 @@ class ProfitPairService : IntentService("ProfitPairService") {
         intent.putExtra(Pair::class.java.name, pair)
         intent.putExtra("minQuantity", marketInfoReader.getMinQuantity(pair))
         if (pair.askMarketName == Market.BINANCE_MARKET || pair.bidMarketName == Market.BINANCE_MARKET) {
-            intent.putExtra("stepSize", getStepSize(pair))
+            intent.putExtra("stepSize", marketInfoReader.getStepSize(pair))
         }
         startService(intent)
-    }
-
-    private fun getStepSize(pair: Pair): Double? {
-        val binanceResponse = tradeLimits[Market.BINANCE_MARKET] as BinanceResponse
-        return binanceResponse.getStepSizeByName(pair.getPairNameForMarket(Market.BINANCE_MARKET))
     }
 
     private val isNotificationShown: Boolean

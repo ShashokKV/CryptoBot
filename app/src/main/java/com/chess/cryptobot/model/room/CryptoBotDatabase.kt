@@ -7,7 +7,13 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.chess.cryptobot.model.room.converter.TimestampConverter
 
-@Database(version = 3, entities = [ProfitPair::class, BtcBalance::class, BalanceSyncTicker::class], exportSchema = false)
+@Database(version = 4, entities = [
+    ProfitPair::class,
+    BtcBalance::class,
+    BalanceSyncTicker::class,
+    PairMinTradeSize::class,
+    CoinInfo::class
+], exportSchema = false)
 @TypeConverters(TimestampConverter::class)
 abstract class CryptoBotDatabase : RoomDatabase() {
     abstract val profitPairDao: ProfitPairDao?

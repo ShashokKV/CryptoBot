@@ -6,7 +6,6 @@ import com.chess.cryptobot.content.balance.BalancePreferences
 import com.chess.cryptobot.content.pairs.AllPairsPreferences
 import com.chess.cryptobot.exceptions.BinanceException
 import com.chess.cryptobot.exceptions.MarketException
-import com.chess.cryptobot.market.sockets.BinanceWebSocket
 import com.chess.cryptobot.model.History
 import com.chess.cryptobot.model.response.*
 import com.chess.cryptobot.model.response.binance.BinanceDeserializer
@@ -36,7 +35,7 @@ class BinanceMarketClient internal constructor(url: String, apiKey: String?, sec
         algorithm = "HmacSHA256"
         path = ""
         service = initService(initRetrofit(initGson())) as BinanceMarketService
-        webSocket = BinanceWebSocket()
+//        webSocket = BinanceWebSocket()
     }
 
     override fun initHttpClient(): OkHttpClient {
@@ -71,7 +70,7 @@ class BinanceMarketClient internal constructor(url: String, apiKey: String?, sec
     }
 
     override fun initWebSocket() {
-        this.webSocket = BinanceWebSocket()
+//        this.webSocket = BinanceWebSocket()
     }
 
     @Throws(BinanceException::class)

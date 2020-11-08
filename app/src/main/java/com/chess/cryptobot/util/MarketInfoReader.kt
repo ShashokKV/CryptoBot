@@ -6,10 +6,11 @@ import com.chess.cryptobot.market.Market
 import com.chess.cryptobot.model.Pair
 import com.chess.cryptobot.model.room.CryptoBotDatabase
 
-class MarketInfoReader(context: Context) {
-    private val database = CryptoBotDatabase.getInstance(context)
-    private val coinInfoDao = database?.coinInfoDao
-    private val minTradeSizeDao = database?.minTradeSizeDao
+class MarketInfoReader(database: CryptoBotDatabase?) {
+    private var coinInfoDao = database?.coinInfoDao
+    private var minTradeSizeDao = database?.minTradeSizeDao
+
+    constructor(context: Context): this(CryptoBotDatabase.getInstance(context))
 
     fun checkCoinStatus(coinName: String): Boolean {
         val bittrexStatus = coinInfoDao?.getByNameAndMarketName(coinName, Market.BITTREX_MARKET)?.status ?: true
@@ -25,5 +26,9 @@ class MarketInfoReader(context: Context) {
 
     fun getMinQuantity(pair: Pair): Double? {
         return minTradeSizeDao?.getByPairName(pair.name)?.minTradeSize
+    }
+
+    fun getStepSize(pair: Pair): Double? {
+        return minTradeSizeDao?.getByPairName(pair.name)?.stepSize
     }
 }

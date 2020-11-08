@@ -20,9 +20,6 @@ class ProfitPair {
     @ColumnInfo(name = "dateCreated")
     var dateCreated: LocalDateTime? = null
 
-    @ColumnInfo(name = "minTradeSize")
-    var minTradeSize: Double? = null
-
     override fun equals(other: Any?): Boolean {
         if (other == null) return false
         if (other == this) return true
