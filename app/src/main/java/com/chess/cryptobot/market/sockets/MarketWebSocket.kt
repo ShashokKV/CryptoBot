@@ -10,15 +10,14 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
 
-abstract class MarketWebSocket {
+abstract class MarketWebSocket(private val orchestrator: WebSocketOrchestrator) {
     abstract val socketUrl: String
-    lateinit var webSocket: WebSocket
+    private lateinit var webSocket: WebSocket
     lateinit var webSocketListener: MarketWebSocketListener
     lateinit var subscribeMessage: String
     lateinit var unsubscribeMessage: String
-    lateinit var pairs: List<Pair>
+    abstract val marketName: String
     var isSubscribed = false
-
 
 
     fun initWebSocket(webSocketListener: MarketWebSocketListener): WebSocket {
@@ -35,13 +34,12 @@ abstract class MarketWebSocket {
         try{
             future.get()
         }catch (e: ExecutionException) {
-            Log.e("future error", e.message)
+            Log.e("future error", e.message?:e.stackTraceToString(), e)
         }
     }
 
     fun subscribe(pairs: List<Pair>) {
         if (webSocket.isOpen) {
-            this.pairs = pairs
             prepareSubscribeMessage(pairs)
             webSocket.sendText(subscribeMessage)
             isSubscribed = true
@@ -49,11 +47,6 @@ abstract class MarketWebSocket {
     }
 
     abstract fun prepareSubscribeMessage(pairs: List<Pair>)
-
-    fun unsubscribe() {
-        this.unsubscribe(pairs)
-    }
-
 
     fun unsubscribe(pairs: List<Pair>) {
         if (webSocket.isOpen) {
@@ -63,10 +56,19 @@ abstract class MarketWebSocket {
         }
     }
 
+    fun passToOrchestrator(pairName: String, bid: Double, ask: Double) {
+        synchronized(orchestrator) {
+            orchestrator.updateBidsMap(pairName, marketName, bid)
+            orchestrator.updateAsksMap(pairName, marketName, ask)
+            orchestrator.checkPair(pairName)
+        }
+    }
+
     abstract fun prepareUnsubscribeMessage(pairs: List<Pair>)
 
     fun disconnect() {
         webSocket.disconnect()
+        isSubscribed=false
     }
 
     fun isConnected(): Boolean {

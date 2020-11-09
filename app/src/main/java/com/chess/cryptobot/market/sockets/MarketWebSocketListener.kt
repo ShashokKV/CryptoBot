@@ -1,17 +1,19 @@
 package com.chess.cryptobot.market.sockets
 
+import android.util.Log
 import com.chess.cryptobot.exceptions.MarketException
 import com.neovisionaries.ws.client.WebSocket
 import com.neovisionaries.ws.client.WebSocketAdapter
 import com.neovisionaries.ws.client.WebSocketFrame
 
-abstract class MarketWebSocketListener: WebSocketAdapter() {
+abstract class MarketWebSocketListener(val marketWebSocket: MarketWebSocket): WebSocketAdapter() {
     override fun onTextMessage(websocket: WebSocket?, message: String?) {
         try {
             checkError(message)
             parseMessage(message)
         } catch (e: Exception) {
-            websocket?.disconnect()
+            Log.e("WebSocketListener", e.message?:e.stackTraceToString(), e)
+            marketWebSocket.disconnect()
         }
     }
 

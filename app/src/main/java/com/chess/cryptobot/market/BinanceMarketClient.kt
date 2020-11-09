@@ -35,7 +35,6 @@ class BinanceMarketClient internal constructor(url: String, apiKey: String?, sec
         algorithm = "HmacSHA256"
         path = ""
         service = initService(initRetrofit(initGson())) as BinanceMarketService
-//        webSocket = BinanceWebSocket()
     }
 
     override fun initHttpClient(): OkHttpClient {

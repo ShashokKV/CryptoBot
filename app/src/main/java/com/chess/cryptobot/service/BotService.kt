@@ -12,8 +12,7 @@ import androidx.preference.PreferenceManager
 import com.chess.cryptobot.R
 import com.chess.cryptobot.content.balance.BalancePreferences
 import com.chess.cryptobot.content.pairs.AllPairsPreferences
-import com.chess.cryptobot.market.MarketClient
-import com.chess.cryptobot.market.MarketFactory
+import com.chess.cryptobot.market.sockets.WebSocketOrchestrator
 import com.chess.cryptobot.model.Pair
 import com.chess.cryptobot.view.notification.NotificationBuilder
 import java.util.*
@@ -30,7 +29,7 @@ class BotService : Service() {
         super.onStartCommand(intent, flags, startId)
         Toast.makeText(this, "Bot starting", Toast.LENGTH_SHORT).show()
         initFields()
-        startTimer()
+        runTimer()
         startForeground(FOREGROUND_NOTIFICATION_ID, buildForegroundNotification())
         isRunning = true
         return START_STICKY
@@ -47,15 +46,9 @@ class BotService : Service() {
         webSocketEnabled = preferences.getBoolean(getString(R.string.web_socket_enabled), false)
     }
 
-    private fun startTimer() {
-        val marketFactory = MarketFactory()
-        val markets = marketFactory.getMarkets(this, PreferenceManager.getDefaultSharedPreferences(this))
-        runTimer(markets)
-    }
-
-    private fun runTimer(markets: List<MarketClient?>) {
+    private fun runTimer() {
         val period = runPeriod * 1000 * 60.toLong()
-        val botTimerTask = BotTimerTask(markets)
+        val botTimerTask = BotTimerTask()
         botTimer!!.schedule(botTimerTask, period, period)
         Log.d(TAG, "timer started")
     }
@@ -78,7 +71,7 @@ class BotService : Service() {
             botTimer!!.purge()
         }
         initFields()
-        startTimer()
+        runTimer()
     }
 
     override fun onDestroy() {
@@ -94,21 +87,17 @@ class BotService : Service() {
         return botBinder
     }
 
-    private inner class BotTimerTask(private val markets: List<MarketClient?>) : TimerTask() {
-        private var pairs: MutableList<Pair>? = initPairsFromPrefs()
+    private inner class BotTimerTask : TimerTask() {
+        private var pairs: MutableList<Pair> = initPairsFromPrefs()
+        private var webSocketOrchestrator: WebSocketOrchestrator? = null
 
         override fun run() {
             Log.d(TAG, "timer running")
 
             if (webSocketEnabled) {
-                markets.forEach {
-                    if (it?.webSocket?.isConnected() == false) {
-                        it.webSocket?.connect()
-                    }
-                    if (it?.webSocket?.isSubscribed == false) {
-                        pairs?.let { it1 -> it.webSocket?.subscribe(it1) }
-                    }
-                }
+                if (webSocketOrchestrator==null)
+                    webSocketOrchestrator = WebSocketOrchestrator(this@BotService, pairs)
+                webSocketOrchestrator?.subscribeAll()
             } else {
                 startService(Intent(this@BotService, ProfitPairService::class.java))
             }
@@ -116,10 +105,8 @@ class BotService : Service() {
 
         override fun cancel(): Boolean {
             if (webSocketEnabled) {
-                markets.forEach {
-                    pairs?.let { it1 -> it?.webSocket?.unsubscribe(it1) }
-                    it?.webSocket?.disconnect()
-                }
+                webSocketOrchestrator?.unsubscribeAll()
+                webSocketOrchestrator = null
             }
             return super.cancel()
         }

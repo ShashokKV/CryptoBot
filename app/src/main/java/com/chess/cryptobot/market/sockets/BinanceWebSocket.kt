@@ -6,15 +6,17 @@ import com.google.gson.Gson
 import java.util.*
 import com.chess.cryptobot.model.Pair
 
-class BinanceWebSocket : MarketWebSocket() {
+class BinanceWebSocket(orchestrator: WebSocketOrchestrator) : MarketWebSocket(orchestrator) {
     override val socketUrl = "wss://stream.binance.com:9443/ws"
+    override val marketName: String
+        get() = BINANCE_MARKET
 
     init {
         initWebSocket(initWebSocketListener())
     }
 
     override fun initWebSocketListener(): BinanceWebSocketListener {
-        webSocketListener = BinanceWebSocketListener()
+        webSocketListener = BinanceWebSocketListener(this)
         return webSocketListener as BinanceWebSocketListener
     }
 
