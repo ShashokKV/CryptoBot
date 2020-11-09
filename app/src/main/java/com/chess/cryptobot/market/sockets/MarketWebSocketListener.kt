@@ -6,7 +6,7 @@ import com.neovisionaries.ws.client.WebSocket
 import com.neovisionaries.ws.client.WebSocketAdapter
 import com.neovisionaries.ws.client.WebSocketFrame
 
-abstract class MarketWebSocketListener(val marketWebSocket: MarketWebSocket): WebSocketAdapter() {
+abstract class MarketWebSocketListener(private val marketWebSocket: MarketWebSocket): WebSocketAdapter() {
     override fun onTextMessage(websocket: WebSocket?, message: String?) {
         try {
             checkError(message)

@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.preference.PreferenceManager
 import com.chess.cryptobot.R
 import com.chess.cryptobot.market.Market.Companion.BINANCE_MARKET
+import com.chess.cryptobot.market.sockets.binance.BinanceWebSocket
 import com.chess.cryptobot.model.Pair
 import com.chess.cryptobot.service.ProfitPairService
 import java.util.concurrent.ConcurrentHashMap
@@ -14,6 +15,7 @@ class WebSocketOrchestrator(val context: Context, val pairs: MutableList<Pair>) 
     private var webSockets = HashMap<String, MarketWebSocket>()
     private val bidsMap = ConcurrentHashMap<String, ConcurrentHashMap<String, Double>>()
     private val asksMap = ConcurrentHashMap<String, ConcurrentHashMap<String, Double>>()
+    private var stopFlag = false
 
     init {
         minPercent = PreferenceManager.getDefaultSharedPreferences(context)
@@ -33,6 +35,7 @@ class WebSocketOrchestrator(val context: Context, val pairs: MutableList<Pair>) 
                 it.subscribe(pairs)
             }
         }
+        stopFlag = false
     }
 
     fun unsubscribeAll() {
@@ -73,6 +76,8 @@ class WebSocketOrchestrator(val context: Context, val pairs: MutableList<Pair>) 
     }
 
     private fun runServiceByWebSocketSignal(pairName: String) {
+        if (stopFlag) return
+        stopFlag = true
         unsubscribeAll()
         val intent = Intent(context, ProfitPairService::class.java)
         intent.putExtra("pairName", pairName)
