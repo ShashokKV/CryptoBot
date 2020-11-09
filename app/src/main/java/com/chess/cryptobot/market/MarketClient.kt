@@ -2,7 +2,6 @@ package com.chess.cryptobot.market
 
 //import okhttp3.logging.HttpLoggingInterceptor
 import com.chess.cryptobot.exceptions.MarketException
-import com.chess.cryptobot.market.sockets.MarketWebSocket
 import com.chess.cryptobot.model.response.ErrorResponse
 import com.chess.cryptobot.model.response.MarketResponse
 import com.google.gson.Gson
@@ -32,7 +31,6 @@ abstract class MarketClient(val url: String, apiKey: String?, secretKey: String?
     var algorithm: String? = null
     val apiKey: String = apiKey ?: ""
     private val secretKey: String = secretKey ?: ""
-    var webSocket: MarketWebSocket? = null
 
     abstract fun initGson(): Gson
 

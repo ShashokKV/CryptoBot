@@ -29,7 +29,7 @@ import kotlin.collections.HashMap
 
 class BalanceSyncService : IntentService("BalanceSyncService") {
     private var resultInfo = ""
-    private val marketInfoReader = MarketInfoReader(this)
+    private lateinit var marketInfoReader: MarketInfoReader
     private val marketsMap: MutableMap<String, Market?> = HashMap()
     private var minBalance = 0.0
     private var minBtcAmount = 0.0005
@@ -41,6 +41,7 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
 
     override fun onHandleIntent(intent: Intent?) {
         if (intent == null) return
+        marketInfoReader = MarketInfoReader(this)
         makeNotifications = intent.getBooleanExtra("makeNotifications", false)
         if (makeNotifications) makeNotification("Balance sync in progress...")
         val balancePreferences = BalancePreferences(this)
