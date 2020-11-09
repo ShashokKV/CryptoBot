@@ -160,8 +160,15 @@ class TradingService : IntentService("TradingService") {
                 "USDT" -> minUsdtAmount
                 else -> 0.0
             }
+            val minMarketAmount = when(pair.marketName) {
+                "BTC" -> minBtcAmount
+                "ETH" -> minEthAmount
+                "USDT" -> minUsdtAmount
+                else -> 0.0
+            }
 
             if (quantity * askPrice < minBaseAmount) quantity = 0.0
+            if (quantity * bidPrice < minMarketAmount) quantity = 0.0
 
             if (stepSize>0.0) {
                 quantity = quantity.toBigDecimal().setScale(computeScale(), RoundingMode.DOWN).toDouble()
