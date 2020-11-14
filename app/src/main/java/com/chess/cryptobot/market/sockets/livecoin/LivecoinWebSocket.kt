@@ -8,6 +8,7 @@ import com.chess.cryptobot.market.sockets.livecoin.proto.LcWsApi.*
 import com.chess.cryptobot.model.Pair
 import com.neovisionaries.ws.client.WebSocket
 import com.neovisionaries.ws.client.WebSocketFactory
+import com.neovisionaries.ws.client.WebSocketState
 import java.io.UnsupportedEncodingException
 import java.security.InvalidKeyException
 import java.security.NoSuchAlgorithmException
@@ -16,11 +17,11 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
 
-class LivecoinWebSocket(orchestrator: WebSocketOrchestrator): MarketWebSocket(orchestrator)  {
+class LivecoinWebSocket(orchestrator: WebSocketOrchestrator) : MarketWebSocket(orchestrator) {
     override val socketUrl = "wss://ws.api.livecoin.net/ws/beta2"
     private var webSocket: WebSocket?
     override val isConnected: Boolean
-        get() = webSocket?.isOpen?:false
+        get() = webSocket?.isOpen ?: false
 
     override val marketName: String
         get() = LIVECOIN_MARKET
@@ -36,12 +37,16 @@ class LivecoinWebSocket(orchestrator: WebSocketOrchestrator): MarketWebSocket(or
     }
 
     override fun connect() {
-        if (webSocket==null) webSocket = createWebSocket()
+        if (webSocket == null) webSocket = createWebSocket()
+        if (webSocket!!.state != WebSocketState.CREATED) {
+            webSocket = webSocket!!.recreate()
+        }
         val es: ExecutorService = Executors.newSingleThreadExecutor()
+
         val future: Future<WebSocket> = webSocket!!.connect(es)
-        try{
+        try {
             future.get()
-        }catch (e: ExecutionException) {
+        } catch (e: ExecutionException) {
             Log.e("LivecoinWebSocket", e.message ?: e.stackTraceToString(), e)
         }
     }

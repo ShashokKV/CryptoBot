@@ -68,7 +68,7 @@ class BinanceMarketClient internal constructor(url: String, apiKey: String?, sec
         return getBalancesMap()[coinName] ?: 0.0
     }
 
-    public fun getBalancesMap():  MutableMap<String, Double> {
+    private fun getBalancesMap():  MutableMap<String, Double> {
         if (keysIsEmpty()) return HashMap()
 
         val params: MutableMap<String, String> = LinkedHashMap()

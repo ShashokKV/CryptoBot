@@ -67,25 +67,32 @@ class WebSocketOrchestrator(val context: Context, val pairs: MutableList<Pair>) 
         asksMap[pairName] = marketsMap
     }
 
-    fun checkPair(pairName: String) {
-        val bids = bidsMap[pairName]
-        val asks = asksMap[pairName]
+    fun checkPairs() {
+        val pairNames = ArrayList<String>()
+        bidsMap.keys.forEach { pairName ->
+            val bids = bidsMap[pairName]
+            val asks = asksMap[pairName]
 
-        val bid: Double = bids?.values?.maxOrNull() ?: 0.0
-        val ask: Double = asks?.values?.minOrNull() ?: Double.MAX_VALUE
+            val bid: Double = bids?.values?.maxOrNull() ?: 0.0
+            val ask: Double = asks?.values?.minOrNull() ?: Double.MAX_VALUE
 
-        if (((bid - ask) / bid * 100) > minPercent) {
-            runServiceByWebSocketSignal(pairName)
+            if (((bid - ask) / bid * 100) > minPercent) {
+                pairNames.add(pairName)
+            }
+        }
+
+        if (pairNames.isNotEmpty()) {
+            runServiceByWebSocketSignal(pairNames)
         }
     }
 
-    private fun runServiceByWebSocketSignal(pairName: String) {
+    private fun runServiceByWebSocketSignal(pairNames: ArrayList<String>) {
         if (stopFlag) return
         stopFlag = true
         disconnectAll()
-        Log.d("WebSocketOrchestrator", "pairName: $pairName")
+        Log.d("WebSocketOrchestrator", "pairNames: " + pairNames.toArray())
         val intent = Intent(context, ProfitPairService::class.java)
-        intent.putExtra("pairName", pairName)
+        intent.putStringArrayListExtra("pairNames", pairNames)
         context.startService(intent)
     }
 

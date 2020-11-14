@@ -26,7 +26,6 @@ class LivecoinWebSocketListener(private val livecoinWebSocket: LivecoinWebSocket
                 val bid = t?.bestBid?.toDouble()?: Double.MAX_VALUE
                 val ask = t?.bestAsk?.toDouble()?:0.0
                 val pair = Pair.normalizeFromMarketPairName(message.currencyPair, LIVECOIN_MARKET)
-                Log.d("LivecoinWebSocketListener", "pair: $pair, bid: $bid, ask: $ask")
                 livecoinWebSocket.passToOrchestrator(pair, bid, ask)
             })
         } else if (response.meta.responseType == WsResponseMetaData.WsResponseMsgType.ERROR) {

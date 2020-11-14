@@ -10,18 +10,16 @@ import com.neovisionaries.ws.client.WebSocket
 import com.neovisionaries.ws.client.WebSocketAdapter
 import com.neovisionaries.ws.client.WebSocketFrame
 
-class BinanceWebSocketListener(private val binanceWebSocket: BinanceWebSocket): WebSocketAdapter() {
+class BinanceWebSocketListener(private val binanceWebSocket: BinanceWebSocket) : WebSocketAdapter() {
 
     override fun onTextMessage(websocket: WebSocket?, message: String?) {
-        if (message==null || message.isEmpty()) return
+        if (message == null || message.isEmpty()) return
         try {
-            Log.d("BinanceWebSocket", message)
-            val jsonMessage: JsonObject =  JsonParser().parse(message).asJsonObject
+            val jsonMessage: JsonObject = JsonParser().parse(message).asJsonObject
             checkError(jsonMessage)
             parseMessage(jsonMessage)
         } catch (e: Exception) {
             Log.e("BinanceWebSocketListener", e.message ?: e.stackTraceToString(), e)
-            binanceWebSocket.disconnect()
         }
     }
 
@@ -31,7 +29,7 @@ class BinanceWebSocketListener(private val binanceWebSocket: BinanceWebSocket): 
 
     private fun parseMessage(jsonMessage: JsonObject) {
         val symbol = jsonMessage.get("s")
-        if (symbol!=null) {
+        if (symbol != null) {
             var pairName: String? = symbol.asString
             pairName = BinanceDeserializer.symbolToPairName(pairName)
             val bid = jsonMessage["b"].asDouble

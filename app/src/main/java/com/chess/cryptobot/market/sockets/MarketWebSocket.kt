@@ -11,7 +11,7 @@ abstract class MarketWebSocket(private val orchestrator: WebSocketOrchestrator) 
         synchronized(orchestrator) {
             orchestrator.updateBidsMap(pairName, marketName, bid)
             orchestrator.updateAsksMap(pairName, marketName, ask)
-            orchestrator.checkPair(pairName)
+            orchestrator.checkPairs()
         }
     }
 

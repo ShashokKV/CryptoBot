@@ -8,7 +8,6 @@ import com.chess.cryptobot.model.Pair
 import com.github.signalr4j.client.ConnectionState
 import com.github.signalr4j.client.hubs.HubConnection
 import com.github.signalr4j.client.hubs.HubProxy
-import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import java.io.UnsupportedEncodingException
@@ -23,7 +22,7 @@ class BittrexWebSocket(orchestrator: WebSocketOrchestrator) : MarketWebSocket(or
     private var hubConnection: HubConnection
     private var hubProxy: HubProxy
     override val isConnected: Boolean
-        get() =  hubConnection.state == ConnectionState.Connected
+        get() = hubConnection.state == ConnectionState.Connected
 
     override val marketName: String
         get() {
@@ -44,9 +43,6 @@ class BittrexWebSocket(orchestrator: WebSocketOrchestrator) : MarketWebSocket(or
     }
 
     override fun subscribe(pairs: List<Pair>) {
-        if (!isConnected) {
-            connect()
-        }
         val channels = pairs.map { pair -> "ticker_" + pair.getPairNameForMarket(marketName) }
 
         val msgHandler = MsgHandler()
@@ -70,7 +66,6 @@ class BittrexWebSocket(orchestrator: WebSocketOrchestrator) : MarketWebSocket(or
             try {
                 val msg = DataConverter.decodeMessage(compressedData)
                 val pairName = msg.get("symbol").asString
-                Log.d("BittrexWebSocket", GsonBuilder().setPrettyPrinting().create().toJson(msg))
                 passToOrchestrator(Pair.normalizeFromMarketPairName(pairName, marketName), msg.get("bidRate").asDouble, msg.get("askRate").asDouble)
             } catch (e: Exception) {
                 Log.e("BittrexWebSocket", "Error decompressing message - $e - $compressedData", e)

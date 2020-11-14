@@ -38,13 +38,10 @@ class ProfitPairService : IntentService("ProfitPairService") {
         marketInfoReader = MarketInfoReader(this)
         markets = MarketFactory.getInstance(this).getMarkets()
         autoTrade = preferences.getBoolean(getString(R.string.auto_trade), false)
-        val pairName = intent.getStringExtra("pairName")
-        pairs = if (pairName != null) {
-            mutableListOf(Pair.fromPairName(pairName))
-        } else {
-            initPairsFromPrefs()
-        }
-        Log.d("ProfitParisService", "Starting on pairs: "+pairs.map { pair -> pair.name })
+        val pairNames = intent.getStringArrayListExtra("pairNames")
+        pairs = pairNames?.map { pairName -> Pair.fromPairName(pairName) }?.toMutableList()
+                ?: initPairsFromPrefs()
+        Log.d("ProfitParisService", "Starting on pairs: " + pairs.map { pair -> pair.name })
         minPercent = preferences.getString(getString(R.string.min_profit_percent), "3")?.toFloat()
                 ?: 3.0f
 

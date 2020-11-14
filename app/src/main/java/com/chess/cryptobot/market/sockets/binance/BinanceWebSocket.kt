@@ -9,17 +9,18 @@ import java.util.*
 import com.chess.cryptobot.model.Pair
 import com.neovisionaries.ws.client.WebSocket
 import com.neovisionaries.ws.client.WebSocketFactory
+import com.neovisionaries.ws.client.WebSocketState
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
 
-class BinanceWebSocket(orchestrator: WebSocketOrchestrator): MarketWebSocket(orchestrator)  {
+class BinanceWebSocket(orchestrator: WebSocketOrchestrator) : MarketWebSocket(orchestrator) {
     override val socketUrl = "wss://stream.binance.com:9443/ws"
     private var webSocket: WebSocket?
     private lateinit var subscribeMessage: String
     override val isConnected: Boolean
-        get() = webSocket?.isOpen?:false
+        get() = webSocket?.isOpen ?: false
     override val marketName: String
         get() = BINANCE_MARKET
 
@@ -34,13 +35,16 @@ class BinanceWebSocket(orchestrator: WebSocketOrchestrator): MarketWebSocket(orc
     }
 
     override fun connect() {
-        if (webSocket==null) webSocket = createWebSocket()
+        if (webSocket == null) webSocket = createWebSocket()
+        if (webSocket!!.state != WebSocketState.CREATED) {
+            webSocket = webSocket!!.recreate()
+        }
         val es: ExecutorService = Executors.newSingleThreadExecutor()
         val future: Future<WebSocket> = webSocket!!.connect(es)
-        try{
+        try {
             future.get()
-        }catch (e: ExecutionException) {
-            Log.e("future error", e.message?:e.stackTraceToString(), e)
+        } catch (e: ExecutionException) {
+            Log.e("future error", e.message ?: e.stackTraceToString(), e)
         }
     }
 
@@ -52,8 +56,8 @@ class BinanceWebSocket(orchestrator: WebSocketOrchestrator): MarketWebSocket(orc
     }
 
     private fun prepareSubscribeMessage(pairs: List<Pair>) {
-        subscribeMessage = Gson().toJson(BinanceSubscribe(params = pairs.map {
-            pair -> pair.getPairNameForMarket(BINANCE_MARKET).toLowerCase(Locale.ROOT).plus("@bookTicker")
+        subscribeMessage = Gson().toJson(BinanceSubscribe(params = pairs.map { pair ->
+            pair.getPairNameForMarket(BINANCE_MARKET).toLowerCase(Locale.ROOT).plus("@bookTicker")
         }, id = 100))
     }
 
