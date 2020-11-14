@@ -31,8 +31,8 @@ class BalanceGraphTask(balanceGraphFragment: BalanceGraphFragment) : AsyncTask<V
 
     override fun doInBackground(vararg params: Void?): Void? {
         val context = graphFragmentWeakReference.get()!!.context
-        val database = CryptoBotDatabase.getInstance(context)
-        val dao = database!!.btcBalanceDao
+        val database = CryptoBotDatabase.getInstance(context!!)
+        val dao = database.btcBalanceDao
         val dateEnd = LocalDateTime.now()
         val dateStart = dateEnd.minusDays(30)
         val balances = dao!!.getByDate(dateStart, dateEnd)

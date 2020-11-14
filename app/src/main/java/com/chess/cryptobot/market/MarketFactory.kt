@@ -2,42 +2,69 @@ package com.chess.cryptobot.market
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.preference.PreferenceManager
 import com.chess.cryptobot.R
-import com.chess.cryptobot.content.ContextHolder
+import com.chess.cryptobot.util.SingletonHolder
+import okhttp3.OkHttpClient
+import java.util.concurrent.TimeUnit
 
-open class MarketFactory {
-    open val bittrexApiKey = R.string.bittrex_api_key
-    open val bittrexSecretKey = R.string.bittrex_secret_key
-    open val binanceApiKey = R.string.binance_api_key
-    open val binanceSecretKey = R.string.binance_secret_key
-    open val livecoinApiKey = R.string.livecoin_api_key
-    open val livecoinSecretKey = R.string.livecoin_secret_key
+class MarketFactory private constructor(context: Context) {
+    private val bittrexApiKey = R.string.bittrex_api_key
+    private val bittrexSecretKey = R.string.bittrex_secret_key
+    private val binanceApiKey = R.string.binance_api_key
+    private val binanceSecretKey = R.string.binance_secret_key
+    private val binanceWithdrawalApiKey = R.string.binance_withdrawal_api_key
+    private val binanceWithdrawalSecretKey = R.string.binance_withdrawal_secret_key
+    private val livecoinApiKey = R.string.livecoin_api_key
+    private val livecoinSecretKey = R.string.livecoin_secret_key
 
+    private var binanceMarket: BinanceMarketClient
+    private val binanceWithdrawalMarket: BinanceMarketClient
+    private val bittrexMarket: BittrexMarketClient
+    private val livecoinMarket: LivecoinMarketClient
 
-    fun getMarkets(contextHolder: ContextHolder): List<Market?> {
-        return getMarkets(contextHolder.context, contextHolder.prefs.sharedPreferences)
+    init {
+        val preferences = PreferenceManager.getDefaultSharedPreferences(context)
+        binanceMarket = binanceMarket(preferences, context)
+        binanceWithdrawalMarket = binanceWithdrawalMarket(preferences, context)
+        bittrexMarket = bittrexMarket(preferences, context)
+        livecoinMarket = livecoinMarket(preferences, context)
     }
 
-    fun getMarkets(context: Context?, preferences: SharedPreferences): List<MarketClient?> {
+    companion object : SingletonHolder<MarketFactory, Context>(::MarketFactory)
+
+    fun getWithdrawalMarkets(): List<MarketClient?> {
+        val marketNames = arrayOf(Market.BITTREX_MARKET, Market.BINANCE_WITHDRAWAL_MARKET, Market.LIVECOIN_MARKET)
+        return getMarkets(marketNames)
+    }
+
+    fun getMarkets(): List<MarketClient?> {
         val marketNames = arrayOf(Market.BITTREX_MARKET, Market.BINANCE_MARKET, Market.LIVECOIN_MARKET)
+        return getMarkets(marketNames)
+    }
+
+    private fun getMarkets(marketNames: Array<String>): List<MarketClient?> {
         val markets: MutableList<MarketClient?> = ArrayList()
         for (marketName in marketNames) {
-            markets.add(getMarket(marketName, preferences, context))
+            markets.add(getMarket(marketName))
         }
         return markets
     }
 
-    private fun getMarket(marketName: String, preferences: SharedPreferences, context: Context?): MarketClient? {
-        if (context == null) return null
+    private fun getMarket(marketName: String): MarketClient? {
+
         return when (marketName) {
             Market.BITTREX_MARKET -> {
-                bittrexMarket(preferences, context)
+                bittrexMarket
             }
             Market.BINANCE_MARKET -> {
-                binanceMarket(preferences, context)
+                binanceMarket
+            }
+            Market.BINANCE_WITHDRAWAL_MARKET -> {
+                binanceWithdrawalMarket
             }
             Market.LIVECOIN_MARKET -> {
-                livecoinMarket(preferences, context)
+                livecoinMarket
             }
             else -> {
                 throw IllegalArgumentException("Unknown market: $marketName")
@@ -51,16 +78,35 @@ open class MarketFactory {
                 preferences.getString(context.getString(bittrexSecretKey), null))
     }
 
-    open fun binanceMarket(preferences: SharedPreferences, context: Context): BinanceMarketClient {
+    private fun binanceMarket(preferences: SharedPreferences, context: Context): BinanceMarketClient {
         return BinanceMarketClient(context.getString(R.string.binance_url),
                 preferences.getString(context.getString(binanceApiKey), null),
                 preferences.getString(context.getString(binanceSecretKey), null),
                 null)
     }
 
+    private fun binanceWithdrawalMarket(preferences: SharedPreferences, context: Context): BinanceMarketClient {
+        val proxySelector = BinanceProxySelector(preferences.getString(context.getString(R.string.proxy_url), null),
+                preferences.getString(context.getString(R.string.proxy_port), null),
+                preferences.getString(context.getString(R.string.proxy_username), null),
+                preferences.getString(context.getString(R.string.proxy_password), null))
+        return BinanceMarketClient(context.getString(R.string.binance_url),
+                preferences.getString(context.getString(binanceWithdrawalApiKey), null),
+                preferences.getString(context.getString(binanceWithdrawalSecretKey), null),
+                proxySelector)
+    }
+
     private fun livecoinMarket(preferences: SharedPreferences, context: Context): LivecoinMarketClient {
         return LivecoinMarketClient(context.getString(R.string.livecoin_url),
                 preferences.getString(context.getString(livecoinApiKey), null),
                 preferences.getString(context.getString(livecoinSecretKey), null))
+    }
+
+    object MarketHttpBuilder {
+        val instance: OkHttpClient.Builder = OkHttpClient()
+                .newBuilder()
+                .connectTimeout(2, TimeUnit.MINUTES)
+                .readTimeout(45, TimeUnit.SECONDS)
+                .writeTimeout(20, TimeUnit.SECONDS)
     }
 }

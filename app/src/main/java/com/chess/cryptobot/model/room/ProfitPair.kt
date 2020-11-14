@@ -6,19 +6,17 @@ import androidx.room.PrimaryKey
 import java.time.LocalDateTime
 
 @Entity
-class ProfitPair {
+data class ProfitPair (
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id", typeAffinity = ColumnInfo.INTEGER)
-    var id = 0
-
+    var id: Int = 0,
     @ColumnInfo(name = "pairName", typeAffinity = ColumnInfo.TEXT)
-    var pairName: String? = null
-
+    var pairName: String,
     @ColumnInfo(name = "percent", typeAffinity = ColumnInfo.REAL)
-    var percent: Float? = null
-
+    var percent: Float,
     @ColumnInfo(name = "dateCreated")
-    var dateCreated: LocalDateTime? = null
+    var dateCreated: LocalDateTime
+) {
 
     override fun equals(other: Any?): Boolean {
         if (other == null) return false
@@ -37,6 +35,6 @@ class ProfitPair {
     }
 
     override fun hashCode(): Int {
-        return pairName?.hashCode() ?: 0
+        return pairName.hashCode()
     }
 }

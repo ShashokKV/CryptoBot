@@ -3,7 +3,9 @@ package com.chess.cryptobot.market.sockets.binance
 import android.util.Log
 import com.chess.cryptobot.exceptions.BinanceException
 import com.chess.cryptobot.model.response.binance.BinanceDeserializer
-import com.jayway.jsonpath.JsonPath
+import com.google.gson.JsonNull
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
 import com.neovisionaries.ws.client.WebSocket
 import com.neovisionaries.ws.client.WebSocketAdapter
 import com.neovisionaries.ws.client.WebSocketFrame
@@ -11,11 +13,14 @@ import com.neovisionaries.ws.client.WebSocketFrame
 class BinanceWebSocketListener(private val binanceWebSocket: BinanceWebSocket): WebSocketAdapter() {
 
     override fun onTextMessage(websocket: WebSocket?, message: String?) {
+        if (message==null || message.isEmpty()) return
         try {
-            checkError(message)
-            parseMessage(message)
+            Log.d("BinanceWebSocket", message)
+            val jsonMessage: JsonObject =  JsonParser().parse(message).asJsonObject
+            checkError(jsonMessage)
+            parseMessage(jsonMessage)
         } catch (e: Exception) {
-            Log.e("WebSocketListener", e.message ?: e.stackTraceToString(), e)
+            Log.e("BinanceWebSocketListener", e.message ?: e.stackTraceToString(), e)
             binanceWebSocket.disconnect()
         }
     }
@@ -24,20 +29,22 @@ class BinanceWebSocketListener(private val binanceWebSocket: BinanceWebSocket): 
         websocket?.sendPong()
     }
 
-    private fun parseMessage(message: String?) {
-        if (message==null || message.isEmpty()) return
-        var pairName: String? = JsonPath.read<String>(message, "$.s") ?: return
-        pairName = BinanceDeserializer.symbolToPairName(pairName)
-        val bid = JsonPath.read<String>(message, "$.b").toDouble()
-        val ask = JsonPath.read<String>(message, "$.a").toDouble()
-        binanceWebSocket.passToOrchestrator(pairName, bid, ask)
+    private fun parseMessage(jsonMessage: JsonObject) {
+        val symbol = jsonMessage.get("s")
+        if (symbol!=null) {
+            var pairName: String? = symbol.asString
+            pairName = BinanceDeserializer.symbolToPairName(pairName)
+            val bid = jsonMessage["b"].asDouble
+            val ask = jsonMessage["a"].asDouble
+            binanceWebSocket.passToOrchestrator(pairName, bid, ask)
+        }
     }
 
     @Throws(BinanceException::class)
-    fun checkError(message: String?) {
-        val errorText = JsonPath.read<String?>(message, "$.result")
-        if (errorText != null) {
-            throw BinanceException(errorText)
+    fun checkError(jsonMessage: JsonObject) {
+        val result = jsonMessage["result"]
+        if (result != null && result !is JsonNull) {
+            throw BinanceException(result.asString)
         }
     }
 }

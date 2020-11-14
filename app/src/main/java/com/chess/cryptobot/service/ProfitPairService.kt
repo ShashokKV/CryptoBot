@@ -4,6 +4,7 @@ import android.app.IntentService
 import android.app.NotificationManager
 import android.content.Intent
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.preference.PreferenceManager
 import com.chess.cryptobot.R
 import com.chess.cryptobot.content.balance.BalancePreferences
@@ -35,7 +36,7 @@ class ProfitPairService : IntentService("ProfitPairService") {
 
         preferences = PreferenceManager.getDefaultSharedPreferences(this)
         marketInfoReader = MarketInfoReader(this)
-        markets = MarketFactory().getMarkets(this, preferences)
+        markets = MarketFactory.getInstance(this).getMarkets()
         autoTrade = preferences.getBoolean(getString(R.string.auto_trade), false)
         val pairName = intent.getStringExtra("pairName")
         pairs = if (pairName != null) {
@@ -43,6 +44,7 @@ class ProfitPairService : IntentService("ProfitPairService") {
         } else {
             initPairsFromPrefs()
         }
+        Log.d("ProfitParisService", "Starting on pairs: "+pairs.map { pair -> pair.name })
         minPercent = preferences.getString(getString(R.string.min_profit_percent), "3")?.toFloat()
                 ?: 3.0f
 

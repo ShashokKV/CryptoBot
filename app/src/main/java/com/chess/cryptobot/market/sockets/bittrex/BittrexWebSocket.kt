@@ -1,19 +1,29 @@
 package com.chess.cryptobot.market.sockets.bittrex
 
+import android.util.Log
 import com.chess.cryptobot.market.Market
-import com.chess.cryptobot.market.sockets.BittrexExample
 import com.chess.cryptobot.market.sockets.MarketWebSocket
-import com.chess.cryptobot.market.sockets.SocketResponse
 import com.chess.cryptobot.market.sockets.WebSocketOrchestrator
 import com.chess.cryptobot.model.Pair
 import com.github.signalr4j.client.ConnectionState
 import com.github.signalr4j.client.hubs.HubConnection
 import com.github.signalr4j.client.hubs.HubProxy
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
+import java.io.UnsupportedEncodingException
+import java.nio.charset.Charset
+import java.util.*
+import java.util.zip.DataFormatException
+import java.util.zip.Inflater
 
-class BittrexWebSocket(orchestrator: WebSocketOrchestrator): MarketWebSocket(orchestrator) {
+
+class BittrexWebSocket(orchestrator: WebSocketOrchestrator) : MarketWebSocket(orchestrator) {
     override val socketUrl = "https://socket-v3.bittrex.com/signalr"
     private var hubConnection: HubConnection
     private var hubProxy: HubProxy
+    override val isConnected: Boolean
+        get() =  hubConnection.state == ConnectionState.Connected
 
     override val marketName: String
         get() {
@@ -27,44 +37,62 @@ class BittrexWebSocket(orchestrator: WebSocketOrchestrator): MarketWebSocket(orc
 
     override fun connect() {
         hubConnection.start().get()
-        isConnected = hubConnection.state == ConnectionState.Connected
     }
 
     override fun disconnect() {
-        TODO("Not yet implemented")
+        hubConnection.stop()
     }
 
     override fun subscribe(pairs: List<Pair>) {
-        val channels = pairs.map { pair -> "trade_"+pair.getPairNameForMarket(marketName) }
-
-        val msgHandler: Any = object : Any() {
-            fun heartbeat() {
-                println("<heartbeat>")
-            }
-
-            fun trade(compressedData: String?) {
-                // If subscribed to multiple market's trade streams,
-                // use the marketSymbol field in the message to differentiate
-                BittrexExample.printSocketMessage("Trade", compressedData)
-            }
-
-            fun balance(compressedData: String?) {
-                BittrexExample.printSocketMessage("Balance", compressedData)
-            }
+        if (!isConnected) {
+            connect()
         }
+        val channels = pairs.map { pair -> "ticker_" + pair.getPairNameForMarket(marketName) }
 
-        client.setMessageHandler(msgHandler)
+        val msgHandler = MsgHandler()
+        hubProxy.subscribe(msgHandler)
         try {
-            val response: Array<SocketResponse> = client.subscribe(channels)
+            val response: Array<SocketResponse> = hubProxy.invoke(Array<SocketResponse>::class.java, "Subscribe", channels).get()
             for (i in channels.indices) {
-                println(channels[i] + ": " + if (response[i].Success) "Success" else response[i].ErrorCode)
+                if (response[i].Success == true) {
+                    Log.d("BittrexWebSocket", channels[i] + ": " + "Success")
+                } else {
+                    Log.e("BittrexWebSocket", channels[i] + ": " + response[i].ErrorCode)
+                }
             }
         } catch (e: Exception) {
-            println("Failed to subscribe: $e")
+            Log.e("BittrexWebSocket", e.message ?: e.stackTraceToString(), e)
         }
     }
 
-    override fun unsubscribe(pairs: List<Pair>) {
-        TODO("Not yet implemented")
+    inner class MsgHandler {
+        fun ticker(compressedData: String?) {
+            try {
+                val msg = DataConverter.decodeMessage(compressedData)
+                val pairName = msg.get("symbol").asString
+                Log.d("BittrexWebSocket", GsonBuilder().setPrettyPrinting().create().toJson(msg))
+                passToOrchestrator(Pair.normalizeFromMarketPairName(pairName, marketName), msg.get("bidRate").asDouble, msg.get("askRate").asDouble)
+            } catch (e: Exception) {
+                Log.e("BittrexWebSocket", "Error decompressing message - $e - $compressedData", e)
+            }
+        }
+    }
+
+    internal object DataConverter {
+        @Throws(DataFormatException::class, UnsupportedEncodingException::class)
+        fun decodeMessage(encodedData: String?): JsonObject {
+            val compressedData = Base64.getDecoder().decode(encodedData)
+            val inflater = Inflater(true)
+            inflater.setInput(compressedData)
+            var buffer = ByteArray(1024)
+            val resultBuilder = StringBuilder()
+            while (inflater.inflate(buffer) > 0) {
+                resultBuilder.append(String(buffer, Charset.forName("UTF-8")))
+                buffer = ByteArray(1024)
+            }
+            inflater.end()
+            val text = resultBuilder.toString().trim { it <= ' ' }
+            return JsonParser().parse(text).asJsonObject
+        }
     }
 }

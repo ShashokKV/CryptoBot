@@ -5,7 +5,6 @@ import androidx.fragment.app.Fragment
 import com.chess.cryptobot.content.ContextHolder
 import com.chess.cryptobot.content.Preferences
 import com.chess.cryptobot.exceptions.ItemNotFoundException
-import com.chess.cryptobot.market.BinanceMarketClient
 import com.chess.cryptobot.market.MarketFactory
 import com.chess.cryptobot.model.Balance
 import com.chess.cryptobot.model.ViewItem
@@ -28,8 +27,7 @@ class BalanceHolder(fragment: Fragment) : ContextHolder(fragment) {
     }
 
     private fun checkIfHasKeys(): Boolean {
-        val factory = MarketFactory()
-        for (market in factory.getMarkets(this)) {
+        for (market in MarketFactory.getInstance(context).getMarkets()) {
             if (market?.keysIsEmpty() != false) {
                 return false
             }
@@ -37,7 +35,7 @@ class BalanceHolder(fragment: Fragment) : ContextHolder(fragment) {
         return true
     }
 
-    public override fun initPrefs(context: Context?): Preferences {
+    public override fun initPrefs(context: Context): Preferences {
         prefs = BalancePreferences(context)
         return prefs
     }
@@ -76,13 +74,6 @@ class BalanceHolder(fragment: Fragment) : ContextHolder(fragment) {
     private fun updateAmount(balance: Balance) {
         val task = BalanceUpdateTask(this)
         task.executeOnExecutor(serialExecutor, balance)
-    }
-
-    override fun updateAllItems() {
-        super.updateAllItems()
-        for (market in markets) {
-            if (market is BinanceMarketClient) market.balances = HashMap()
-        }
     }
 
     @Throws(ItemNotFoundException::class)

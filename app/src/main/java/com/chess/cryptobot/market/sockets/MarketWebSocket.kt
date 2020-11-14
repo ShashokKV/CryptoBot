@@ -5,8 +5,7 @@ import com.chess.cryptobot.model.Pair
 abstract class MarketWebSocket(private val orchestrator: WebSocketOrchestrator) {
     abstract val socketUrl: String
     abstract val marketName: String
-    var isSubscribed: Boolean = false
-    var isConnected: Boolean = false
+    abstract val isConnected: Boolean
 
     fun passToOrchestrator(pairName: String, bid: Double, ask: Double) {
         synchronized(orchestrator) {
@@ -21,6 +20,4 @@ abstract class MarketWebSocket(private val orchestrator: WebSocketOrchestrator) 
     abstract fun disconnect()
 
     abstract fun subscribe(pairs: List<Pair>)
-
-    abstract fun unsubscribe(pairs: List<Pair>)
 }

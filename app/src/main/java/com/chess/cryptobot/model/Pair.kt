@@ -1,6 +1,9 @@
 package com.chess.cryptobot.model
 
-import com.chess.cryptobot.market.Market
+import com.chess.cryptobot.market.Market.Companion.BINANCE_MARKET
+import com.chess.cryptobot.market.Market.Companion.BITTREX_MARKET
+import com.chess.cryptobot.market.Market.Companion.LIVECOIN_MARKET
+import com.chess.cryptobot.model.response.binance.BinanceDeserializer
 import java.io.Serializable
 
 class Pair(val baseName: String, val marketName: String) : ViewItem, Serializable {
@@ -32,13 +35,13 @@ class Pair(val baseName: String, val marketName: String) : ViewItem, Serializabl
 
     fun getPairNameForMarket(marketName: String): String {
         return when(marketName) {
-            Market.BITTREX_MARKET -> {
+            BITTREX_MARKET -> {
                 bittrexPairName
             }
-            Market.BINANCE_MARKET -> {
+            BINANCE_MARKET -> {
                 binancePairName
             }
-            Market.LIVECOIN_MARKET -> {
+            LIVECOIN_MARKET -> {
                 livecoinPairName
             }
             else -> {
@@ -66,6 +69,22 @@ class Pair(val baseName: String, val marketName: String) : ViewItem, Serializabl
         fun fromPairName(pairName: String): Pair {
             val coinNames = pairName.split("/").toTypedArray()
             return Pair(coinNames[0], coinNames[1])
+        }
+
+        fun normalizeFromMarketPairName(pairName: String, marketName: String): String {
+            return when (marketName) {
+                BINANCE_MARKET -> {
+                    BinanceDeserializer.symbolToPairName(pairName)
+                }
+                BITTREX_MARKET -> {
+                    val split = pairName.split("-")
+                    split[1]+"/"+split[0]
+                }
+                else -> {
+                    val split = pairName.split("/")
+                    split[1]+"/"+split[0]
+                }
+            }
         }
     }
 

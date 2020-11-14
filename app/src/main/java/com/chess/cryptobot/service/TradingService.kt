@@ -3,7 +3,6 @@ package com.chess.cryptobot.service
 import android.app.IntentService
 import android.app.NotificationManager
 import android.content.Intent
-import androidx.preference.PreferenceManager
 import com.chess.cryptobot.content.balance.BalancePreferences
 import com.chess.cryptobot.exceptions.MarketException
 import com.chess.cryptobot.market.Market
@@ -11,7 +10,10 @@ import com.chess.cryptobot.market.MarketFactory
 import com.chess.cryptobot.model.Pair
 import com.chess.cryptobot.view.notification.NotificationBuilder
 import com.chess.cryptobot.view.notification.NotificationID
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.runBlocking
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.util.*
@@ -74,8 +76,7 @@ class TradingService : IntentService("TradingService") {
     }
 
     private fun initMarkets() {
-        MarketFactory().getMarkets(this,
-                PreferenceManager.getDefaultSharedPreferences(this))
+        MarketFactory.getInstance(this).getMarkets()
                 .forEach { market -> if (market != null) marketsMap[market.getMarketName()] = market }
     }
 

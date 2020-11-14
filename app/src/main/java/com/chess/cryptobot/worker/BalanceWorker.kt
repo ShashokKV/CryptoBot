@@ -1,7 +1,6 @@
 package com.chess.cryptobot.worker
 
 import android.content.Context
-import androidx.preference.PreferenceManager
 import android.util.Log
 import androidx.work.Worker
 import androidx.work.WorkerParameters
@@ -21,10 +20,8 @@ class BalanceWorker(context: Context, workerParams: WorkerParameters) : Worker(c
 
     override fun doWork(): Result {
         cleanDatabase()
-        val marketFactory = MarketFactory()
-        val context = applicationContext
         var btcSum = 0.0
-        val markets = marketFactory.getMarkets(context, PreferenceManager.getDefaultSharedPreferences(context))
+        val markets = MarketFactory.getInstance(applicationContext).getMarkets()
         if (isApiKeysEmpty(markets)) return Result.success()
         for (market in markets) {
             val amount = try {
@@ -48,7 +45,7 @@ class BalanceWorker(context: Context, workerParams: WorkerParameters) : Worker(c
 
     private fun cleanDatabase() {
         val database = CryptoBotDatabase.getInstance(applicationContext)
-        val dao = database!!.btcBalanceDao
+        val dao = database.btcBalanceDao
         val filterDate = LocalDateTime.now().minusDays(31)
         val balances = dao!!.getLowerThanDate(filterDate)
         dao.deleteAll(balances)
@@ -56,10 +53,8 @@ class BalanceWorker(context: Context, workerParams: WorkerParameters) : Worker(c
 
     private fun saveToDatabase(btcSum: Double) {
         val database = CryptoBotDatabase.getInstance(applicationContext)
-        val dao = database?.btcBalanceDao
-        val balance = BtcBalance()
-        balance.balance = btcSum.toFloat()
-        balance.dateCreated = LocalDateTime.now()
+        val dao = database.btcBalanceDao
+        val balance = BtcBalance(balance = btcSum.toFloat(), dateCreated = LocalDateTime.now())
         dao?.insert(balance)
     }
 

@@ -6,8 +6,9 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.chess.cryptobot.model.room.converter.TimestampConverter
+import com.chess.cryptobot.util.SingletonHolder
 
-@Database(version = 4, entities = [
+@Database(version = 5, entities = [
     ProfitPair::class,
     BtcBalance::class,
     BalanceSyncTicker::class,
@@ -22,17 +23,10 @@ abstract class CryptoBotDatabase : RoomDatabase() {
     abstract val minTradeSizeDao: PairMinTradeSizeDao?
     abstract val coinInfoDao: CoinInfoDao?
 
-    companion object {
-        private var database: CryptoBotDatabase? = null
-
-        fun getInstance(context: Context?): CryptoBotDatabase? {
-            if (database == null) {
-                database = Room.databaseBuilder(context!!, CryptoBotDatabase::class.java, "cryptobotDB")
-                        .enableMultiInstanceInvalidation()
-                        .fallbackToDestructiveMigration()
-                        .build()
-            }
-            return database
-        }
-    }
+    companion object : SingletonHolder<CryptoBotDatabase, Context>({
+        Room.databaseBuilder(it.applicationContext, CryptoBotDatabase::class.java, "cryptobotDB")
+                .enableMultiInstanceInvalidation()
+                .fallbackToDestructiveMigration()
+                .build()
+    })
 }

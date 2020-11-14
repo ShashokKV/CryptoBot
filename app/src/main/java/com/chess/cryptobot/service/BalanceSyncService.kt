@@ -5,14 +5,13 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
 import android.graphics.drawable.Icon
-import androidx.preference.PreferenceManager
 import com.chess.cryptobot.R
 import com.chess.cryptobot.content.balance.BalancePreferences
 import com.chess.cryptobot.enricher.PairResponseEnricher
 import com.chess.cryptobot.exceptions.MarketException
 import com.chess.cryptobot.exceptions.SyncServiceException
 import com.chess.cryptobot.market.Market
-import com.chess.cryptobot.market.WithdrawalMarketFactory
+import com.chess.cryptobot.market.MarketFactory
 import com.chess.cryptobot.model.History
 import com.chess.cryptobot.model.Pair
 import com.chess.cryptobot.model.response.TickerResponse
@@ -48,8 +47,8 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
         minBtcAmount += minBtcAmount / 100
         val coinNames = intent.getStringArrayListExtra("coinNames")
         forceUpdate = intent.getBooleanExtra("forceUpdate", false)
-        val marketFactory = WithdrawalMarketFactory()
-        val markets = marketFactory.getMarkets(this, PreferenceManager.getDefaultSharedPreferences(this))
+
+        val markets = MarketFactory.getInstance(this).getWithdrawalMarkets()
         markets.forEach { marketsMap[it!!.getMarketName()] = it }
         var syncExecuted = false
         coinNames?.forEach { coinName: String ->
@@ -204,8 +203,13 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
             if (history.isEmpty()) return
             val historyItem = history.sortedByDescending { it.dateTime }[0]
             val database = CryptoBotDatabase.getInstance(applicationContext)
-            val dao = database?.balanceSyncDao
-            val ticker = BalanceSyncTicker()
+            val dao = database.balanceSyncDao
+            val ticker = BalanceSyncTicker(
+                    coinName = historyItem.currencyName,
+                    marketName = moveTo,
+                    dateCreated = historyItem.dateTime,
+                    amount = historyItem.amount
+            )
             ticker.coinName = historyItem.currencyName
             ticker.marketName = moveTo
             ticker.dateCreated = historyItem.dateTime
@@ -248,7 +252,7 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
         @Throws(SyncServiceException::class)
         private fun checkHistory(moveToMarket: Market) {
             val database = CryptoBotDatabase.getInstance(applicationContext)
-            val dao = database?.balanceSyncDao
+            val dao = database.balanceSyncDao
             val balanceSyncTickers: List<BalanceSyncTicker> =
                     dao?.getByCoinNameAndMarket(coinName, moveToMarket.getMarketName())
                             ?.sortedByDescending { it.dateCreated } ?: return

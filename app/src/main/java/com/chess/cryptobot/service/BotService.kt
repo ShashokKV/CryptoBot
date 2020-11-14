@@ -24,6 +24,7 @@ class BotService : Service() {
     private var runPeriod: Int = 5
     private val botBinder: IBinder = BotBinder()
     private var webSocketEnabled = false
+    private var webSocketOrchestrator: WebSocketOrchestrator? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
@@ -49,7 +50,7 @@ class BotService : Service() {
     private fun runTimer() {
         val period = runPeriod * 1000 * 60.toLong()
         val botTimerTask = BotTimerTask()
-        botTimer!!.schedule(botTimerTask, period, period)
+        botTimer!!.schedule(botTimerTask, 10000, period)
         Log.d(TAG, "timer started")
     }
 
@@ -70,6 +71,10 @@ class BotService : Service() {
             botTimer!!.cancel()
             botTimer!!.purge()
         }
+        if (webSocketEnabled) {
+            webSocketOrchestrator?.disconnectAll()
+            webSocketOrchestrator = null
+        }
         initFields()
         runTimer()
     }
@@ -77,6 +82,10 @@ class BotService : Service() {
     override fun onDestroy() {
         Toast.makeText(this, "Bot stopping", Toast.LENGTH_SHORT).show()
         if (botTimer != null) botTimer!!.cancel()
+        if (webSocketEnabled) {
+            webSocketOrchestrator?.disconnectAll()
+            webSocketOrchestrator = null
+        }
         stopForeground(true)
         isRunning = false
         Log.d(TAG, "timer stopped")
@@ -89,7 +98,6 @@ class BotService : Service() {
 
     private inner class BotTimerTask : TimerTask() {
         private var pairs: MutableList<Pair> = initPairsFromPrefs()
-        private var webSocketOrchestrator: WebSocketOrchestrator? = null
 
         override fun run() {
             Log.d(TAG, "timer running")
@@ -101,14 +109,6 @@ class BotService : Service() {
             } else {
                 startService(Intent(this@BotService, ProfitPairService::class.java))
             }
-        }
-
-        override fun cancel(): Boolean {
-            if (webSocketEnabled) {
-                webSocketOrchestrator?.unsubscribeAll()
-                webSocketOrchestrator = null
-            }
-            return super.cancel()
         }
 
         private fun initPairsFromPrefs(): MutableList<Pair> {

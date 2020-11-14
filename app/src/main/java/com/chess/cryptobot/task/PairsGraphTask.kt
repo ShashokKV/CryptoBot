@@ -32,8 +32,8 @@ class PairsGraphTask(pairsGraphFragment: PairsGraphFragment, private val daysToS
 
     override fun doInBackground(vararg params: Void?): Void? {
         val context = graphFragmentWeakReference.get()!!.context
-        val database = getInstance(context)
-        dao = database!!.profitPairDao
+        val database = getInstance(context!!)
+        dao = database.profitPairDao
         val searchDate = date.minusDays(daysToShow.toLong())
         allPairNames = dao!!.getPairNamesByDateAndMinPercent(searchDate, minPercent)
 
@@ -80,7 +80,7 @@ class PairsGraphTask(pairsGraphFragment: PairsGraphFragment, private val daysToS
 
     private fun countAveragePercent(pairs: List<ProfitPair?>?) {
         pairs!!.forEach { pair: ProfitPair? ->
-            val averagePercent: Float = pair!!.percent!! / count
+            val averagePercent: Float = pair!!.percent / count
             if (averagePercent > maxPercent) maxPercent = averagePercent
             pair.percent = averagePercent
         }

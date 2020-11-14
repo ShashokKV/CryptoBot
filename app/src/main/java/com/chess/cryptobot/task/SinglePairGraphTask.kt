@@ -32,8 +32,8 @@ class SinglePairGraphTask(pairsGraphFragment: PairsGraphFragment, private val da
 
     override fun doInBackground(vararg params: Void?): Void? {
         val context = graphFragmentWeakReference.get()!!.context
-        val database = getInstance(context)
-        dao = database!!.profitPairDao
+        val database = getInstance(context!!)
+        dao = database.profitPairDao
 
         val entriesGroups = initEntriesGroup()
         xAxisNames = ArrayList()
@@ -75,7 +75,7 @@ class SinglePairGraphTask(pairsGraphFragment: PairsGraphFragment, private val da
             pair.percent = 0f
             return
         }
-        val averagePercent: Float = pair.percent ?:0f / pair.id
+        val averagePercent: Float = pair.percent
         if (averagePercent > maxPercent) maxPercent = averagePercent
         pair.percent = averagePercent
     }

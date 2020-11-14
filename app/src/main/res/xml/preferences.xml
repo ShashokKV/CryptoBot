@@ -68,6 +68,9 @@
         <CheckBoxPreference
             android:key="@string/auto_trade"
             android:title="AutoTrade" />
+        <CheckBoxPreference
+            android:key="@string/web_socket_enabled"
+            android:title="WebSockets" />
         <androidx.preference.EditTextPreference
             android:defaultValue="3"
             android:dialogLayout="@layout/number_dialog"
