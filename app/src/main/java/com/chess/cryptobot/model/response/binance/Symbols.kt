@@ -24,5 +24,9 @@ class Symbols {
         @SerializedName("stepSize")
         @Expose
         val stepSize: Double = 0.0
+
+        @SerializedName("tickSize")
+        @Expose
+        val tickSize: Double = 0.0
     }
 }

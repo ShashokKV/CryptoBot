@@ -134,6 +134,7 @@ class ProfitPairService : IntentService("ProfitPairService") {
         intent.putExtra("minQuantity", marketInfoReader.getMinQuantity(pair))
         if (pair.askMarketName == Market.BINANCE_MARKET || pair.bidMarketName == Market.BINANCE_MARKET) {
             intent.putExtra("stepSize", marketInfoReader.getStepSize(pair))
+            intent.putExtra("priceFilter", marketInfoReader.getPriceFilter(pair))
         }
         startService(intent)
     }

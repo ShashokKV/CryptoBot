@@ -8,9 +8,9 @@ import androidx.room.TypeConverters
 import com.chess.cryptobot.model.room.converter.TimestampConverter
 import com.chess.cryptobot.util.SingletonHolder
 
-@Database(version = 5, entities = [
+@Database(version = 6, entities = [
     ProfitPair::class,
-    BtcBalance::class,
+    CryptoBalance::class,
     BalanceSyncTicker::class,
     PairMinTradeSize::class,
     CoinInfo::class
@@ -18,7 +18,7 @@ import com.chess.cryptobot.util.SingletonHolder
 @TypeConverters(TimestampConverter::class)
 abstract class CryptoBotDatabase : RoomDatabase() {
     abstract val profitPairDao: ProfitPairDao?
-    abstract val btcBalanceDao: BtcBalanceDao?
+    abstract val cryptoBalanceDao: CryptoBalanceDao?
     abstract val balanceSyncDao: BalanceSyncDao?
     abstract val minTradeSizeDao: PairMinTradeSizeDao?
     abstract val coinInfoDao: CoinInfoDao?

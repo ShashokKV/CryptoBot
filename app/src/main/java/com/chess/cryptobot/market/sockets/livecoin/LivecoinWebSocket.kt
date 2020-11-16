@@ -46,6 +46,7 @@ class LivecoinWebSocket(orchestrator: WebSocketOrchestrator) : MarketWebSocket(o
         val future: Future<WebSocket> = webSocket!!.connect(es)
         try {
             future.get()
+            Log.d("LivecoinWebSocket", "CONNECTED")
         } catch (e: ExecutionException) {
             Log.e("LivecoinWebSocket", e.message ?: e.stackTraceToString(), e)
         }

@@ -53,8 +53,8 @@ class MarketWorker(private val context: Context, workerParams: WorkerParameters)
     private fun infoOnProfitPairs() {
         val pairs: MutableList<Pair> = getTickerPairs(markets)
         saveProfitPairsToDatabase(pairs.stream()
-                .peek{ pair -> PairResponseEnricher(pair).enrichWithMinPercent(null)}
-                .filter{pair -> pair.percent>0}
+                .peek { pair -> PairResponseEnricher(pair).enrichWithMinPercent(null) }
+                .filter { pair -> pair.percent > 0 }
                 .collect(Collectors.toList()))
     }
 
@@ -145,6 +145,8 @@ class MarketWorker(private val context: Context, workerParams: WorkerParameters)
                         val binanceResponse = response as BinanceResponse
                         pairMinTradeSize.stepSize = binanceResponse.getStepSizeByName(pair.getPairNameForMarket(BINANCE_MARKET))
                                 ?: 1.00000000
+                        pairMinTradeSize.priceFilter = binanceResponse.getPriceFilterByName(pair.getPairNameForMarket(BINANCE_MARKET))
+                                ?: 0.00000001
                     }
                 }
             }
@@ -207,9 +209,9 @@ class MarketWorker(private val context: Context, workerParams: WorkerParameters)
         val profitPairs: MutableList<ProfitPair?> = ArrayList()
         pairs.forEach { pair: Pair ->
             val profitPair = ProfitPair(
-            dateCreated = LocalDateTime.now(),
-            pairName = pair.name,
-            percent = pair.percent
+                    dateCreated = LocalDateTime.now(),
+                    pairName = pair.name,
+                    percent = pair.percent
             )
             profitPairs.add(profitPair)
         }

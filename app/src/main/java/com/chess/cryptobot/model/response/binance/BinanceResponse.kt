@@ -8,6 +8,7 @@ import java.time.*
 import kotlin.math.roundToLong
 
 const val MIN_QTY_FILTER: String = "LOT_SIZE"
+const val PRICE_FILTER: String = "PRICE_FILTER"
 
 open class BinanceResponse : MarketResponse, CurrenciesListResponse,
         AddressResponse, OrderBookResponse, TradeLimitResponse {
@@ -68,6 +69,21 @@ open class BinanceResponse : MarketResponse, CurrenciesListResponse,
                 for (filter in symbol.filters) {
                     if (filter.filterType.equals(MIN_QTY_FILTER)) {
                         return filter.stepSize
+                    }
+                }
+            }
+        }
+        return null
+    }
+
+    fun getPriceFilterByName(pairName: String?): Double? {
+        if (symbols == null) return null
+        for (symbol in symbols) {
+            if (symbol.symbol.equals(pairName)) {
+                if (symbol.filters == null) return null
+                for (filter in symbol.filters) {
+                    if (filter.filterType.equals(PRICE_FILTER)) {
+                        return filter.tickSize
                     }
                 }
             }

@@ -14,7 +14,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
-import java.math.BigDecimal
 import java.math.RoundingMode
 import java.util.*
 import kotlin.collections.HashMap
@@ -27,6 +26,7 @@ class TradingService : IntentService("TradingService") {
     private var askBaseAmount: Double = 0.0
     private var minMarketQuantity: Double = 0.0
     private var stepSize: Double = 0.0
+    private var priceFilter: Double = 0.0
     private var minBtcAmount = 0.0005
     private var minEthAmount = 0.025
     private var minUsdtAmount = 10.0
@@ -72,7 +72,8 @@ class TradingService : IntentService("TradingService") {
         pair = intent.getSerializableExtra(Pair::class.java.name) as Pair
         workingOnPair = pair.name
         minMarketQuantity = intent.getDoubleExtra("minQuantity", 0.0)
-        stepSize = intent.getDoubleExtra("stepSize", 1.00000000)
+        stepSize = intent.getDoubleExtra("stepSize", 0.00000001)
+        priceFilter = intent.getDoubleExtra("priceFilter", 0.00000001)
     }
 
     private fun initMarkets() {
@@ -133,8 +134,8 @@ class TradingService : IntentService("TradingService") {
         private var buyMarket: Market? = null
         private var baseAmount: Double = 0.0
         private var marketAmount: Double = 0.0
-        private var sellPairName: String? = null
-        var buyPairName: String? = null
+        private var sellPairName: String
+        var buyPairName: String
         var success: Boolean = false
 
         init {
@@ -171,16 +172,16 @@ class TradingService : IntentService("TradingService") {
             if (quantity * askPrice < minBaseAmount) quantity = 0.0
             if (quantity * bidPrice < minMarketAmount) quantity = 0.0
 
-            if (stepSize>0.0) {
-                quantity = quantity.toBigDecimal().setScale(computeScale(), RoundingMode.DOWN).toDouble()
+            if (stepSize>0.00000001) {
+                quantity = quantity.toBigDecimal().setScale(computeScale(stepSize), RoundingMode.DOWN).toDouble()
             }
             return quantity
         }
 
-        private fun computeScale(): Int {
+        private fun computeScale(testValue: Double): Int {
             var scale = 0
             var testStep = 1.00000000
-            while (scale<=8 && testStep!=stepSize) {
+            while (scale<=8 && testStep!=testValue) {
                 testStep /= 10
                 scale++
             }
@@ -190,7 +191,7 @@ class TradingService : IntentService("TradingService") {
         fun buy(): String {
             val price = formatAmount(askPrice)
             try {
-                buyMarket!!.buy(buyPairName!!, price, quantity)
+                buyMarket!!.buy(buyPairName, price, quantity)
             } catch (e: MarketException) {
                 success = false
                 return String.format(Locale.US, "%.8f%s bid %.8f; ask %.8f; error: %s",
@@ -208,7 +209,7 @@ class TradingService : IntentService("TradingService") {
         fun sell(): String {
             val price = formatAmount(bidPrice)
             try {
-                sellMarket!!.sell(sellPairName!!, price, quantity)
+                sellMarket!!.sell(sellPairName, price, quantity)
             } catch (e: MarketException) {
                 success = false
                 return String.format(Locale.US, "%.8f%s bid %.8f; ask %.8f; error: %s",
@@ -223,9 +224,8 @@ class TradingService : IntentService("TradingService") {
                     price, sellMarket!!.getMarketName())
         }
 
-        private fun formatAmount(amount: Double?): Double {
-            val bd = BigDecimal(amount!!).setScale(8, RoundingMode.DOWN)
-            return bd.toDouble()
+        private fun formatAmount(amount: Double): Double {
+            return amount.toBigDecimal().setScale(computeScale(priceFilter), RoundingMode.DOWN).toDouble()
         }
 
         fun updateInfo(text: String) {

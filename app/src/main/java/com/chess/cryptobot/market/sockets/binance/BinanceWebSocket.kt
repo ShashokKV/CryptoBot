@@ -43,8 +43,9 @@ class BinanceWebSocket(orchestrator: WebSocketOrchestrator) : MarketWebSocket(or
         val future: Future<WebSocket> = webSocket!!.connect(es)
         try {
             future.get()
+            Log.d("BinanceWebSocket", "CONNECTED")
         } catch (e: ExecutionException) {
-            Log.e("future error", e.message ?: e.stackTraceToString(), e)
+            Log.e("BinanceWebSocket", e.message ?: e.stackTraceToString(), e)
         }
     }
 
