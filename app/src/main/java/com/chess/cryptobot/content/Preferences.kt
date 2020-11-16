@@ -6,7 +6,7 @@ import androidx.preference.PreferenceManager
 import androidx.core.content.edit
 import kotlin.collections.HashSet
 
-abstract class Preferences protected constructor(context: Context?) {
+abstract class Preferences protected constructor(context: Context) {
     val sharedPreferences: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
     private val preferenceKey: String by lazy { initPrefKey(context) }
 
@@ -14,7 +14,7 @@ abstract class Preferences protected constructor(context: Context?) {
         get() = sharedPreferences.getStringSet(preferenceKey, HashSet())?.toHashSet()
         set(items) = updateItemSet(items)
 
-    protected abstract fun initPrefKey(context: Context?): String
+    protected abstract fun initPrefKey(context: Context): String
 
     open fun addItem(itemName: String) {
         val itemsSet = items

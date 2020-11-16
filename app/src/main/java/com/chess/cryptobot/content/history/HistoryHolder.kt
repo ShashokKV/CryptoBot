@@ -17,7 +17,7 @@ class HistoryHolder(fragment: Fragment, private val state: State) : ContextHolde
         updateAllItems()
     }
 
-    override fun initPrefs(context: Context?): Preferences {
+    override fun initPrefs(context: Context): Preferences {
         prefs = HistoryPreferences(context)
         return prefs
     }

@@ -43,7 +43,7 @@ interface Market {
     fun getOpenOrders(): List<History>
 
     @Throws(MarketException::class)
-    fun getHistory(context: Context?): List<History>
+    fun getHistory(context: Context): List<History>
 
     @Throws(MarketException::class)
     fun getDepositHistory(): List<History>
@@ -55,5 +55,7 @@ interface Market {
         const val LIVECOIN_MARKET = "livecoin"
         const val BITTREX_MARKET = "bittrex"
         const val BINANCE_MARKET = "binance"
+        const val BINANCE_WITHDRAWAL_MARKET = "binanceWithdrawal"
+
     }
 }

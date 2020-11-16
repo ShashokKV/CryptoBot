@@ -19,7 +19,6 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
-import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.collections.LinkedHashMap
@@ -29,21 +28,16 @@ class BinanceMarketClient internal constructor(url: String, apiKey: String?, sec
                                                private val proxySelector: BinanceProxySelector?) : MarketClient(url, apiKey, secretKey) {
 
     private val service: BinanceMarketService
-    var balances: MutableMap<String, Double> = HashMap()
 
     init {
         algorithm = "HmacSHA256"
         path = ""
         service = initService(initRetrofit(initGson())) as BinanceMarketService
-//        webSocket = BinanceWebSocket()
     }
 
     override fun initHttpClient(): OkHttpClient {
 
-        var clientBuilder = OkHttpClient.Builder()
-                .connectTimeout(2, TimeUnit.MINUTES)
-                .readTimeout(45, TimeUnit.SECONDS)
-                .writeTimeout(20, TimeUnit.SECONDS)
+        var clientBuilder = MarketFactory.MarketHttpBuilder.instance
 
         if (proxySelector != null) {
             clientBuilder = clientBuilder
@@ -69,16 +63,13 @@ class BinanceMarketClient internal constructor(url: String, apiKey: String?, sec
         return retrofit.create(BinanceMarketService::class.java)
     }
 
-    override fun initWebSocket() {
-//        this.webSocket = BinanceWebSocket()
-    }
-
     @Throws(BinanceException::class)
     override fun getAmount(coinName: String): Double {
-        if (keysIsEmpty()) return 0.0
+        return getBalancesMap()[coinName] ?: 0.0
+    }
 
-        val balance: Double? = balances[coinName]
-        if (balance != null) return balance
+    private fun getBalancesMap():  MutableMap<String, Double> {
+        if (keysIsEmpty()) return HashMap()
 
         val params: MutableMap<String, String> = LinkedHashMap()
         params["recvWindow"] = "15000"
@@ -96,11 +87,12 @@ class BinanceMarketClient internal constructor(url: String, apiKey: String?, sec
             throw BinanceException(e.message!!)
         }
 
-        balances = HashMap()
+        val balances = HashMap<String, Double>()
         response.balances.forEach { balanceResponse ->
             balances[balanceResponse.coinName!!] = balanceResponse.amount
         }
-        return balances[coinName] ?: 0.0
+
+        return balances
     }
 
     @Throws(BinanceException::class)
@@ -265,7 +257,7 @@ class BinanceMarketClient internal constructor(url: String, apiKey: String?, sec
     }
 
     @Throws(MarketException::class)
-    override fun getHistory(context: Context?): List<History> {
+    override fun getHistory(context: Context): List<History> {
         if (keysIsEmpty()) return listOf(History())
         val startTime = getStartTime()
         val historyList: MutableList<History> = ArrayList()
@@ -277,7 +269,7 @@ class BinanceMarketClient internal constructor(url: String, apiKey: String?, sec
         return historyList
     }
 
-    private fun getAllPairs(context: Context?): List<String> {
+    private fun getAllPairs(context: Context): List<String> {
         val allPairs = AllPairsPreferences(context).items ?: return ArrayList()
         val balancePrefs = BalancePreferences(context)
         val pairsList = ArrayList<String>()

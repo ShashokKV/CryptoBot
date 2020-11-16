@@ -6,20 +6,17 @@ import androidx.room.PrimaryKey
 import java.time.LocalDateTime
 
 @Entity
-class BalanceSyncTicker {
+data class BalanceSyncTicker (
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id", typeAffinity = ColumnInfo.INTEGER)
-    var id = 0
-
+    var id: Int = 0,
     @ColumnInfo(name = "coinName")
-    var coinName: String? = null
-
+    var coinName: String?,
     @ColumnInfo(name = "marketName")
-    var marketName: String? = null
+    var marketName: String?,
 
     @ColumnInfo(name = "amount", typeAffinity = ColumnInfo.REAL)
-    var amount: Double? = null
-
+    var amount: Double?,
     @ColumnInfo(name = "dateCreated")
-    var dateCreated: LocalDateTime? = null
-}
+    var dateCreated: LocalDateTime?
+)

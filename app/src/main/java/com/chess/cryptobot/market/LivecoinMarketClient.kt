@@ -36,10 +36,6 @@ class LivecoinMarketClient internal constructor(url: String?, apiKey: String?, s
         return retrofit.create(LivecoinMarketService::class.java)
     }
 
-    override fun initWebSocket() {
-        TODO("Not yet implemented")
-    }
-
     @Throws(LivecoinException::class)
     override fun getAmount(coinName: String): Double {
         if (keysIsEmpty()) return 0.0
@@ -223,7 +219,7 @@ class LivecoinMarketClient internal constructor(url: String?, apiKey: String?, s
     }
 
     @Throws(MarketException::class)
-    override fun getHistory(context: Context?): List<History>    {
+    override fun getHistory(context: Context): List<History>    {
         return getHistoryByType(null)
     }
 

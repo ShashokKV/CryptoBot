@@ -153,6 +153,7 @@ class MainActivity : AppCompatActivity(), DialogListener {
         val nameDialogView = dialog.dialog?.findViewById<EditText>(R.id.name_dialog_edit_text)
         val coinName = nameDialogView?.text.toString()
         if (coinName.isNotEmpty()) balanceHolder.add(coinName)
+        updateBot()
     }
 
     override fun onDialogNegativeClick(dialog: CryptoDialog?) {
@@ -196,14 +197,14 @@ class MainActivity : AppCompatActivity(), DialogListener {
         }
     }
 
-    private fun updateBot() {
+    fun updateBot() {
         if (!botIsActive) return
         if (!isBound) {
             val intent = Intent(this, BotService::class.java)
             bindService(intent, boundServiceConnection, Context.BIND_AUTO_CREATE)
             isBound = true
         } else {
-            botService!!.update()
+            botService?.update()
         }
     }
 

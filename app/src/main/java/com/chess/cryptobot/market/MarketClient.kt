@@ -18,7 +18,6 @@ import java.security.NoSuchAlgorithmException
 import java.time.Instant
 import java.time.ZoneId
 import java.util.*
-import java.util.concurrent.TimeUnit
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 import kotlin.collections.ArrayList
@@ -38,10 +37,7 @@ abstract class MarketClient(val url: String, apiKey: String?, secretKey: String?
 //        val interceptor = HttpLoggingInterceptor()
 //        interceptor.level = HttpLoggingInterceptor.Level.BODY
 
-        return OkHttpClient.Builder()
-                .connectTimeout(2, TimeUnit.MINUTES)
-                .readTimeout(45, TimeUnit.SECONDS)
-                .writeTimeout(20, TimeUnit.SECONDS)
+        return MarketFactory.MarketHttpBuilder.instance
                 //.addInterceptor(interceptor)
                 .build()
     }
@@ -55,8 +51,6 @@ abstract class MarketClient(val url: String, apiKey: String?, secretKey: String?
     }
 
     abstract fun initService(retrofit: Retrofit): Any
-
-    abstract fun initWebSocket()
 
     override fun keysIsEmpty(): Boolean {
         return apiKey.isEmpty() || secretKey.isEmpty()

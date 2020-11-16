@@ -31,7 +31,7 @@ class PairsHolder(fr: Fragment) : ContextHolder(fr) {
         availablePairsTask.executeOnExecutor(serialExecutor, 0)
     }
 
-    public override fun initPrefs(context: Context?): Preferences {
+    public override fun initPrefs(context: Context): Preferences {
         allPairsPrefs = AllPairsPreferences(context)
         prefs = PairsPreferences(context)
         return prefs

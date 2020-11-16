@@ -100,7 +100,8 @@ class BalanceFragment : MainFragment<BalanceAdapter.BalanceViewHolder>() {
 
     public override fun initRecyclerView(view: View): RecyclerView {
         val recyclerView: RecyclerView = view.findViewById(R.id.balanceRecyclerView)
-        val itemTouchHelper = ItemTouchHelper(SwipeBalanceCallback((holder as BalanceHolder)))
+        val activity: MainActivity = this.activity as MainActivity
+        val itemTouchHelper = ItemTouchHelper(SwipeBalanceCallback((holder as BalanceHolder), activity))
         itemTouchHelper.attachToRecyclerView(recyclerView)
         return recyclerView
     }

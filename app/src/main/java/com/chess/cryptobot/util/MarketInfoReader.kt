@@ -31,4 +31,8 @@ class MarketInfoReader(database: CryptoBotDatabase?) {
     fun getStepSize(pair: Pair): Double? {
         return minTradeSizeDao?.getByPairName(pair.name)?.stepSize
     }
+
+    fun getPriceFilter(pair: Pair): Double? {
+        return minTradeSizeDao?.getByPairName(pair.name)?.priceFilter
+    }
 }

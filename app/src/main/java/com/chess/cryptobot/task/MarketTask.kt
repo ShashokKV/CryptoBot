@@ -4,6 +4,7 @@ import android.os.AsyncTask
 import com.chess.cryptobot.content.ContextHolder
 import com.chess.cryptobot.exceptions.MarketException
 import com.chess.cryptobot.market.Market
+import com.chess.cryptobot.market.MarketFactory
 import java.lang.ref.WeakReference
 
 abstract class MarketTask<S, T>(holder: ContextHolder) : AsyncTask<S, Int?, T?>() {
@@ -19,7 +20,7 @@ abstract class MarketTask<S, T>(holder: ContextHolder) : AsyncTask<S, Int?, T?>(
         preMarketProcess(param)
         if (holder == null) return null
 
-        val markets = holder.markets
+        val markets = MarketFactory.getInstance(holder.context).getMarkets()
         markets.parallelStream().forEach { result = marketsLoop(it, param) }
         return postMarketProcess(result)
     }

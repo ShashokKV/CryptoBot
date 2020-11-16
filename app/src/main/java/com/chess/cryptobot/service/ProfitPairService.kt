@@ -4,6 +4,7 @@ import android.app.IntentService
 import android.app.NotificationManager
 import android.content.Intent
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.preference.PreferenceManager
 import com.chess.cryptobot.R
 import com.chess.cryptobot.content.balance.BalancePreferences
@@ -35,9 +36,12 @@ class ProfitPairService : IntentService("ProfitPairService") {
 
         preferences = PreferenceManager.getDefaultSharedPreferences(this)
         marketInfoReader = MarketInfoReader(this)
-        markets = MarketFactory().getMarkets(this, preferences)
+        markets = MarketFactory.getInstance(this).getMarkets()
         autoTrade = preferences.getBoolean(getString(R.string.auto_trade), false)
-        pairs = initPairsFromPrefs()
+        val pairNames = intent.getStringArrayListExtra("pairNames")
+        pairs = pairNames?.map { pairName -> Pair.fromPairName(pairName) }?.toMutableList()
+                ?: initPairsFromPrefs()
+        Log.d("ProfitParisService", "Starting on pairs: " + pairs.map { pair -> pair.name })
         minPercent = preferences.getString(getString(R.string.min_profit_percent), "3")?.toFloat()
                 ?: 3.0f
 
@@ -130,6 +134,7 @@ class ProfitPairService : IntentService("ProfitPairService") {
         intent.putExtra("minQuantity", marketInfoReader.getMinQuantity(pair))
         if (pair.askMarketName == Market.BINANCE_MARKET || pair.bidMarketName == Market.BINANCE_MARKET) {
             intent.putExtra("stepSize", marketInfoReader.getStepSize(pair))
+            intent.putExtra("priceFilter", marketInfoReader.getPriceFilter(pair))
         }
         startService(intent)
     }

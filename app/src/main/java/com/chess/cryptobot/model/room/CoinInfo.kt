@@ -5,20 +5,18 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity
-class CoinInfo {
+data class CoinInfo (
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id", typeAffinity = ColumnInfo.INTEGER)
-    var id = 0
-
+    var id: Int = 0,
     @ColumnInfo(name = "name", typeAffinity = ColumnInfo.TEXT)
-    var name: String? = null
-
+    var name: String?,
     @ColumnInfo(name = "marketName", typeAffinity = ColumnInfo.TEXT)
-    var marketName: String? = null
-
+    var marketName: String,
     @ColumnInfo(name = "status", typeAffinity = ColumnInfo.INTEGER)
-    var status: Boolean = true
-
+    var status: Boolean,
     @ColumnInfo(name = "fee", typeAffinity = ColumnInfo.REAL)
-    var fee: Double = 0.0
+    var fee: Double
+) {
+    constructor(name: String? ,marketName: String) : this(0, name, marketName, true, 0.0)
 }

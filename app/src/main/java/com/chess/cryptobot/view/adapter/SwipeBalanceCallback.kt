@@ -5,8 +5,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.chess.cryptobot.content.balance.BalanceHolder
 import com.chess.cryptobot.exceptions.ItemNotFoundException
 import com.chess.cryptobot.model.Balance
+import com.chess.cryptobot.view.MainActivity
 
-class SwipeBalanceCallback(private val balanceHolder: BalanceHolder) : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
+class SwipeBalanceCallback(private val balanceHolder: BalanceHolder, private val activity: MainActivity) : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
     override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, viewHolder1: RecyclerView.ViewHolder): Boolean {
         return false
     }
@@ -18,6 +19,7 @@ class SwipeBalanceCallback(private val balanceHolder: BalanceHolder) : ItemTouch
             return
         }
         balanceHolder.remove(balance)
+        activity.updateBot()
     }
 
 }

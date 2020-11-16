@@ -2,6 +2,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'com.google.protobuf'
 
 android {
     compileSdkVersion 29
@@ -31,6 +32,13 @@ android {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
+    sourceSets {
+        main {
+            proto {
+                srcDir 'src/main/java/com/chess/cryptobot/market/sockets/livecoin/proto'
+            }
+        }
+    }
     testOptions {
         unitTests.includeAndroidResources = true
     }
@@ -44,9 +52,29 @@ android {
     }
 }
 
+protobuf {
+    protoc {
+        artifact = 'com.google.protobuf:protoc:3.0.0'
+    }
+    plugins {
+        javalite {
+            artifact = 'com.google.protobuf:protoc-gen-javalite:3.0.0'
+        }
+    }
+    generateProtoTasks {
+        all().each { task ->
+            task.builtins {
+                remove java
+            }
+            task.plugins {
+                javalite { }
+            }
+        }
+    }
+}
+
 dependencies {
     def room_version = "2.2.5"
-//    def scarlet_version = "0.1.10"
 
     implementation "androidx.core:core-ktx:1.3.2"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
@@ -69,7 +97,8 @@ dependencies {
     implementation 'com.h6ah4i.android.widget.verticalseekbar:verticalseekbar:1.0.0'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.0'
     implementation 'com.neovisionaries:nv-websocket-client:2.10'
-    implementation 'com.jayway.jsonpath:json-path:2.4.0'
+    implementation 'com.google.protobuf:protobuf-lite:3.0.0'
+    implementation 'com.github.signalr4j:signalr4j:2.0.3'
     androidTestImplementation 'androidx.test:core:1.3.0'
     androidTestImplementation 'androidx.work:work-testing:2.4.0'
     androidTestImplementation 'androidx.test:runner:1.3.0'

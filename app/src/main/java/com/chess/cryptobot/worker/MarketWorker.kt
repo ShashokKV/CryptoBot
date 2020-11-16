@@ -2,7 +2,6 @@ package com.chess.cryptobot.worker
 
 import android.content.Context
 import android.util.Log
-import androidx.preference.PreferenceManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.chess.cryptobot.content.balance.BalancePreferences
@@ -30,12 +29,12 @@ import java.util.stream.Collectors
 class MarketWorker(private val context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
     private var allPairNames: HashSet<String>? = null
     private lateinit var markets: List<MarketClient?>
-    private var database: CryptoBotDatabase? = null
+    private lateinit var database: CryptoBotDatabase
     private lateinit var marketInfoReader: MarketInfoReader
 
     override fun doWork(): Result {
         allPairNames = AllPairsPreferences(context).items
-        markets = MarketFactory().getMarkets(context, PreferenceManager.getDefaultSharedPreferences(context))
+        markets = MarketFactory.getInstance(applicationContext).getMarkets()
         database = CryptoBotDatabase.getInstance(context)
         marketInfoReader = MarketInfoReader(database)
 
@@ -54,8 +53,8 @@ class MarketWorker(private val context: Context, workerParams: WorkerParameters)
     private fun infoOnProfitPairs() {
         val pairs: MutableList<Pair> = getTickerPairs(markets)
         saveProfitPairsToDatabase(pairs.stream()
-                .peek{ pair -> PairResponseEnricher(pair).enrichWithMinPercent(null)}
-                .filter{pair -> pair.percent>0}
+                .peek { pair -> PairResponseEnricher(pair).enrichWithMinPercent(null) }
+                .filter { pair -> pair.percent > 0 }
                 .collect(Collectors.toList()))
     }
 
@@ -124,14 +123,13 @@ class MarketWorker(private val context: Context, workerParams: WorkerParameters)
     }
 
     private fun updatePairsWithTradeLimits(pairNames: MutableList<String>, tradeLimits: MutableMap<String, TradeLimitResponse?>) {
-        val minTradeSizeDao = database?.minTradeSizeDao
+        val minTradeSizeDao = database.minTradeSizeDao
         pairNames.forEach { pairName ->
             var resultQuantity = 0.0
             var insert = false
             var pairMinTradeSize = minTradeSizeDao?.getByPairName(pairName)
             if (pairMinTradeSize == null) {
-                pairMinTradeSize = PairMinTradeSize()
-                pairMinTradeSize.pairName = pairName
+                pairMinTradeSize = PairMinTradeSize(pairName = pairName)
                 insert = true
             }
             markets.forEach { market ->
@@ -147,6 +145,8 @@ class MarketWorker(private val context: Context, workerParams: WorkerParameters)
                         val binanceResponse = response as BinanceResponse
                         pairMinTradeSize.stepSize = binanceResponse.getStepSizeByName(pair.getPairNameForMarket(BINANCE_MARKET))
                                 ?: 1.00000000
+                        pairMinTradeSize.priceFilter = binanceResponse.getPriceFilterByName(pair.getPairNameForMarket(BINANCE_MARKET))
+                                ?: 0.00000001
                     }
                 }
             }
@@ -160,7 +160,7 @@ class MarketWorker(private val context: Context, workerParams: WorkerParameters)
     }
 
     private fun infoOnCoins() {
-        val coinInfoDao = database?.coinInfoDao
+        val coinInfoDao = database.coinInfoDao
         markets.parallelStream().forEach {
             it ?: return@forEach
             val currencies = it.getCurrencies()
@@ -168,8 +168,11 @@ class MarketWorker(private val context: Context, workerParams: WorkerParameters)
                 for (currency in currencies) {
                     var coinInfo = coinInfoDao?.getByNameAndMarketName(currency.currencyName, it.getMarketName())
                     if (coinInfo == null) {
-                        coinInfo = CoinInfo()
-                        coinInfo.name = currency.currencyName
+                        coinInfo = CoinInfo(
+                                name = currency.currencyName,
+                                marketName = it.getMarketName()
+                        )
+                        coinInfo.name = currency.currencyName!!
                         coinInfo.marketName = it.getMarketName()
                         updateCoinInfo(coinInfo, currency)
                         coinInfoDao?.insert(coinInfo)
@@ -194,7 +197,7 @@ class MarketWorker(private val context: Context, workerParams: WorkerParameters)
     }
 
     private fun cleanDatabase() {
-        val dao = database!!.profitPairDao
+        val dao = database.profitPairDao
         val filterDate = LocalDateTime.now().minusDays(31)
         val profitPairs = dao!!.getLowerThanDate(filterDate)
         dao.deleteAll(profitPairs)
@@ -202,13 +205,14 @@ class MarketWorker(private val context: Context, workerParams: WorkerParameters)
 
     private fun saveProfitPairsToDatabase(pairs: List<Pair>) {
         if (pairs.isEmpty()) return
-        val pairDao = database!!.profitPairDao
+        val pairDao = database.profitPairDao
         val profitPairs: MutableList<ProfitPair?> = ArrayList()
         pairs.forEach { pair: Pair ->
-            val profitPair = ProfitPair()
-            profitPair.dateCreated = LocalDateTime.now()
-            profitPair.pairName = pair.name
-            profitPair.percent = pair.percent
+            val profitPair = ProfitPair(
+                    dateCreated = LocalDateTime.now(),
+                    pairName = pair.name,
+                    percent = pair.percent
+            )
             profitPairs.add(profitPair)
         }
         pairDao!!.insertAll(profitPairs)

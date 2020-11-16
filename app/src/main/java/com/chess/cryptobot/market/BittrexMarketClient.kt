@@ -26,7 +26,6 @@ class BittrexMarketClient internal constructor(url: String, apiKey: String?, sec
     init {
         algorithm = "HmacSHA512"
         service = initService(initRetrofit(initGson())) as BittrexMarketService
-        initWebSocket()
     }
 
     override fun getMarketName(): String {
@@ -49,11 +48,6 @@ class BittrexMarketClient internal constructor(url: String, apiKey: String?, sec
     override fun initService(retrofit: Retrofit): Any {
         return retrofit.create(BittrexMarketService::class.java)
     }
-
-    override fun initWebSocket() {
-
-    }
-
 
     @Throws(BittrexException::class)
     override fun getAmount(coinName: String): Double {
@@ -192,7 +186,7 @@ class BittrexMarketClient internal constructor(url: String, apiKey: String?, sec
     }
 
     @Throws(MarketException::class)
-    override fun getHistory(context: Context?): List<History> {
+    override fun getHistory(context: Context): List<History> {
         if (keysIsEmpty()) return listOf(History())
         path = url + "orders/closed"
         val response: List<*>

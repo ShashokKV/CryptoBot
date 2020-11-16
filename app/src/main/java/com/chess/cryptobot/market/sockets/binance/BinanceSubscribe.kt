@@ -1,4 +1,4 @@
-package com.chess.cryptobot.model.websocket.binance
+package com.chess.cryptobot.market.sockets.binance
 
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
