@@ -11,11 +11,11 @@ data class ProfitPair (
     @ColumnInfo(name = "id", typeAffinity = ColumnInfo.INTEGER)
     var id: Int = 0,
     @ColumnInfo(name = "pairName", typeAffinity = ColumnInfo.TEXT)
-    var pairName: String,
+    var pairName: String?,
     @ColumnInfo(name = "percent", typeAffinity = ColumnInfo.REAL)
     var percent: Float,
     @ColumnInfo(name = "dateCreated")
-    var dateCreated: LocalDateTime
+    var dateCreated: LocalDateTime?
 ) {
 
     override fun equals(other: Any?): Boolean {

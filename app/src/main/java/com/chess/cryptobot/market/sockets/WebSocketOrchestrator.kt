@@ -2,7 +2,6 @@ package com.chess.cryptobot.market.sockets
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import androidx.preference.PreferenceManager
 import com.chess.cryptobot.R
 import com.chess.cryptobot.market.Market.Companion.BINANCE_MARKET
@@ -32,11 +31,8 @@ class WebSocketOrchestrator(val context: Context, val pairs: MutableList<Pair>) 
     }
 
     fun subscribeAll() {
-        webSockets.values.forEach {
-            if (!it.isConnected) it.connect()
-        }
-        webSockets.values.forEach {
-            if (it.isConnected) it.subscribe(pairs)
+        webSockets.values.parallelStream().forEach {
+            if (!it.isConnected) it.connectAndSubscribe(pairs)
         }
         stopFlag = false
     }
@@ -68,7 +64,6 @@ class WebSocketOrchestrator(val context: Context, val pairs: MutableList<Pair>) 
     }
 
     fun checkPairs() {
-        val pairNames = ArrayList<String>()
         bidsMap.keys.forEach { pairName ->
             val bids = bidsMap[pairName]
             val asks = asksMap[pairName]
@@ -77,22 +72,16 @@ class WebSocketOrchestrator(val context: Context, val pairs: MutableList<Pair>) 
             val ask: Double = asks?.values?.minOrNull() ?: Double.MAX_VALUE
 
             if (((bid - ask) / bid * 100) > minPercent) {
-                pairNames.add(pairName)
+                runServiceByWebSocketSignal()
             }
-        }
-
-        if (pairNames.isNotEmpty()) {
-            runServiceByWebSocketSignal(pairNames)
         }
     }
 
-    private fun runServiceByWebSocketSignal(pairNames: ArrayList<String>) {
+    private fun runServiceByWebSocketSignal() {
         if (stopFlag) return
         stopFlag = true
         disconnectAll()
-        Log.d("WebSocketOrchestrator", "pairNames: " + pairNames.toArray())
         val intent = Intent(context, ProfitPairService::class.java)
-        intent.putStringArrayListExtra("pairNames", pairNames)
         context.startService(intent)
     }
 

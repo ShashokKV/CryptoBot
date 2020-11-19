@@ -8,11 +8,9 @@ import com.chess.cryptobot.view.MainFragment
 
 abstract class ContextHolder protected constructor(private val fr: Fragment) {
     var viewItems: MutableList<ViewItem> = ArrayList()
+    val context: Context = fr.requireContext()
 
     lateinit var prefs: Preferences
-
-    val context: Context
-        get() = this.fr.requireContext()
 
     protected val mainFragment: MainFragment<*>
         get() = this.fr as MainFragment<*>

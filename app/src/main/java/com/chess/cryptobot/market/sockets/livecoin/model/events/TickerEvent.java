@@ -1,9 +1,10 @@
 package com.chess.cryptobot.market.sockets.livecoin.model.events;
 
+import androidx.annotation.NonNull;
+
 import java.math.BigDecimal;
 
 public class TickerEvent {
-    private String channelId;
     private BigDecimal last;
     private BigDecimal high;
     private BigDecimal low;
@@ -13,14 +14,6 @@ public class TickerEvent {
     private BigDecimal minAsk;
     private BigDecimal bestBid;
     private BigDecimal bestAsk;
-
-    public String getChannelId() {
-        return channelId;
-    }
-
-    public void setChannelId(String channelId) {
-        this.channelId = channelId;
-    }
 
     public BigDecimal getLast() {
         return last;
@@ -94,10 +87,10 @@ public class TickerEvent {
         this.bestAsk = bestAsk;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "Ticker{" +
-                "channelId='" + channelId + '\'' +
                 ", last=" + last +
                 ", high=" + high +
                 ", low=" + low +

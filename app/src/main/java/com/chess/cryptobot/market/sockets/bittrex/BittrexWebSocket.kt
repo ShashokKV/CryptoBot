@@ -11,6 +11,7 @@ import com.github.signalr4j.client.hubs.HubProxy
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import java.io.UnsupportedEncodingException
+import java.net.ConnectException
 import java.nio.charset.Charset
 import java.util.*
 import java.util.zip.DataFormatException
@@ -18,6 +19,7 @@ import java.util.zip.Inflater
 
 
 class BittrexWebSocket(orchestrator: WebSocketOrchestrator) : MarketWebSocket(orchestrator) {
+    private val tag = BittrexWebSocket::class.qualifiedName
     override val socketUrl = "https://socket-v3.bittrex.com/signalr"
     private var hubConnection: HubConnection
     private var hubProxy: HubProxy
@@ -34,15 +36,26 @@ class BittrexWebSocket(orchestrator: WebSocketOrchestrator) : MarketWebSocket(or
         hubProxy = hubConnection.createHubProxy("c3")
     }
 
-    override fun connect() {
-        hubConnection.start().get()
+    override fun connectAndSubscribe(pairs: List<Pair>) {
+        try {
+            hubConnection.start().get()
+            subscribe(pairs)
+        } catch (e: Throwable) {
+            Log.e(tag, e.message?:e.stackTraceToString(), e)
+        }
+
     }
 
     override fun disconnect() {
-        hubConnection.stop()
+        try {
+            hubConnection.stop()
+        } catch (e: ConnectException) {
+            Log.e(tag, e.message?:e.stackTraceToString(), e)
+        }
     }
 
-    override fun subscribe(pairs: List<Pair>) {
+    private fun subscribe(pairs: List<Pair>) {
+        if (!isConnected) return
         val channels = pairs.map { pair -> "ticker_" + pair.getPairNameForMarket(marketName) }
 
         val msgHandler = MsgHandler()
@@ -51,13 +64,13 @@ class BittrexWebSocket(orchestrator: WebSocketOrchestrator) : MarketWebSocket(or
             val response: Array<SocketResponse> = hubProxy.invoke(Array<SocketResponse>::class.java, "Subscribe", channels).get()
             for (i in channels.indices) {
                 if (response[i].Success == true) {
-                    Log.d("BittrexWebSocket", channels[i] + ": " + "Success")
+                    Log.d(tag, channels[i] + ": " + "Success")
                 } else {
-                    Log.e("BittrexWebSocket", channels[i] + ": " + response[i].ErrorCode)
+                    Log.e(tag, channels[i] + ": " + response[i].ErrorCode)
                 }
             }
         } catch (e: Exception) {
-            Log.e("BittrexWebSocket", e.message ?: e.stackTraceToString(), e)
+            Log.e(tag, e.message ?: e.stackTraceToString(), e)
         }
     }
 
@@ -68,7 +81,7 @@ class BittrexWebSocket(orchestrator: WebSocketOrchestrator) : MarketWebSocket(or
                 val pairName = msg.get("symbol").asString
                 passToOrchestrator(Pair.normalizeFromMarketPairName(pairName, marketName), msg.get("bidRate").asDouble, msg.get("askRate").asDouble)
             } catch (e: Exception) {
-                Log.e("BittrexWebSocket", "Error decompressing message - $e - $compressedData", e)
+                Log.e(tag, "Error decompressing message - $e - $compressedData", e)
             }
         }
     }

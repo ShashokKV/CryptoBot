@@ -8,7 +8,7 @@ import androidx.room.TypeConverters
 import com.chess.cryptobot.model.room.converter.TimestampConverter
 import com.chess.cryptobot.util.SingletonHolder
 
-@Database(version = 6, entities = [
+@Database(version = 7, entities = [
     ProfitPair::class,
     CryptoBalance::class,
     BalanceSyncTicker::class,

@@ -71,7 +71,7 @@ class SinglePairGraphTask(pairsGraphFragment: PairsGraphFragment, private val da
     }
 
     private fun countAveragePercent(pair: ProfitPair) {
-        if (pair.id==0) {
+        if (pair.id == 0) {
             pair.percent = 0f
             return
         }
@@ -142,8 +142,8 @@ class SinglePairGraphTask(pairsGraphFragment: PairsGraphFragment, private val da
     }
 
     private fun customizeXAxis(xAxis: XAxis, textColor: Int, axisNames: List<String>?) {
-        xAxis.mAxisMinimum=0f
-        xAxis.mAxisMaximum=daysToShow.toFloat()
+        xAxis.mAxisMinimum = 0f
+        xAxis.mAxisMaximum = daysToShow.toFloat()
         xAxis.calculate(0f, daysToShow.toFloat())
         xAxis.granularity = 1f
         val formatter: ValueFormatter = object : ValueFormatter() {

@@ -3,6 +3,7 @@ package com.chess.cryptobot.service
 import android.app.IntentService
 import android.app.NotificationManager
 import android.content.Intent
+import android.util.Log
 import com.chess.cryptobot.content.balance.BalancePreferences
 import com.chess.cryptobot.exceptions.MarketException
 import com.chess.cryptobot.market.Market
@@ -31,6 +32,7 @@ class TradingService : IntentService("TradingService") {
     private var minEthAmount = 0.025
     private var minUsdtAmount = 10.0
     private val scope = CoroutineScope(SupervisorJob())
+    private val tag = TradingService::class.qualifiedName
 
     override fun onHandleIntent(intent: Intent?) {
         if (intent == null) return
@@ -47,7 +49,10 @@ class TradingService : IntentService("TradingService") {
             return
         }
         val trader = Trader(pair)
-        if (trader.quantity <= minMarketQuantity) return
+        if (trader.quantity <= minMarketQuantity) {
+            Log.d(tag, pair.name + " quantity to low, aborting..")
+            return
+        }
         val buyResult = scope.async { trader.buy() }
         val sellResult = scope.async { trader.sell() }
         runBlocking {
@@ -70,6 +75,7 @@ class TradingService : IntentService("TradingService") {
 
     private fun initFromIntent(intent: Intent) {
         pair = intent.getSerializableExtra(Pair::class.java.name) as Pair
+        Log.d(tag, "Start trading on pair: " + pair.name)
         workingOnPair = pair.name
         minMarketQuantity = intent.getDoubleExtra("minQuantity", 0.0)
         stepSize = intent.getDoubleExtra("stepSize", 0.00000001)
@@ -152,10 +158,10 @@ class TradingService : IntentService("TradingService") {
 
         private fun countMinQuantity(bidQuantity: Double, askQuantity: Double): Double {
             val minAvailableAmount = if (baseAmount < marketAmount) baseAmount else marketAmount
-            quantity = if (bidQuantity < askQuantity) bidQuantity else askQuantity
+            var quantity = if (bidQuantity < askQuantity) bidQuantity else askQuantity
             if (quantity > minAvailableAmount) quantity = minAvailableAmount
             //-1% for trading fee
-            quantity = formatAmount(quantity - quantity / 100)
+            quantity -= quantity / 100
             val minBaseAmount = when(pair.baseName) {
                 "BTC" -> minBtcAmount
                 "ETH" -> minEthAmount
@@ -169,13 +175,10 @@ class TradingService : IntentService("TradingService") {
                 else -> 0.0
             }
 
-            if (quantity * askPrice < minBaseAmount) quantity = 0.0
-            if (quantity * bidPrice < minMarketAmount) quantity = 0.0
+            if (quantity * askPrice < minBaseAmount) return 0.0
+            if (quantity * bidPrice < minMarketAmount) return 0.0
 
-            if (stepSize>0.00000001) {
-                quantity = quantity.toBigDecimal().setScale(computeScale(stepSize), RoundingMode.DOWN).toDouble()
-            }
-            return quantity
+            return quantity.toBigDecimal().setScale(computeScale(stepSize), RoundingMode.DOWN).toDouble()
         }
 
         private fun computeScale(testValue: Double): Int {

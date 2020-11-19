@@ -15,9 +15,7 @@ abstract class MarketWebSocket(private val orchestrator: WebSocketOrchestrator) 
         }
     }
 
-    abstract fun connect()
+    abstract fun connectAndSubscribe(pairs: List<Pair>)
 
     abstract fun disconnect()
-
-    abstract fun subscribe(pairs: List<Pair>)
 }

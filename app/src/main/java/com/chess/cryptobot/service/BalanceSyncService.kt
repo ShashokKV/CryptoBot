@@ -5,6 +5,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
 import android.graphics.drawable.Icon
+import android.util.Log
 import com.chess.cryptobot.R
 import com.chess.cryptobot.content.balance.BalancePreferences
 import com.chess.cryptobot.enricher.PairResponseEnricher
@@ -37,16 +38,18 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
     private var makeNotifications = false
     private var actionIntent: PendingIntent? = null
     private var forceUpdate = false
+    private val tag = BalanceSyncService::class.qualifiedName
 
     override fun onHandleIntent(intent: Intent?) {
         if (intent == null) return
+        val coinNames = intent.getStringArrayListExtra("coinNames")
+        Log.d(tag, "Start balance sync on coins: " + coinNames?.joinToString(", "))
         marketInfoReader = MarketInfoReader(this)
         makeNotifications = intent.getBooleanExtra("makeNotifications", false)
         if (makeNotifications) makeNotification("Balance sync in progress...")
         val balancePreferences = BalancePreferences(this)
         minBtcAmount = balancePreferences.getMinBtcAmount()
         minBtcAmount += minBtcAmount / 100
-        val coinNames = intent.getStringArrayListExtra("coinNames")
         forceUpdate = intent.getBooleanExtra("forceUpdate", false)
 
         val markets = MarketFactory.getInstance(this).getWithdrawalMarkets()

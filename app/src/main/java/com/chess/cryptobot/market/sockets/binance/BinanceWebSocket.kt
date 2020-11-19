@@ -16,6 +16,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.Future
 
 class BinanceWebSocket(orchestrator: WebSocketOrchestrator) : MarketWebSocket(orchestrator) {
+    private val tag = BinanceWebSocket::class.qualifiedName
     override val socketUrl = "wss://stream.binance.com:9443/ws"
     private var webSocket: WebSocket?
     private lateinit var subscribeMessage: String
@@ -34,7 +35,7 @@ class BinanceWebSocket(orchestrator: WebSocketOrchestrator) : MarketWebSocket(or
         return webSocket
     }
 
-    override fun connect() {
+    override fun connectAndSubscribe(pairs: List<Pair>) {
         if (webSocket == null) webSocket = createWebSocket()
         if (webSocket!!.state != WebSocketState.CREATED) {
             webSocket = webSocket!!.recreate()
@@ -43,13 +44,14 @@ class BinanceWebSocket(orchestrator: WebSocketOrchestrator) : MarketWebSocket(or
         val future: Future<WebSocket> = webSocket!!.connect(es)
         try {
             future.get()
-            Log.d("BinanceWebSocket", "CONNECTED")
+            Log.d(tag, "CONNECTED")
+            subscribe(pairs)
         } catch (e: ExecutionException) {
-            Log.e("BinanceWebSocket", e.message ?: e.stackTraceToString(), e)
+            Log.e(tag, e.message ?: e.stackTraceToString(), e)
         }
     }
 
-    override fun subscribe(pairs: List<Pair>) {
+    private fun subscribe(pairs: List<Pair>) {
         if (isConnected) {
             prepareSubscribeMessage(pairs)
             webSocket?.sendText(subscribeMessage)

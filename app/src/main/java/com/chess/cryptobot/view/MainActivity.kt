@@ -56,8 +56,6 @@ class MainActivity : AppCompatActivity(), DialogListener {
                 add(R.id.include, pairFragment, "2")
                 hide(pairFragment)
                 show(pairFragment)
-            }
-            fragmentManager.commit {
                 add(R.id.include, balanceFragment, "1")
                 hide(balanceFragment)
             }
@@ -67,8 +65,6 @@ class MainActivity : AppCompatActivity(), DialogListener {
             fragmentManager.commit {
                 add(R.id.include, pairFragment, "2")
                 hide(pairFragment)
-            }
-            fragmentManager.commit {
                 add(R.id.include, balanceFragment, "1")
                 show(balanceFragment)
             }
@@ -78,8 +74,6 @@ class MainActivity : AppCompatActivity(), DialogListener {
         fragmentManager.commit {
             add(R.id.include, graphFragment, "3")
             hide(graphFragment)
-        }
-        fragmentManager.commit {
             add(R.id.include, historyPagerFragment, "4")
             hide(historyPagerFragment)
         }

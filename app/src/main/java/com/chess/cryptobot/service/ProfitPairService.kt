@@ -24,12 +24,14 @@ import kotlin.collections.ArrayList
 
 
 class ProfitPairService : IntentService("ProfitPairService") {
+
     private lateinit var markets: List<MarketClient?>
     private lateinit var marketInfoReader: MarketInfoReader
     private lateinit var preferences: SharedPreferences
     private var autoTrade = false
     private lateinit var pairs: MutableList<Pair>
     private var minPercent = 0.0f
+    private val tag = ProfitPairService::class.qualifiedName
 
     override fun onHandleIntent(intent: Intent?) {
         if (intent == null) return
@@ -38,10 +40,8 @@ class ProfitPairService : IntentService("ProfitPairService") {
         marketInfoReader = MarketInfoReader(this)
         markets = MarketFactory.getInstance(this).getMarkets()
         autoTrade = preferences.getBoolean(getString(R.string.auto_trade), false)
-        val pairNames = intent.getStringArrayListExtra("pairNames")
-        pairs = pairNames?.map { pairName -> Pair.fromPairName(pairName) }?.toMutableList()
-                ?: initPairsFromPrefs()
-        Log.d("ProfitParisService", "Starting on pairs: " + pairs.map { pair -> pair.name })
+        pairs = initPairsFromPrefs()
+        Log.d(tag, "Starting on pairs: " + pairs.map { pair -> pair.name })
         minPercent = preferences.getString(getString(R.string.min_profit_percent), "3")?.toFloat()
                 ?: 3.0f
 

@@ -11,6 +11,7 @@ import com.neovisionaries.ws.client.WebSocketAdapter
 import com.neovisionaries.ws.client.WebSocketFrame
 
 class BinanceWebSocketListener(private val binanceWebSocket: BinanceWebSocket) : WebSocketAdapter() {
+    private val tag = BinanceWebSocketListener::class.qualifiedName
 
     override fun onTextMessage(websocket: WebSocket?, message: String?) {
         if (message == null || message.isEmpty()) return
@@ -19,7 +20,7 @@ class BinanceWebSocketListener(private val binanceWebSocket: BinanceWebSocket) :
             checkError(jsonMessage)
             parseMessage(jsonMessage)
         } catch (e: Exception) {
-            Log.e("BinanceWebSocketListener", e.message ?: e.stackTraceToString(), e)
+            Log.e(tag, e.message ?: e.stackTraceToString(), e)
         }
     }
 

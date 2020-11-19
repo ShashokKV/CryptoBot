@@ -9,12 +9,13 @@ import com.neovisionaries.ws.client.WebSocketAdapter
 import java.util.function.Consumer
 
 class LivecoinWebSocketListener(private val livecoinWebSocket: LivecoinWebSocket): WebSocketAdapter() {
+    private val tag = LivecoinWebSocketListener::class.qualifiedName
 
     override fun onBinaryMessage(ws: WebSocket?, binary: ByteArray?) {
         try {
             parseMessage(binary)
         } catch (e: Exception) {
-            Log.e("LivecoinWebSocketListener", e.message?:e.stackTraceToString(), e)
+            Log.e(tag, e.message?:e.stackTraceToString(), e)
         }
     }
 
@@ -30,7 +31,7 @@ class LivecoinWebSocketListener(private val livecoinWebSocket: LivecoinWebSocket
             })
         } else if (response.meta.responseType == WsResponseMetaData.WsResponseMsgType.ERROR) {
             val message = ErrorResponse.parseFrom(response.msg)
-           Log.e("LivecoinWebSocketListener", message.message)
+           Log.e(tag, message.message)
         }
     }
 }

@@ -18,6 +18,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.Future
 
 class LivecoinWebSocket(orchestrator: WebSocketOrchestrator) : MarketWebSocket(orchestrator) {
+    private val tag = LivecoinWebSocket::class.qualifiedName
     override val socketUrl = "wss://ws.api.livecoin.net/ws/beta2"
     private var webSocket: WebSocket?
     override val isConnected: Boolean
@@ -36,7 +37,7 @@ class LivecoinWebSocket(orchestrator: WebSocketOrchestrator) : MarketWebSocket(o
         return webSocket
     }
 
-    override fun connect() {
+    override fun connectAndSubscribe(pairs: List<Pair>) {
         if (webSocket == null) webSocket = createWebSocket()
         if (webSocket!!.state != WebSocketState.CREATED) {
             webSocket = webSocket!!.recreate()
@@ -46,13 +47,14 @@ class LivecoinWebSocket(orchestrator: WebSocketOrchestrator) : MarketWebSocket(o
         val future: Future<WebSocket> = webSocket!!.connect(es)
         try {
             future.get()
-            Log.d("LivecoinWebSocket", "CONNECTED")
+            Log.d(tag, "CONNECTED")
+            subscribe(pairs)
         } catch (e: ExecutionException) {
-            Log.e("LivecoinWebSocket", e.message ?: e.stackTraceToString(), e)
+            Log.e(tag, e.message ?: e.stackTraceToString(), e)
         }
     }
 
-    override fun subscribe(pairs: List<Pair>) {
+    private fun subscribe(pairs: List<Pair>) {
         if (isConnected) {
             pairs.forEach { pair ->
                 subscribe(pair.getPairNameForMarket(marketName))
