@@ -6,7 +6,7 @@ import androidx.preference.PreferenceManager
 import com.chess.cryptobot.R
 import com.chess.cryptobot.market.Market.Companion.BINANCE_MARKET
 import com.chess.cryptobot.market.Market.Companion.BITTREX_MARKET
-import com.chess.cryptobot.market.Market.Companion.LIVECOIN_MARKET
+import com.chess.cryptobot.market.Market.Companion.POLONIEX_MARKET
 import com.chess.cryptobot.market.sockets.binance.BinanceWebSocket
 import com.chess.cryptobot.market.sockets.bittrex.BittrexWebSocket
 import com.chess.cryptobot.market.sockets.livecoin.LivecoinWebSocket
@@ -27,7 +27,7 @@ class WebSocketOrchestrator(val context: Context, val pairs: MutableList<Pair>) 
                 ?: 3.0f
         webSockets[BINANCE_MARKET] = BinanceWebSocket(this)
         webSockets[BITTREX_MARKET] = BittrexWebSocket(this)
-        webSockets[LIVECOIN_MARKET] = LivecoinWebSocket(this)
+        webSockets[POLONIEX_MARKET] = LivecoinWebSocket(this)
     }
 
     fun subscribeAll() {

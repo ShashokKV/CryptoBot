@@ -96,8 +96,7 @@ class ProfitPairService : IntentService("ProfitPairService") {
 
         markets.parallelStream()
                 .forEach { market ->
-                    val response: OrderBookResponse
-                    response = try {
+                    val response: OrderBookResponse = try {
                         market!!.getOrderBook(pair.getPairNameForMarket(market.getMarketName()))
                     } catch (e: MarketException) {
                         if (!isNotificationShown) makeNotification("Get order book exception", e.message)

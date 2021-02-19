@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName
 import java.time.*
 import kotlin.math.roundToLong
 
-class LivecoinOrdersResponse : LivecoinResponse() {
+class LivecoinOrdersResponse : PoloniexResponse() {
     @SerializedName("data")
     @Expose
     val data: List<Datum>? = null

@@ -1,7 +1,7 @@
 package com.chess.cryptobot.market.sockets.livecoin
 
 import android.util.Log
-import com.chess.cryptobot.market.Market.Companion.LIVECOIN_MARKET
+import com.chess.cryptobot.market.Market.Companion.POLONIEX_MARKET
 import com.chess.cryptobot.market.sockets.MarketWebSocket
 import com.chess.cryptobot.market.sockets.WebSocketOrchestrator
 import com.chess.cryptobot.market.sockets.livecoin.proto.LcWsApi.*
@@ -25,7 +25,7 @@ class LivecoinWebSocket(orchestrator: WebSocketOrchestrator) : MarketWebSocket(o
         get() = webSocket?.isOpen ?: false
 
     override val marketName: String
-        get() = LIVECOIN_MARKET
+        get() = POLONIEX_MARKET
 
     init {
         webSocket = createWebSocket()

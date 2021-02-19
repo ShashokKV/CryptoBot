@@ -1,7 +1,7 @@
 package com.chess.cryptobot.market.sockets.livecoin
 
 import android.util.Log
-import com.chess.cryptobot.market.Market.Companion.LIVECOIN_MARKET
+import com.chess.cryptobot.market.Market.Companion.POLONIEX_MARKET
 import com.chess.cryptobot.market.sockets.livecoin.proto.LcWsApi.*
 import com.chess.cryptobot.model.Pair
 import com.neovisionaries.ws.client.WebSocket
@@ -26,7 +26,7 @@ class LivecoinWebSocketListener(private val livecoinWebSocket: LivecoinWebSocket
             message.dataList.forEach(Consumer { t: TickerEvent? ->
                 val bid = t?.bestBid?.toDouble()?: Double.MAX_VALUE
                 val ask = t?.bestAsk?.toDouble()?:0.0
-                val pair = Pair.normalizeFromMarketPairName(message.currencyPair, LIVECOIN_MARKET)
+                val pair = Pair.normalizeFromMarketPairName(message.currencyPair, POLONIEX_MARKET)
                 livecoinWebSocket.passToOrchestrator(pair, bid, ask)
             })
         } else if (response.meta.responseType == WsResponseMetaData.WsResponseMsgType.ERROR) {

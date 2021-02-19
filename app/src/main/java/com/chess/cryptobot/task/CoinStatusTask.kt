@@ -31,7 +31,7 @@ class CoinStatusTask(holder: ContextHolder?) : MarketTask<Int, Int>(holder!!) {
             market.getMarketName() == Market.BINANCE_MARKET -> {
                 updateStatuses(binanceStatuses, market.getCurrencies())
             }
-            market.getMarketName() == Market.LIVECOIN_MARKET -> {
+            market.getMarketName() == Market.POLONIEX_MARKET -> {
                 updateStatuses(livecoinStatuses, market.getCurrencies())
             }
         }

@@ -4,7 +4,7 @@ import com.chess.cryptobot.model.response.TradeLimitResponse
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 
-class LivecoinTradeLimitResponse : LivecoinResponse(), TradeLimitResponse {
+class LivecoinTradeLimitResponse : PoloniexResponse(), TradeLimitResponse {
     @SerializedName("restrictions")
     @Expose
     private val restrictions: List<Restriction>? = null

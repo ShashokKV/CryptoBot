@@ -15,7 +15,7 @@ class MarketInfoReader(database: CryptoBotDatabase?) {
     fun checkCoinStatus(coinName: String): Boolean {
         val bittrexStatus = coinInfoDao?.getByNameAndMarketName(coinName, Market.BITTREX_MARKET)?.status ?: true
         val binanceStatus = coinInfoDao?.getByNameAndMarketName(coinName, Market.BINANCE_MARKET)?.status ?: true
-        val livecoinStatus = coinInfoDao?.getByNameAndMarketName(coinName, Market.LIVECOIN_MARKET)?.status ?: true
+        val livecoinStatus = coinInfoDao?.getByNameAndMarketName(coinName, Market.POLONIEX_MARKET)?.status ?: true
         return bittrexStatus && binanceStatus && livecoinStatus
     }
 

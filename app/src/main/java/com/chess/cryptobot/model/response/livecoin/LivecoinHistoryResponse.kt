@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName
 import java.time.*
 import kotlin.math.roundToLong
 
-class LivecoinHistoryResponse : LivecoinResponse(), HistoryResponse {
+class LivecoinHistoryResponse : PoloniexResponse(), HistoryResponse {
     @SerializedName("type")
     @Expose
     override val historyAction: String? = null

@@ -52,7 +52,7 @@ interface Market {
     fun getWithdrawHistory(): List<History>
 
     companion object {
-        const val LIVECOIN_MARKET = "livecoin"
+        const val POLONIEX_MARKET = "poloniex"
         const val BITTREX_MARKET = "bittrex"
         const val BINANCE_MARKET = "binance"
         const val BINANCE_WITHDRAWAL_MARKET = "binanceWithdrawal"

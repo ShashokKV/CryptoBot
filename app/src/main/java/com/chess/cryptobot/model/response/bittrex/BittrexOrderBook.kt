@@ -14,11 +14,11 @@ class BittrexOrderBook: OrderBookResponse, BittrexMarketResponse() {
     @Expose
     val ask: List<BittrexPrice>? = null
 
-    override fun bids(): List<Price?>? {
+    override fun bids(): List<Price?> {
         return parsePrices(bid)
     }
 
-    override fun asks(): List<Price?>? {
+    override fun asks(): List<Price?> {
         return parsePrices(ask)
     }
 

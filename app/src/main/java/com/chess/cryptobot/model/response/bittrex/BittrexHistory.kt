@@ -66,16 +66,16 @@ class BittrexHistory : HistoryResponse, BittrexMarketResponse() {
     override val historyAmount: Double?
         get() = quantity
 
-    override val historyPrice: Double?
+    override val historyPrice: Double
         get() = limit
 
-    override val historyAction: String?
+    override val historyAction: String
         get() {
             if (direction != null) return direction
             return if (confirmations != null) "deposit" else "withdraw"
         }
 
-    override val progress: Int?
+    override val progress: Int
         get() {
             if (quantity == null || fillQuantity == null) return 0
             return if (quantity == 0.0) 0 else ((quantity - fillQuantity) / quantity * 100).toInt()

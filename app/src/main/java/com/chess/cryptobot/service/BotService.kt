@@ -92,7 +92,7 @@ class BotService : Service() {
         super.onDestroy()
     }
 
-    override fun onBind(intent: Intent): IBinder? {
+    override fun onBind(intent: Intent): IBinder {
         return botBinder
     }
 

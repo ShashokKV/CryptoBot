@@ -21,7 +21,7 @@ class BittrexCurrency : CurrenciesResponse, BittrexMarketResponse() {
     @Expose
     val logoUrl: String? = null
 
-    override val isActive: Boolean?
+    override val isActive: Boolean
         get() = status?.equals("ONLINE") ?: false
 
     override val fee: Double

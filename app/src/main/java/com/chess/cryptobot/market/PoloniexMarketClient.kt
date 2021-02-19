@@ -1,8 +1,8 @@
 package com.chess.cryptobot.market
 
 import android.content.Context
-import com.chess.cryptobot.api.LivecoinMarketService
-import com.chess.cryptobot.exceptions.LivecoinException
+import com.chess.cryptobot.api.PoloniexMarketService
+import com.chess.cryptobot.exceptions.PoloniexException
 import com.chess.cryptobot.exceptions.MarketException
 import com.chess.cryptobot.model.History
 import com.chess.cryptobot.model.response.*
@@ -19,84 +19,105 @@ import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.collections.LinkedHashMap
 
-class LivecoinMarketClient internal constructor(url: String?, apiKey: String?, secretKey: String?) : MarketClient(url!!, apiKey, secretKey) {
-    private val service: LivecoinMarketService
+class PoloniexMarketClient internal constructor(url: String?, apiKey: String?, secretKey: String?) : MarketClient(url!!, apiKey, secretKey) {
+    private val service: PoloniexMarketService
     override fun getMarketName(): String {
-        return Market.LIVECOIN_MARKET
+        return Market.POLONIEX_MARKET
     }
 
     override fun initGson(): Gson {
         return GsonBuilder()
-                .excludeFieldsWithoutExposeAnnotation()
-                .setLenient()
+                .registerTypeAdapter(PoloniexResponse::class.java, PoloniexDeserializer())
                 .create()
     }
 
     override fun initService(retrofit: Retrofit): Any {
-        return retrofit.create(LivecoinMarketService::class.java)
+        return retrofit.create(PoloniexMarketService::class.java)
     }
 
-    @Throws(LivecoinException::class)
+    @Throws(PoloniexException::class)
     override fun getAmount(coinName: String): Double {
         if (keysIsEmpty()) return 0.0
         val params = TreeMap<String, String>()
-        params["currency"] = coinName
+        params["command"] = "returnBalances"
+        params["nonce"] = timestamp()
         val hash = makeHash(params)
         val headers = TreeMap<String, String>()
-        headers["API-key"] = apiKey
+        headers["Key"] = apiKey
         headers["Sign"] = hash
-        val response: LivecoinBalanceResponse
+        val response: PoloniexResponse
         val call = service.getBalance(params, headers)
         response = try {
-            execute(call!!) as LivecoinBalanceResponse
+            execute(call!!) as PoloniexResponse
         } catch (e: MarketException) {
-            throw LivecoinException(e.message!!)
+            throw PoloniexException(e.message!!)
         }
-        return response.amount
+
+        return response.objectData?.get(coinName)?.asDouble ?: 0.0
     }
 
-    @Throws(LivecoinException::class)
+    @Throws(PoloniexException::class)
     override fun getOrderBook(pairName: String): OrderBookResponse {
-        val response: LivecoinOrderBookResponse
+        val response: PoloniexResponse
         val params: MutableMap<String, String> = LinkedHashMap()
+        params["command"] = "returnOrderBook"
         params["currencyPair"] = pairName
-        params["groupByPrice"] = "true"
         params["depth"] = "10"
         val call = service.getOrderBook(params)
         response = try {
-            execute(call) as LivecoinOrderBookResponse
+            execute(call) as PoloniexResponse
         } catch (e: MarketException) {
-            throw LivecoinException(e.message!!)
+            throw PoloniexException(e.message!!)
         }
-        return response
+        return PoloniexOrderBookResponse(response)
     }
 
     @Throws(MarketException::class)
     override fun getTicker(): List<TickerResponse> {
-        val responses: List<LivecoinTickerResponse>?
-        val call: Call<List<LivecoinTickerResponse>> = service.ticker
+        val response: PoloniexResponse?
+        val params: MutableMap<String, String> = LinkedHashMap()
+        params["command"] = "returnTicker"
+        val call: Call<PoloniexResponse> = service.ticker(params)
         try {
             val result = call.execute()
-            responses = result.body()
-            if (responses == null) {
-                throw LivecoinException("No response")
+            response = result.body()
+            if (response == null) {
+                throw PoloniexException("No response")
             }
         } catch (e: IOException) {
-            throw LivecoinException(e.message!!)
+            throw PoloniexException(e.message!!)
         }
-        return responses
+        val result = mutableListOf<PoloniexTickerResponse>()
+        val tickers = response.objectData
+        if (tickers!=null) {
+            tickers.keySet()?.forEach { symbol ->
+                result.add(PoloniexTickerResponse(symbol,
+                        tickers[symbol].asJsonObject["highestBid"].asDouble,
+                        tickers[symbol].asJsonObject["lowestAsk"].asDouble))
+            }
+        }
+        return result
     }
 
     @Throws(MarketException::class)
     override fun getCurrencies(): List<CurrenciesResponse> {
-        val response: LivecoinCurrenciesListResponse
-        val call: Call<LivecoinCurrenciesListResponse> = service.currencies
+        val response: PoloniexResponse
+        val params: MutableMap<String, String> = LinkedHashMap()
+        params["command"] = "returnCurrencies"
+        val call: Call<PoloniexResponse> = service.currencies(params)
         response = try {
-            execute(call) as LivecoinCurrenciesListResponse
+            execute(call) as PoloniexResponse
         } catch (e: MarketException) {
-            throw LivecoinException(e.message!!)
+            throw PoloniexException(e.message!!)
         }
-        return response.getCurrencies()
+        val result = mutableListOf<PoloniexCurrenciesResponse>()
+        val currencies = response.objectData
+        currencies?.keySet()?.forEach{ symbol ->
+            val currency = currencies[symbol].asJsonObject
+            result.add(PoloniexCurrenciesResponse(symbol,
+                    !(currency["disabled"].asBoolean && currency["delisted"].asBoolean && currency["frozen"].asBoolean),
+                    currency["txFee"].asDouble))}
+        return result
     }
 
     @Throws(MarketException::class)
@@ -106,7 +127,7 @@ class LivecoinMarketClient internal constructor(url: String?, apiKey: String?, s
         response = try {
             execute(call) as LivecoinTradeLimitResponse
         } catch (e: MarketException) {
-            throw LivecoinException(e.message!!)
+            throw PoloniexException(e.message!!)
         }
         return response
     }
@@ -125,7 +146,7 @@ class LivecoinMarketClient internal constructor(url: String?, apiKey: String?, s
         response = try {
             execute(call!!) as LivecoinAddressResponse
         } catch (e: MarketException) {
-            throw LivecoinException(e.message!!)
+            throw PoloniexException(e.message!!)
         }
         return response.address
     }
@@ -149,7 +170,7 @@ class LivecoinMarketClient internal constructor(url: String?, apiKey: String?, s
         try {
             execute(call!!)
         } catch (e: MarketException) {
-            throw LivecoinException(e.message!!)
+            throw PoloniexException(e.message!!)
         }
     }
 
@@ -172,7 +193,7 @@ class LivecoinMarketClient internal constructor(url: String?, apiKey: String?, s
         try {
             execute(call!!)
         } catch (e: MarketException) {
-            throw LivecoinException(e.message!!)
+            throw PoloniexException(e.message!!)
         }
     }
 
@@ -195,7 +216,7 @@ class LivecoinMarketClient internal constructor(url: String?, apiKey: String?, s
         try {
             execute(call!!)
         } catch (e: MarketException) {
-            throw LivecoinException(e.message!!)
+            throw PoloniexException(e.message!!)
         }
     }
 
@@ -213,7 +234,7 @@ class LivecoinMarketClient internal constructor(url: String?, apiKey: String?, s
         response = try {
             execute(call!!) as LivecoinOrdersResponse
         } catch (e: MarketException) {
-            throw LivecoinException(e.message!!)
+            throw PoloniexException(e.message!!)
         }
         return HistoryResponseFactory(response.data).history
     }
@@ -254,19 +275,19 @@ class LivecoinMarketClient internal constructor(url: String?, apiKey: String?, s
             val result = call.execute()
             responses = result.body()
             if (responses == null) {
-                throw LivecoinException("No response")
+                throw PoloniexException("No response")
             }
         } catch (e: MarketException) {
-            throw LivecoinException(e.message!!)
+            throw PoloniexException(e.message!!)
         } catch (e: IOException) {
-            throw LivecoinException(e.message!!)
+            throw PoloniexException(e.message!!)
         }
         return HistoryResponseFactory(responses).history
     }
 
     init {
-        algorithm = "HmacSHA256"
+        algorithm = "HmacSHA512"
         path = ""
-        service = initService(initRetrofit(initGson())) as LivecoinMarketService
+        service = initService(initRetrofit(initGson())) as PoloniexMarketService
     }
 }

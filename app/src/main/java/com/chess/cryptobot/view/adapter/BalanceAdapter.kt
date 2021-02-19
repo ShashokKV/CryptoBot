@@ -33,8 +33,8 @@ class BalanceAdapter(balanceHolder: BalanceHolder) : RecyclerViewAdapter<Balance
         if (!balance.getStatus(Market.BINANCE_MARKET)) {
             balanceViewHolder.binanceBalanceView.setTextColor(context.resources.getColor(R.color.colorError, null))
         }
-        balanceViewHolder.livecoinBalanceView.text = String.format(Locale.US, "%.8f", balance.getAmount(Market.LIVECOIN_MARKET))
-        if (!balance.getStatus(Market.LIVECOIN_MARKET)) {
+        balanceViewHolder.livecoinBalanceView.text = String.format(Locale.US, "%.8f", balance.getAmount(Market.POLONIEX_MARKET))
+        if (!balance.getStatus(Market.POLONIEX_MARKET)) {
             balanceViewHolder.livecoinBalanceView.setTextColor(context.resources.getColor(R.color.colorError, null))
         }
         balanceViewHolder.cryptoNameView.text = balance.name

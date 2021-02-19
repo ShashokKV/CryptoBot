@@ -80,8 +80,7 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
         if (!marketInfoReader.checkCoinStatus(coinName)) {
             throw SyncServiceException("Not active")
         }
-        val marketAmounts: Map<String, Double>
-        marketAmounts = try {
+        val marketAmounts: Map<String, Double> = try {
             getMarketsAmounts(markets, coinName)
         } catch (e: MarketException) {
             throw SyncServiceException(e.message)

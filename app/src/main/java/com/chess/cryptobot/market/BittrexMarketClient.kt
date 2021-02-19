@@ -53,8 +53,7 @@ class BittrexMarketClient internal constructor(url: String, apiKey: String?, sec
     override fun getAmount(coinName: String): Double {
         if (keysIsEmpty()) return 0.0
         path = url + "balances/" + coinName
-        val response: BittrexBalance
-        response = try {
+        val response: BittrexBalance = try {
             val call = service.getBalance(coinName, signHeaders("", "GET"))
             execute(call) as BittrexBalance
         } catch (e: MarketException) {
@@ -67,8 +66,7 @@ class BittrexMarketClient internal constructor(url: String, apiKey: String?, sec
     override fun getAddress(coinName: String): String? {
         if (keysIsEmpty()) return null
         path = url + "addresses/" + coinName
-        val response: BittrexAddress
-        response = try {
+        val response: BittrexAddress = try {
             val call = service.getAddress(coinName, signHeaders("", "GET"))
             execute(call) as BittrexAddress
         } catch (e: MarketException) {
@@ -79,14 +77,12 @@ class BittrexMarketClient internal constructor(url: String, apiKey: String?, sec
 
     @Throws(BittrexException::class)
     override fun getOrderBook(pairName: String): OrderBookResponse {
-        val response: BittrexOrderBook
-        response = try {
+        return try {
             val call = service.getOrderBook(pairName)
             execute(call) as BittrexOrderBook
         } catch (e: MarketException) {
             throw BittrexException(e.message!!)
         }
-        return response
     }
 
     @Throws(MarketException::class)
@@ -136,8 +132,7 @@ class BittrexMarketClient internal constructor(url: String, apiKey: String?, sec
         withdraw.quantity = amount
         withdraw.cryptoAddress = address
         val call = service.payment(withdraw, signHeaders(gson.toJson(withdraw), "POST"))
-        val response: BittrexWithdrawResponse
-        response = try {
+        val response: BittrexWithdrawResponse = try {
             execute(call) as BittrexWithdrawResponse
         } catch (e: MarketException) {
             throw BittrexException(e.message!!)

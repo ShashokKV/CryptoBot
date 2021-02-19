@@ -32,10 +32,10 @@ class Balance(override val name: String) : ViewItem {
         return amounts
     }
 
-    fun setStatuses(binanceStatus: Boolean, bittrexStatus: Boolean, livecoinStatus: Boolean) {
+    fun setStatuses(binanceStatus: Boolean, bittrexStatus: Boolean, poloniexStatus: Boolean) {
         statuses[Market.BINANCE_MARKET] = binanceStatus
         statuses[Market.BITTREX_MARKET] = bittrexStatus
-        statuses[Market.LIVECOIN_MARKET] = livecoinStatus
+        statuses[Market.POLONIEX_MARKET] = poloniexStatus
     }
 
     fun getStatus(marketName: String?): Boolean {
@@ -50,9 +50,9 @@ class Balance(override val name: String) : ViewItem {
         amounts = HashMap()
         amounts[Market.BITTREX_MARKET] = 0.0
         amounts[Market.BINANCE_MARKET] = 0.0
-        amounts[Market.LIVECOIN_MARKET] = 0.0
+        amounts[Market.POLONIEX_MARKET] = 0.0
         statuses[Market.BITTREX_MARKET] = true
         statuses[Market.BINANCE_MARKET] = true
-        statuses[Market.LIVECOIN_MARKET] = true
+        statuses[Market.POLONIEX_MARKET] = true
     }
 }

@@ -21,8 +21,8 @@ import java.util.zip.Inflater
 class BittrexWebSocket(orchestrator: WebSocketOrchestrator) : MarketWebSocket(orchestrator) {
     private val tag = BittrexWebSocket::class.qualifiedName
     override val socketUrl = "https://socket-v3.bittrex.com/signalr"
-    private var hubConnection: HubConnection
-    private var hubProxy: HubProxy
+    private var hubConnection: HubConnection = HubConnection(socketUrl)
+    private var hubProxy: HubProxy = hubConnection.createHubProxy("c3")
     override val isConnected: Boolean
         get() = hubConnection.state == ConnectionState.Connected
 
@@ -30,11 +30,6 @@ class BittrexWebSocket(orchestrator: WebSocketOrchestrator) : MarketWebSocket(or
         get() {
             return Market.BITTREX_MARKET
         }
-
-    init {
-        hubConnection = HubConnection(socketUrl)
-        hubProxy = hubConnection.createHubProxy("c3")
-    }
 
     override fun connectAndSubscribe(pairs: List<Pair>) {
         try {

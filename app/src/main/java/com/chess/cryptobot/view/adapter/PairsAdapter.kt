@@ -31,10 +31,10 @@ class PairsAdapter(pairsHolder: ContextHolder) : RecyclerViewAdapter<PairsViewHo
         holder.bittrexBidQuantityView.text = String.format(Locale.getDefault(), "%.8f", pair.bidQuantityMap[Market.BITTREX_MARKET])
         holder.bittrexAskView.text = String.format(Locale.getDefault(), "%.8f", pair.askMap[Market.BITTREX_MARKET])
         holder.bittrexAskQuantityView.text = String.format(Locale.getDefault(), "%.8f", pair.askQuantityMap[Market.BITTREX_MARKET])
-        holder.livecoinBidView.text = String.format(Locale.getDefault(), "%.8f", pair.bidMap[Market.LIVECOIN_MARKET])
-        holder.livecoinBidQuantityView.text = String.format(Locale.getDefault(), "%.8f", pair.bidQuantityMap[Market.LIVECOIN_MARKET])
-        holder.livecoinAskView.text = String.format(Locale.getDefault(), "%.8f", pair.askMap[Market.LIVECOIN_MARKET])
-        holder.livecoinAskQuantityView.text = String.format(Locale.getDefault(), "%.8f", pair.askQuantityMap[Market.LIVECOIN_MARKET])
+        holder.livecoinBidView.text = String.format(Locale.getDefault(), "%.8f", pair.bidMap[Market.POLONIEX_MARKET])
+        holder.livecoinBidQuantityView.text = String.format(Locale.getDefault(), "%.8f", pair.bidQuantityMap[Market.POLONIEX_MARKET])
+        holder.livecoinAskView.text = String.format(Locale.getDefault(), "%.8f", pair.askMap[Market.POLONIEX_MARKET])
+        holder.livecoinAskQuantityView.text = String.format(Locale.getDefault(), "%.8f", pair.askQuantityMap[Market.POLONIEX_MARKET])
         holder.percent.text = pair.percent.toString()
     }
 

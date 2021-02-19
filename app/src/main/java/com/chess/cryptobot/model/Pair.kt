@@ -2,7 +2,7 @@ package com.chess.cryptobot.model
 
 import com.chess.cryptobot.market.Market.Companion.BINANCE_MARKET
 import com.chess.cryptobot.market.Market.Companion.BITTREX_MARKET
-import com.chess.cryptobot.market.Market.Companion.LIVECOIN_MARKET
+import com.chess.cryptobot.market.Market.Companion.POLONIEX_MARKET
 import com.chess.cryptobot.model.response.binance.BinanceDeserializer
 import java.io.Serializable
 
@@ -41,8 +41,8 @@ class Pair(val baseName: String, val marketName: String) : ViewItem, Serializabl
             BINANCE_MARKET -> {
                 binancePairName
             }
-            LIVECOIN_MARKET -> {
-                livecoinPairName
+            POLONIEX_MARKET -> {
+                poloniexPairName
             }
             else -> {
                 throw IllegalArgumentException("Unknown market: $marketName")
@@ -62,8 +62,8 @@ class Pair(val baseName: String, val marketName: String) : ViewItem, Serializabl
     private val binancePairName: String
         get() = "$marketName$baseName"
 
-    private val livecoinPairName: String
-        get() = "$marketName/$baseName"
+    private val poloniexPairName: String
+        get() = baseName +"_$marketName"
 
     companion object {
         fun fromPairName(pairName: String): Pair {
@@ -81,8 +81,7 @@ class Pair(val baseName: String, val marketName: String) : ViewItem, Serializabl
                     split[1]+"/"+split[0]
                 }
                 else -> {
-                    val split = pairName.split("/")
-                    split[1]+"/"+split[0]
+                    pairName.replace("_", "/")
                 }
             }
         }

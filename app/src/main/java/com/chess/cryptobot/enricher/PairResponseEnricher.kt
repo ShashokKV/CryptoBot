@@ -7,7 +7,7 @@ import com.chess.cryptobot.model.response.OrderBookResponse
 import com.chess.cryptobot.model.response.TickerResponse
 import com.chess.cryptobot.model.response.binance.BinanceResponse
 import com.chess.cryptobot.model.response.bittrex.BittrexOrderBook
-import com.chess.cryptobot.model.response.livecoin.LivecoinResponse
+import com.chess.cryptobot.model.response.livecoin.PoloniexResponse
 
 class PairResponseEnricher(val pair: Pair) {
     private var responsesMap = HashMap<String, OrderBookResponse>(3)
@@ -21,7 +21,7 @@ class PairResponseEnricher(val pair: Pair) {
     private var feeMap = hashMapOf(
             Market.BITTREX_MARKET to bittrexFee,
             Market.BINANCE_MARKET to binanceFee,
-            Market.LIVECOIN_MARKET to livecoinFee)
+            Market.POLONIEX_MARKET to livecoinFee)
 
     fun enrichWithResponse(response: OrderBookResponse) {
         var marketName  = ""
@@ -32,8 +32,8 @@ class PairResponseEnricher(val pair: Pair) {
             is BinanceResponse -> {
                 marketName = Market.BINANCE_MARKET
             }
-            is LivecoinResponse -> {
-                marketName = Market.LIVECOIN_MARKET
+            is PoloniexResponse -> {
+                marketName = Market.POLONIEX_MARKET
             }
         }
         initMaps(marketName, response)
