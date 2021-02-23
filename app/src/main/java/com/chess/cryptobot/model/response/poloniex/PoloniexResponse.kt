@@ -1,4 +1,4 @@
-package com.chess.cryptobot.model.response.livecoin
+package com.chess.cryptobot.model.response.poloniex
 
 import com.chess.cryptobot.model.response.MarketResponse
 import com.google.gson.JsonArray

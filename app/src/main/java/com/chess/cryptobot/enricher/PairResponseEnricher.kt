@@ -7,7 +7,7 @@ import com.chess.cryptobot.model.response.OrderBookResponse
 import com.chess.cryptobot.model.response.TickerResponse
 import com.chess.cryptobot.model.response.binance.BinanceResponse
 import com.chess.cryptobot.model.response.bittrex.BittrexOrderBook
-import com.chess.cryptobot.model.response.livecoin.PoloniexResponse
+import com.chess.cryptobot.model.response.poloniex.PoloniexResponse
 
 class PairResponseEnricher(val pair: Pair) {
     private var responsesMap = HashMap<String, OrderBookResponse>(3)

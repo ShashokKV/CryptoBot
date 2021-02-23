@@ -6,7 +6,7 @@ import com.chess.cryptobot.exceptions.PoloniexException
 import com.chess.cryptobot.exceptions.MarketException
 import com.chess.cryptobot.model.History
 import com.chess.cryptobot.model.response.*
-import com.chess.cryptobot.model.response.livecoin.*
+import com.chess.cryptobot.model.response.poloniex.*
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import retrofit2.Call
@@ -48,7 +48,7 @@ class PoloniexMarketClient internal constructor(url: String?, apiKey: String?, s
         val response: PoloniexResponse
         val call = service.getBalance(params, headers)
         response = try {
-            execute(call!!) as PoloniexResponse
+            execute(call) as PoloniexResponse
         } catch (e: MarketException) {
             throw PoloniexException(e.message!!)
         }
@@ -120,55 +120,50 @@ class PoloniexMarketClient internal constructor(url: String?, apiKey: String?, s
         return result
     }
 
-    @Throws(MarketException::class)
     override fun getMinQuantity(): TradeLimitResponse {
-        val response: LivecoinTradeLimitResponse
-        val call: Call<LivecoinTradeLimitResponse> = service.minTradeSize
-        response = try {
-            execute(call) as LivecoinTradeLimitResponse
-        } catch (e: MarketException) {
-            throw PoloniexException(e.message!!)
-        }
-        return response
+        return PoloniexTradeLimitResponse()
     }
 
     @Throws(MarketException::class)
     override fun getAddress(coinName: String): String? {
         if (keysIsEmpty()) return null
         val params: MutableMap<String, String> = LinkedHashMap()
-        params["currency"] = coinName
+        params["command"] = "returnDepositAddresses"
+        params["nonce"] = timestamp()
         val hash = makeHash(params)
         val headers: MutableMap<String, String> = HashMap()
-        headers["API-key"] = apiKey
+        headers["Key"] = apiKey
         headers["Sign"] = hash
-        val response: LivecoinAddressResponse
+        val response: PoloniexResponse
         val call = service.getAddress(params, headers)
         response = try {
-            execute(call!!) as LivecoinAddressResponse
+            execute(call) as PoloniexResponse
         } catch (e: MarketException) {
             throw PoloniexException(e.message!!)
         }
-        return response.address
+        val addresses = response.objectData
+        if (addresses!=null) {
+            return addresses[coinName].asString
+        }
+        return null
     }
 
     @Throws(MarketException::class)
     override fun sendCoins(coinName: String, amount: Double, address: String) {
         if (keysIsEmpty()) return
         val params: MutableMap<String, String> = LinkedHashMap()
-        params["amount"] = String.format(Locale.US, "%.8f", amount)
+        params["command"] = "withdraw"
         params["currency"] = coinName
-        params["wallet"] = address
+        params["amount"] = String.format(Locale.US, "%.8f", amount)
+        params["address"] = address
+        params["nonce"] = timestamp()
         val hash = makeHash(params)
-        val headers: MutableMap<String?, String?> = HashMap()
-        headers["API-key"] = apiKey
+        val headers: MutableMap<String, String> = HashMap()
+        headers["Key"] = apiKey
         headers["Sign"] = hash
-        val call = service.payment(
-                params["amount"],
-                params["currency"],
-                params["wallet"],
-                headers)
+        val call = service.payment(params, headers)
         try {
-            execute(call!!)
+            execute(call)
         } catch (e: MarketException) {
             throw PoloniexException(e.message!!)
         }
@@ -178,20 +173,18 @@ class PoloniexMarketClient internal constructor(url: String?, apiKey: String?, s
     override fun buy(pairName: String, price: Double, amount: Double) {
         if (keysIsEmpty()) return
         val params: MutableMap<String, String> = LinkedHashMap()
+        params["command"] = "buy"
         params["currencyPair"] = pairName
-        params["price"] = String.format(Locale.US, "%.8f", price)
-        params["quantity"] = String.format(Locale.US, "%.8f", amount)
+        params["rate"] = String.format(Locale.US, "%.8f", price)
+        params["amount"] = String.format(Locale.US, "%.8f", amount)
+        params["nonce"] = timestamp()
         val hash = makeHash(params)
         val headers: MutableMap<String, String> = HashMap()
-        headers["API-key"] = apiKey
+        headers["Key"] = apiKey
         headers["Sign"] = hash
-        val call = service.buy(
-                params["currencyPair"],
-                params["price"],
-                params["quantity"],
-                headers)
+        val call = service.buy(params, headers)
         try {
-            execute(call!!)
+            execute(call)
         } catch (e: MarketException) {
             throw PoloniexException(e.message!!)
         }
@@ -201,20 +194,18 @@ class PoloniexMarketClient internal constructor(url: String?, apiKey: String?, s
     override fun sell(pairName: String, price: Double, amount: Double) {
         if (keysIsEmpty()) return
         val params: MutableMap<String, String> = LinkedHashMap()
+        params["command"] = "sell"
         params["currencyPair"] = pairName
-        params["price"] = String.format(Locale.US, "%.8f", price)
-        params["quantity"] = String.format(Locale.US, "%.8f", amount)
+        params["rate"] = String.format(Locale.US, "%.8f", price)
+        params["amount"] = String.format(Locale.US, "%.8f", amount)
+        params["nonce"] = timestamp()
         val hash = makeHash(params)
         val headers: MutableMap<String, String> = HashMap()
-        headers["API-key"] = apiKey
+        headers["Key"] = apiKey
         headers["Sign"] = hash
-        val call = service.sell(
-                params["currencyPair"],
-                params["price"],
-                params["quantity"],
-                headers)
+        val call = service.sell(params, headers)
         try {
-            execute(call!!)
+            execute(call)
         } catch (e: MarketException) {
             throw PoloniexException(e.message!!)
         }

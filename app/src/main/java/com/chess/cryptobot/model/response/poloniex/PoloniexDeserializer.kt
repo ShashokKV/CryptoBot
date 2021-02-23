@@ -1,4 +1,4 @@
-package com.chess.cryptobot.model.response.livecoin
+package com.chess.cryptobot.model.response.poloniex
 
 import com.google.gson.*
 import java.lang.reflect.Type
