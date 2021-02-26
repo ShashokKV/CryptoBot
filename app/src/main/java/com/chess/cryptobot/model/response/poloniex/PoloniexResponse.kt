@@ -1,7 +1,6 @@
 package com.chess.cryptobot.model.response.poloniex
 
 import com.chess.cryptobot.model.response.MarketResponse
-import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 
 open class PoloniexResponse : MarketResponse {
@@ -15,7 +14,5 @@ open class PoloniexResponse : MarketResponse {
         return error ?: "no message"
     }
 
-    var objectData: JsonObject? = null
-
-    var arrayData: JsonArray? = null
+    var data: JsonObject? = null
 }

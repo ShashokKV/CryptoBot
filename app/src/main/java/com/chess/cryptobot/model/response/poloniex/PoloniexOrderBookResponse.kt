@@ -18,10 +18,10 @@ class PoloniexOrderBookResponse(poloniexResponse: PoloniexResponse) : OrderBookR
     }
 
     init {
-        poloniexResponse.objectData?.get("asks")?.asJsonArray?.forEach { ask ->
+        poloniexResponse.data?.get("asks")?.asJsonArray?.forEach { ask ->
             asks.add(Price(ask.asJsonArray[0].asDouble, ask.asJsonArray[1].asDouble))
         }
-        poloniexResponse.objectData?.get("bids")?.asJsonArray?.forEach { ask ->
+        poloniexResponse.data?.get("bids")?.asJsonArray?.forEach { ask ->
             bids.add(Price(ask.asJsonArray[0].asDouble, ask.asJsonArray[1].asDouble))
         }
     }

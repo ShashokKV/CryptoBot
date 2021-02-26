@@ -16,7 +16,7 @@ class BalanceHolder(fragment: Fragment) : ContextHolder(fragment) {
     private var hasKeys: Boolean = false
     private var bittrexStatuses: Map<String, Boolean> = HashMap()
     private var binanceStatuses: Map<String, Boolean> = HashMap()
-    private var livecoinStatuses: Map<String, Boolean> = HashMap()
+    private var poloniexStatuses: Map<String, Boolean> = HashMap()
     private var iconUrls: Map<String, String?> = HashMap()
     var availableCoins = ArrayList<String>()
     private val serialExecutor: SerialExecutor = SerialExecutor()
@@ -60,7 +60,7 @@ class BalanceHolder(fragment: Fragment) : ContextHolder(fragment) {
         val balance = item as Balance
         balance.setStatuses(binanceStatuses[balance.name]?: true,
                 bittrexStatuses[balance.name]?: true,
-                livecoinStatuses[balance.name]?: true)
+                poloniexStatuses[balance.name]?: true)
         balance.coinUrl = iconUrls[balance.name]
         updateImage(balance)
         if (hasKeys) updateAmount(balance)
@@ -83,10 +83,10 @@ class BalanceHolder(fragment: Fragment) : ContextHolder(fragment) {
         return this.getItemByName(coinName) as Balance
     }
 
-    fun setCurrencyStatus(bittrexStatuses: Map<String, Boolean>, binanceStatuses: Map<String, Boolean>, livecoinStatuses: Map<String, Boolean>) {
+    fun setCurrencyStatus(bittrexStatuses: Map<String, Boolean>, binanceStatuses: Map<String, Boolean>, poloniexStatuses: Map<String, Boolean>) {
         this.bittrexStatuses = bittrexStatuses
         this.binanceStatuses = binanceStatuses
-        this.livecoinStatuses = livecoinStatuses
+        this.poloniexStatuses = poloniexStatuses
     }
 
     fun setIconUrls(urls: Map<String, String?>) {

@@ -15,8 +15,8 @@ class MarketFactory private constructor(context: Context) {
     private val binanceSecretKey = R.string.binance_secret_key
     private val binanceWithdrawalApiKey = R.string.binance_withdrawal_api_key
     private val binanceWithdrawalSecretKey = R.string.binance_withdrawal_secret_key
-    private val livecoinApiKey = R.string.livecoin_api_key
-    private val livecoinSecretKey = R.string.livecoin_secret_key
+    private val poloniexApiKey = R.string.poloniex_api_key
+    private val poloniexSecretKey = R.string.poloniex_secret_key
 
     private var binanceMarket: BinanceMarketClient
     private val binanceWithdrawalMarket: BinanceMarketClient
@@ -28,7 +28,7 @@ class MarketFactory private constructor(context: Context) {
         binanceMarket = binanceMarket(preferences, context)
         binanceWithdrawalMarket = binanceWithdrawalMarket(preferences, context)
         bittrexMarket = bittrexMarket(preferences, context)
-        poloniexMarket = livecoinMarket(preferences, context)
+        poloniexMarket = poloniexMarket(preferences, context)
     }
 
     companion object : SingletonHolder<MarketFactory, Context>(::MarketFactory)
@@ -96,10 +96,10 @@ class MarketFactory private constructor(context: Context) {
                 proxySelector)
     }
 
-    private fun livecoinMarket(preferences: SharedPreferences, context: Context): PoloniexMarketClient {
-        return PoloniexMarketClient(context.getString(R.string.livecoin_url),
-                preferences.getString(context.getString(livecoinApiKey), null),
-                preferences.getString(context.getString(livecoinSecretKey), null))
+    private fun poloniexMarket(preferences: SharedPreferences, context: Context): PoloniexMarketClient {
+        return PoloniexMarketClient(context.getString(R.string.poloniex_url),
+                preferences.getString(context.getString(poloniexApiKey), null),
+                preferences.getString(context.getString(poloniexSecretKey), null))
     }
 
     object MarketHttpBuilder {

@@ -9,8 +9,8 @@ abstract class MarketWebSocket(private val orchestrator: WebSocketOrchestrator) 
 
     fun passToOrchestrator(pairName: String, bid: Double, ask: Double) {
         synchronized(orchestrator) {
-            orchestrator.updateBidsMap(pairName, marketName, bid)
-            orchestrator.updateAsksMap(pairName, marketName, ask)
+            if (bid > 0) orchestrator.updateBidsMap(pairName, marketName, bid)
+            if (ask > 0) orchestrator.updateAsksMap(pairName, marketName, ask)
             orchestrator.checkPairs()
         }
     }

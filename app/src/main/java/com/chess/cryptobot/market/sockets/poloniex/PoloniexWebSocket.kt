@@ -1,25 +1,22 @@
-package com.chess.cryptobot.market.sockets.livecoin
+package com.chess.cryptobot.market.sockets.poloniex
 
 import android.util.Log
 import com.chess.cryptobot.market.Market.Companion.POLONIEX_MARKET
 import com.chess.cryptobot.market.sockets.MarketWebSocket
 import com.chess.cryptobot.market.sockets.WebSocketOrchestrator
-import com.chess.cryptobot.market.sockets.livecoin.proto.LcWsApi.*
 import com.chess.cryptobot.model.Pair
 import com.neovisionaries.ws.client.WebSocket
 import com.neovisionaries.ws.client.WebSocketFactory
 import com.neovisionaries.ws.client.WebSocketState
-import java.io.UnsupportedEncodingException
-import java.security.InvalidKeyException
-import java.security.NoSuchAlgorithmException
+import org.json.JSONObject
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
 
-class LivecoinWebSocket(orchestrator: WebSocketOrchestrator) : MarketWebSocket(orchestrator) {
-    private val tag = LivecoinWebSocket::class.qualifiedName
-    override val socketUrl = "wss://ws.api.livecoin.net/ws/beta2"
+class PoloniexWebSocket(orchestrator: WebSocketOrchestrator) : MarketWebSocket(orchestrator) {
+    private val tag = PoloniexWebSocket::class.qualifiedName
+    override val socketUrl = "wss://api2.poloniex.com"
     private var webSocket: WebSocket?
     override val isConnected: Boolean
         get() = webSocket?.isOpen ?: false
@@ -33,7 +30,7 @@ class LivecoinWebSocket(orchestrator: WebSocketOrchestrator) : MarketWebSocket(o
 
     private fun createWebSocket(): WebSocket {
         val webSocket = WebSocketFactory().createSocket(socketUrl, 10000)
-        webSocket.addListener(LivecoinWebSocketListener(this))
+        webSocket.addListener(PoloniexWebSocketListener(this))
         return webSocket
     }
 
@@ -57,23 +54,13 @@ class LivecoinWebSocket(orchestrator: WebSocketOrchestrator) : MarketWebSocket(o
     private fun subscribe(pairs: List<Pair>) {
         if (isConnected) {
             pairs.forEach { pair ->
-                subscribe(pair.getPairNameForMarket(marketName))
+                val request = JSONObject()
+                request.put("command", "subscribe")
+                request.put("channel",  pair.getPairNameForMarket(POLONIEX_MARKET))
+
+                webSocket?.sendText(request.toString())
             }
         }
-    }
-
-    @Throws(UnsupportedEncodingException::class, NoSuchAlgorithmException::class, InvalidKeyException::class)
-    private fun subscribe(symbol: String) {
-        val builder = SubscribeTickerChannelRequest
-                .newBuilder()
-                .setCurrencyPair(symbol)
-        val msg = builder.build().toByteString()
-        val meta = WsRequestMetaData
-                .newBuilder()
-                .setRequestType(WsRequestMetaData.WsRequestMsgType.SUBSCRIBE_TICKER)
-                .build()
-        val request = WsRequest.newBuilder().setMeta(meta).setMsg(msg).build()
-        webSocket?.sendBinary(request.toByteArray())
     }
 
     override fun disconnect() {

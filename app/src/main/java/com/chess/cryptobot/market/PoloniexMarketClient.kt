@@ -2,8 +2,8 @@ package com.chess.cryptobot.market
 
 import android.content.Context
 import com.chess.cryptobot.api.PoloniexMarketService
-import com.chess.cryptobot.exceptions.PoloniexException
 import com.chess.cryptobot.exceptions.MarketException
+import com.chess.cryptobot.exceptions.PoloniexException
 import com.chess.cryptobot.model.History
 import com.chess.cryptobot.model.response.*
 import com.chess.cryptobot.model.response.poloniex.*
@@ -46,14 +46,14 @@ class PoloniexMarketClient internal constructor(url: String?, apiKey: String?, s
         headers["Key"] = apiKey
         headers["Sign"] = hash
         val response: PoloniexResponse
-        val call = service.getBalance(params, headers)
+        val call = service.privateApi(params, headers)
         response = try {
             execute(call) as PoloniexResponse
         } catch (e: MarketException) {
             throw PoloniexException(e.message!!)
         }
 
-        return response.objectData?.get(coinName)?.asDouble ?: 0.0
+        return response.data?.get(coinName)?.asDouble ?: 0.0
     }
 
     @Throws(PoloniexException::class)
@@ -63,7 +63,7 @@ class PoloniexMarketClient internal constructor(url: String?, apiKey: String?, s
         params["command"] = "returnOrderBook"
         params["currencyPair"] = pairName
         params["depth"] = "10"
-        val call = service.getOrderBook(params)
+        val call = service.publicApi(params)
         response = try {
             execute(call) as PoloniexResponse
         } catch (e: MarketException) {
@@ -77,7 +77,7 @@ class PoloniexMarketClient internal constructor(url: String?, apiKey: String?, s
         val response: PoloniexResponse?
         val params: MutableMap<String, String> = LinkedHashMap()
         params["command"] = "returnTicker"
-        val call: Call<PoloniexResponse> = service.ticker(params)
+        val call: Call<PoloniexResponse> = service.publicApi(params)
         try {
             val result = call.execute()
             response = result.body()
@@ -88,8 +88,8 @@ class PoloniexMarketClient internal constructor(url: String?, apiKey: String?, s
             throw PoloniexException(e.message!!)
         }
         val result = mutableListOf<PoloniexTickerResponse>()
-        val tickers = response.objectData
-        if (tickers!=null) {
+        val tickers = response.data
+        if (tickers != null) {
             tickers.keySet()?.forEach { symbol ->
                 result.add(PoloniexTickerResponse(symbol,
                         tickers[symbol].asJsonObject["highestBid"].asDouble,
@@ -104,19 +104,20 @@ class PoloniexMarketClient internal constructor(url: String?, apiKey: String?, s
         val response: PoloniexResponse
         val params: MutableMap<String, String> = LinkedHashMap()
         params["command"] = "returnCurrencies"
-        val call: Call<PoloniexResponse> = service.currencies(params)
+        val call: Call<PoloniexResponse> = service.publicApi(params)
         response = try {
             execute(call) as PoloniexResponse
         } catch (e: MarketException) {
             throw PoloniexException(e.message!!)
         }
         val result = mutableListOf<PoloniexCurrenciesResponse>()
-        val currencies = response.objectData
-        currencies?.keySet()?.forEach{ symbol ->
+        val currencies = response.data
+        currencies?.keySet()?.forEach { symbol ->
             val currency = currencies[symbol].asJsonObject
             result.add(PoloniexCurrenciesResponse(symbol,
                     !(currency["disabled"].asBoolean && currency["delisted"].asBoolean && currency["frozen"].asBoolean),
-                    currency["txFee"].asDouble))}
+                    currency["txFee"].asDouble))
+        }
         return result
     }
 
@@ -135,14 +136,14 @@ class PoloniexMarketClient internal constructor(url: String?, apiKey: String?, s
         headers["Key"] = apiKey
         headers["Sign"] = hash
         val response: PoloniexResponse
-        val call = service.getAddress(params, headers)
+        val call = service.privateApi(params, headers)
         response = try {
             execute(call) as PoloniexResponse
         } catch (e: MarketException) {
             throw PoloniexException(e.message!!)
         }
-        val addresses = response.objectData
-        if (addresses!=null) {
+        val addresses = response.data
+        if (addresses != null) {
             return addresses[coinName].asString
         }
         return null
@@ -161,7 +162,7 @@ class PoloniexMarketClient internal constructor(url: String?, apiKey: String?, s
         val headers: MutableMap<String, String> = HashMap()
         headers["Key"] = apiKey
         headers["Sign"] = hash
-        val call = service.payment(params, headers)
+        val call = service.privateApi(params, headers)
         try {
             execute(call)
         } catch (e: MarketException) {
@@ -171,30 +172,18 @@ class PoloniexMarketClient internal constructor(url: String?, apiKey: String?, s
 
     @Throws(MarketException::class)
     override fun buy(pairName: String, price: Double, amount: Double) {
-        if (keysIsEmpty()) return
-        val params: MutableMap<String, String> = LinkedHashMap()
-        params["command"] = "buy"
-        params["currencyPair"] = pairName
-        params["rate"] = String.format(Locale.US, "%.8f", price)
-        params["amount"] = String.format(Locale.US, "%.8f", amount)
-        params["nonce"] = timestamp()
-        val hash = makeHash(params)
-        val headers: MutableMap<String, String> = HashMap()
-        headers["Key"] = apiKey
-        headers["Sign"] = hash
-        val call = service.buy(params, headers)
-        try {
-            execute(call)
-        } catch (e: MarketException) {
-            throw PoloniexException(e.message!!)
-        }
+        makeTrade("buy", pairName, price, amount)
     }
 
     @Throws(MarketException::class)
     override fun sell(pairName: String, price: Double, amount: Double) {
+        makeTrade("sell", pairName, price, amount)
+    }
+
+    private fun makeTrade(command: String, pairName: String, price: Double, amount: Double) {
         if (keysIsEmpty()) return
         val params: MutableMap<String, String> = LinkedHashMap()
-        params["command"] = "sell"
+        params["command"] = command
         params["currencyPair"] = pairName
         params["rate"] = String.format(Locale.US, "%.8f", price)
         params["amount"] = String.format(Locale.US, "%.8f", amount)
@@ -203,7 +192,7 @@ class PoloniexMarketClient internal constructor(url: String?, apiKey: String?, s
         val headers: MutableMap<String, String> = HashMap()
         headers["Key"] = apiKey
         headers["Sign"] = hash
-        val call = service.sell(params, headers)
+        val call = service.privateApi(params, headers)
         try {
             execute(call)
         } catch (e: MarketException) {
@@ -213,67 +202,112 @@ class PoloniexMarketClient internal constructor(url: String?, apiKey: String?, s
 
     @Throws(MarketException::class)
     override fun getOpenOrders(): List<History> {
-        if (keysIsEmpty()) return ArrayList()
-        val params: MutableMap<String, String> = LinkedHashMap()
-        params["openClosed"] = "OPEN"
-        val hash = makeHash(params)
-        val headers: MutableMap<String, String> = HashMap()
-        headers["API-key"] = apiKey
-        headers["Sign"] = hash
-        val response: LivecoinOrdersResponse
-        val call = service.getOpenOrders(params, headers)
-        response = try {
-            execute(call!!) as LivecoinOrdersResponse
-        } catch (e: MarketException) {
-            throw PoloniexException(e.message!!)
-        }
-        return HistoryResponseFactory(response.data).history
+        return getOrdersHistory("returnOpenOrders")
     }
 
     @Throws(MarketException::class)
-    override fun getHistory(context: Context): List<History>    {
-        return getHistoryByType(null)
+    override fun getHistory(context: Context): List<History> {
+        val historyResult: MutableList<History> = getOrdersHistory("returnTradeHistory") as MutableList<History>
+        historyResult.addAll(this.getCoinMoveHistoryByType(null))
+        return historyResult
+    }
+
+    private fun getOrdersHistory(command: String): List<History> {
+        if (keysIsEmpty()) return ArrayList()
+        val params: MutableMap<String, String> = LinkedHashMap()
+        params["command"] = command
+        params["currencyPair"] = "all"
+        params["nonce"] = timestamp()
+        val hash = makeHash(params)
+        val headers: MutableMap<String, String> = HashMap()
+        headers["Key"] = apiKey
+        headers["Sign"] = hash
+        val response: PoloniexResponse
+        val call = service.privateApi(params, headers)
+        response = try {
+            execute(call) as PoloniexResponse
+        } catch (e: MarketException) {
+            throw PoloniexException(e.message!!)
+        }
+        val result = mutableListOf<PoloniexHistoryResponse>()
+        val history = response.data
+        history?.keySet()?.forEach { currency ->
+            val currencyHistories = history[currency].asJsonArray
+            if (currencyHistories.size() > 0) {
+                currencyHistories.forEach { currencyHistory ->
+                    val poloniexHistory = PoloniexHistoryResponse()
+                    val historyObject = currencyHistory.asJsonObject
+                    poloniexHistory.currencyPair = currency
+                    poloniexHistory.issueTime = LocalDateTime.parse(historyObject["date"].asString)
+                    poloniexHistory.historyAction = historyObject["type"].asString
+                    if (command == "returnTradeHistory") {
+                        poloniexHistory.historyAmount = historyObject["amount"].asDouble
+                    } else if (command == "returnOpenOrders") {
+                        poloniexHistory.historyAmount = historyObject["startingAmount"].asDouble
+                        poloniexHistory.remainingAmount = historyObject["amount"].asDouble
+                    }
+                    poloniexHistory.historyPrice = historyObject["rate"].asDouble
+                    result.add(poloniexHistory)
+                }
+            }
+        }
+        return HistoryResponseFactory(result).history
     }
 
     @Throws(MarketException::class)
     override fun getDepositHistory(): List<History> {
-        return getHistoryByType("DEPOSIT")
+        return getCoinMoveHistoryByType("deposits")
     }
 
     @Throws(MarketException::class)
     override fun getWithdrawHistory(): List<History> {
-        return getHistoryByType("WITHDRAWAL")
+        return getCoinMoveHistoryByType("withdrawals")
     }
 
-    private fun getHistoryByType(historyType: String?) : List<History> {
+    private fun getCoinMoveHistoryByType(historyType: String?): List<History> {
         if (keysIsEmpty()) return ArrayList()
         val startTime = LocalDateTime.now().minusDays(29)
         val endTime = LocalDateTime.now()
         val params: MutableMap<String, String> = LinkedHashMap()
+        params["command"] = "returnDepositsWithdrawals"
         params["end"] = (endTime.toEpochSecond(ZoneOffset.UTC) * 1000).toString()
         params["start"] = (startTime.toEpochSecond(ZoneOffset.UTC) * 1000).toString()
-        if (historyType!=null) {
-            params["types"] = historyType
-        }
-
+        params["nonce"] = timestamp()
         val hash = makeHash(params)
         val headers: MutableMap<String, String> = HashMap()
-        headers["API-key"] = apiKey
+        headers["Key"] = apiKey
         headers["Sign"] = hash
-        val responses: List<LivecoinHistoryResponse>?
-        val call = service.getHistory(params, headers)
-        try {
-            val result = call.execute()
-            responses = result.body()
-            if (responses == null) {
-                throw PoloniexException("No response")
-            }
+        val response: PoloniexResponse
+        val call = service.privateApi(params, headers)
+        response = try {
+            execute(call) as PoloniexResponse
         } catch (e: MarketException) {
             throw PoloniexException(e.message!!)
-        } catch (e: IOException) {
-            throw PoloniexException(e.message!!)
         }
-        return HistoryResponseFactory(responses).history
+        val result = mutableListOf<PoloniexHistoryResponse>()
+        val history = response.data
+        val historyKey = if (historyType == null) {
+            history?.keySet()
+        } else {
+            setOf(historyType)
+        }
+        historyKey?.forEach { histType ->
+            val currencyHistories = history?.get(histType)?.asJsonArray
+            if (currencyHistories?.size() ?: 0 > 0) {
+                currencyHistories?.forEach { currencyHistory ->
+                    val poloniexHistory = PoloniexHistoryResponse()
+                    val historyObject = currencyHistory.asJsonObject
+                    poloniexHistory.currencyPair = historyObject["currency"].asString
+                    val timestamp = historyObject["timestamp"].asLong
+                    poloniexHistory.issueTime = LocalDateTime.ofEpochSecond(
+                            (timestamp) / 1000, (timestamp % 1000 * 1000000).toInt(), ZoneOffset.UTC)
+                    poloniexHistory.historyAction = histType.dropLast(1)
+                    poloniexHistory.historyAmount = historyObject["amount"].asDouble
+                    result.add(poloniexHistory)
+                }
+            }
+        }
+        return HistoryResponseFactory(result).history
     }
 
     init {

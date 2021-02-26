@@ -21,7 +21,7 @@ class PairResponseEnricher(val pair: Pair) {
     private var feeMap = hashMapOf(
             Market.BITTREX_MARKET to bittrexFee,
             Market.BINANCE_MARKET to binanceFee,
-            Market.POLONIEX_MARKET to livecoinFee)
+            Market.POLONIEX_MARKET to poloniexFee)
 
     fun enrichWithResponse(response: OrderBookResponse) {
         var marketName  = ""
@@ -119,6 +119,6 @@ class PairResponseEnricher(val pair: Pair) {
     companion object {
         private const val bittrexFee = 0.2
         private const val binanceFee = 0.1
-        private const val livecoinFee = 0.18
+        private const val poloniexFee = 0.18
     }
 }

@@ -9,7 +9,7 @@ import com.chess.cryptobot.market.Market.Companion.BITTREX_MARKET
 import com.chess.cryptobot.market.Market.Companion.POLONIEX_MARKET
 import com.chess.cryptobot.market.sockets.binance.BinanceWebSocket
 import com.chess.cryptobot.market.sockets.bittrex.BittrexWebSocket
-import com.chess.cryptobot.market.sockets.livecoin.LivecoinWebSocket
+import com.chess.cryptobot.market.sockets.poloniex.PoloniexWebSocket
 import com.chess.cryptobot.model.Pair
 import com.chess.cryptobot.service.ProfitPairService
 import java.util.concurrent.ConcurrentHashMap
@@ -27,7 +27,7 @@ class WebSocketOrchestrator(val context: Context, val pairs: MutableList<Pair>) 
                 ?: 3.0f
         webSockets[BINANCE_MARKET] = BinanceWebSocket(this)
         webSockets[BITTREX_MARKET] = BittrexWebSocket(this)
-        webSockets[POLONIEX_MARKET] = LivecoinWebSocket(this)
+        webSockets[POLONIEX_MARKET] = PoloniexWebSocket(this)
     }
 
     fun subscribeAll() {

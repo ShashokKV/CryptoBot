@@ -9,18 +9,12 @@ class PoloniexDeserializer : JsonDeserializer<PoloniexResponse> {
     override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): PoloniexResponse {
         val response = PoloniexResponse()
         if (json.isJsonObject) {
-            if (json.asJsonObject.has("error")) {
-                response.error = json.asJsonObject["error"].asString
+            val jsonObject = json.asJsonObject
+            if (jsonObject.has("error")) {
+                response.error =jsonObject["error"].asString
                 return response
             }
-        }
-        if (json.isJsonArray) {
-            response.arrayData = json.asJsonArray
-            return response
-        }
-
-        if (json.isJsonObject) {
-            response.objectData = json.asJsonObject
+            response.data = jsonObject
             return response
         }
 

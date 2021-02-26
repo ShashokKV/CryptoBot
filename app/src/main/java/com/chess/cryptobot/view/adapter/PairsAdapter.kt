@@ -31,10 +31,10 @@ class PairsAdapter(pairsHolder: ContextHolder) : RecyclerViewAdapter<PairsViewHo
         holder.bittrexBidQuantityView.text = String.format(Locale.getDefault(), "%.8f", pair.bidQuantityMap[Market.BITTREX_MARKET])
         holder.bittrexAskView.text = String.format(Locale.getDefault(), "%.8f", pair.askMap[Market.BITTREX_MARKET])
         holder.bittrexAskQuantityView.text = String.format(Locale.getDefault(), "%.8f", pair.askQuantityMap[Market.BITTREX_MARKET])
-        holder.livecoinBidView.text = String.format(Locale.getDefault(), "%.8f", pair.bidMap[Market.POLONIEX_MARKET])
-        holder.livecoinBidQuantityView.text = String.format(Locale.getDefault(), "%.8f", pair.bidQuantityMap[Market.POLONIEX_MARKET])
-        holder.livecoinAskView.text = String.format(Locale.getDefault(), "%.8f", pair.askMap[Market.POLONIEX_MARKET])
-        holder.livecoinAskQuantityView.text = String.format(Locale.getDefault(), "%.8f", pair.askQuantityMap[Market.POLONIEX_MARKET])
+        holder.poloniexBidView.text = String.format(Locale.getDefault(), "%.8f", pair.bidMap[Market.POLONIEX_MARKET])
+        holder.poloniexBidQuantityView.text = String.format(Locale.getDefault(), "%.8f", pair.bidQuantityMap[Market.POLONIEX_MARKET])
+        holder.poloniexAskView.text = String.format(Locale.getDefault(), "%.8f", pair.askMap[Market.POLONIEX_MARKET])
+        holder.poloniexAskQuantityView.text = String.format(Locale.getDefault(), "%.8f", pair.askQuantityMap[Market.POLONIEX_MARKET])
         holder.percent.text = pair.percent.toString()
     }
 
@@ -48,10 +48,10 @@ class PairsAdapter(pairsHolder: ContextHolder) : RecyclerViewAdapter<PairsViewHo
         val binanceAskQuantityView: TextView = itemView.findViewById(R.id.binance_ask_quantity)
         val binanceBidView: TextView = itemView.findViewById(R.id.binance_bid)
         val binanceBidQuantityView: TextView = itemView.findViewById(R.id.binance_bid_quantity)
-        val livecoinAskView: TextView = itemView.findViewById(R.id.livecoin_ask)
-        val livecoinAskQuantityView: TextView = itemView.findViewById(R.id.livecoin_ask_quantity)
-        val livecoinBidView: TextView = itemView.findViewById(R.id.livecoin_bid)
-        val livecoinBidQuantityView: TextView = itemView.findViewById(R.id.livecoin_bid_quantity)
+        val poloniexAskView: TextView = itemView.findViewById(R.id.poloniex_ask)
+        val poloniexAskQuantityView: TextView = itemView.findViewById(R.id.poloniex_ask_quantity)
+        val poloniexBidView: TextView = itemView.findViewById(R.id.poloniex_bid)
+        val poloniexBidQuantityView: TextView = itemView.findViewById(R.id.poloniex_bid_quantity)
         val percent: TextView = itemView.findViewById(R.id.pair_percent)
     }
 }

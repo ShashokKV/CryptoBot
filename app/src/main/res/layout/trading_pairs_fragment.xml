@@ -51,7 +51,7 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="0.225"
-                android:text="@string/livecoin"
+                android:text="@string/poloniex"
                 android:textColor="@color/colorSecondary"
                 android:textSize="18sp"
                 android:textStyle="bold" />

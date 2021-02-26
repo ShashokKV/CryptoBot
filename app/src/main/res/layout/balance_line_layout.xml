@@ -61,7 +61,7 @@
         tools:text="0.000005" />
 
     <TextView
-        android:id="@+id/LivecoinBalanceView"
+        android:id="@+id/PoloniexBalanceView"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_marginStart="2dp"

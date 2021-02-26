@@ -13,7 +13,7 @@ import kotlin.collections.ArrayList
 class CoinStatusTask(holder: ContextHolder?) : MarketTask<Int, Int>(holder!!) {
     private var bittrexStatuses: MutableMap<String, Boolean> = HashMap()
     private var binanceStatuses: MutableMap<String, Boolean> = HashMap()
-    private var livecoinStatuses: MutableMap<String, Boolean> = HashMap()
+    private var poloniexStatuses: MutableMap<String, Boolean> = HashMap()
     private var coinIcons: MutableMap<String, String?> = HashMap()
     private var availableCoins = ArrayList<String>()
 
@@ -32,7 +32,7 @@ class CoinStatusTask(holder: ContextHolder?) : MarketTask<Int, Int>(holder!!) {
                 updateStatuses(binanceStatuses, market.getCurrencies())
             }
             market.getMarketName() == Market.POLONIEX_MARKET -> {
-                updateStatuses(livecoinStatuses, market.getCurrencies())
+                updateStatuses(poloniexStatuses, market.getCurrencies())
             }
         }
         return 0
@@ -72,7 +72,7 @@ class CoinStatusTask(holder: ContextHolder?) : MarketTask<Int, Int>(holder!!) {
 
     override fun doInPostExecute(result: Int, holder: ContextHolder) {
         val balanceHolder = holder as BalanceHolder
-        balanceHolder.setCurrencyStatus(bittrexStatuses, binanceStatuses, livecoinStatuses)
+        balanceHolder.setCurrencyStatus(bittrexStatuses, binanceStatuses, poloniexStatuses)
         balanceHolder.setIconUrls(coinIcons)
         balanceHolder.availableCoins = availableCoins
         balanceHolder.updateAllItems()

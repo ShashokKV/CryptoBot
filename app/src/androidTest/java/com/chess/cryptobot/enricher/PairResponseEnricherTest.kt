@@ -27,9 +27,9 @@ class PairResponseEnricherTest {
         val bPrice3 = Price(0.00000962, 400.0000)
         asks = listOf(bPrice1, bPrice2, bPrice3)
 
-        pair.bidMap["livecoin"] = lPrice1.value
+        pair.bidMap["poloniex"] = lPrice1.value
         pair.askMap["binance"] = bPrice1.value
-        pair.bidQuantityMap["livecoin"] = lPrice1.quantity
+        pair.bidQuantityMap["poloniex"] = lPrice1.quantity
         pair.askQuantityMap["binance"] = bPrice1.quantity
 
         enrichWithMinPercentTest()
@@ -75,7 +75,7 @@ class PairResponseEnricherTest {
     private fun countPercent(): Float {
         val feeMap = HashMap<String, Double>()
         feeMap["binance"] = 0.18
-        feeMap["livecoin"] = 0.25
+        feeMap["poloniex"] = 0.25
         val bidFee = feeMap[pair.bidMarketName]?:1.0
         val askFee = feeMap[pair.askMarketName]?:1.0
         val percentBid = (bid - bid / 100 * bidFee).toFloat()
