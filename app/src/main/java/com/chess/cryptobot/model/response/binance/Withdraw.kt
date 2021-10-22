@@ -15,7 +15,7 @@ class Withdraw : HistoryResponse {
     override val historyTime: ZonedDateTime
         get() = longToTime(applyTime)
 
-    @SerializedName("asset")
+    @SerializedName("coin")
     @Expose
     override val historyName: String? = null
 

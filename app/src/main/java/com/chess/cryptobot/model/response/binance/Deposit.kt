@@ -15,7 +15,7 @@ class Deposit : HistoryResponse {
     override val historyTime: ZonedDateTime
         get() = longToTime(insertTime)
 
-    @SerializedName("asset")
+    @SerializedName("coin")
     @Expose
     override val historyName: String? = null
 

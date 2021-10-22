@@ -14,27 +14,27 @@ interface BinanceMarketService {
     @GET("api/v3/ticker/24hr")
     fun getTicker(): Call<BinanceResponse>
 
-    @GET("wapi/v3/assetDetail.html")
+    @GET("sapi/v1/asset/assetDetail")
     fun getAssetDetails(@QueryMap(encoded = true) options: Map<String, String>, @HeaderMap headers: Map<String, String>): Call<BinanceResponse>
 
     @GET("api/v3/exchangeInfo")
     fun getExchangeInfo(): Call<BinanceResponse>
 
-    @GET("wapi/v3/depositAddress.html")
+    @GET("sapi/v1/capital/deposit/address")
     fun getAddress(@QueryMap(encoded = true) options: Map<String, String>, @HeaderMap headers: Map<String, String>): Call<BinanceResponse>
 
     @FormUrlEncoded
-    @POST("wapi/v3/withdraw.html")
+    @POST("sapi/v1/capital/withdraw/apply")
     fun payment(@FieldMap(encoded = true) options: Map<String, String>, @HeaderMap headers: Map<String, String>): Call<BinanceResponse>
 
     @FormUrlEncoded
     @POST("api/v3/order")
     fun newOrder(@FieldMap(encoded = true) options: Map<String, String>, @HeaderMap headers: Map<String, String>): Call<BinanceResponse>
 
-    @GET("wapi/v3/depositHistory.html")
+    @GET("sapi/v1/capital/deposit/hisrec")
     fun getDepositHistory(@QueryMap(encoded = true) options: Map<String, String>, @HeaderMap headers: Map<String, String>): Call<BinanceResponse>
 
-    @GET("wapi/v3/withdrawHistory.html")
+    @GET("sapi/v1/capital/withdraw/history")
     fun getWithdrawHistory(@QueryMap(encoded = true) options: Map<String, String>, @HeaderMap headers: Map<String, String>): Call<BinanceResponse>
 
     @GET("api/v3/allOrders")

@@ -38,9 +38,7 @@ open class BinanceResponse : MarketResponse, CurrenciesListResponse,
 
     val balances: MutableList<BinanceBalance> = ArrayList()
 
-    @SerializedName("withdrawList")
-    @Expose
-    val withdrawList: List<Withdraw>? = null
+    val withdrawList: MutableList<Withdraw> = ArrayList()
 
     @SerializedName("symbols")
     @Expose
@@ -113,9 +111,7 @@ open class BinanceResponse : MarketResponse, CurrenciesListResponse,
         return prices
     }
 
-    @SerializedName("depositList")
-    @Expose
-    val depositList: List<Deposit>? = null
+    val depositList: MutableList<Deposit> = ArrayList()
 
     @SerializedName("address")
     @Expose
