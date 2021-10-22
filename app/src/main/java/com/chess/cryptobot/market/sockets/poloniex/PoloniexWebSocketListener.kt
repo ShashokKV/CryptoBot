@@ -11,6 +11,7 @@ class PoloniexWebSocketListener(private val poloniexWebSocket: PoloniexWebSocket
     private val pairIdMap: MutableMap<Int, String> = HashMap()
 
     override fun onTextMessage(ws: WebSocket?, message: String?) {
+        if (message == null || message.isEmpty()) return
         try {
             parseMessage(message)
         } catch (e: Exception) {
@@ -21,6 +22,8 @@ class PoloniexWebSocketListener(private val poloniexWebSocket: PoloniexWebSocket
     private fun parseMessage(message: String?) {
         if (message == null) return
         val response: JsonArray = JsonParser().parse(message).asJsonArray
+
+        if (response.size() < 3) return
 
         val channelId = response[0].asInt
         val orders = response[2].asJsonArray
@@ -45,7 +48,7 @@ class PoloniexWebSocketListener(private val poloniexWebSocket: PoloniexWebSocket
                 }
             }
             val pairName = pairIdMap[channelId]
-            if (pairName!=null && ask+bid>0) {
+            if (pairName != null && ask + bid > 0) {
                 poloniexWebSocket.passToOrchestrator(pairName.replace("_", "/"), bid, ask)
             }
         }
