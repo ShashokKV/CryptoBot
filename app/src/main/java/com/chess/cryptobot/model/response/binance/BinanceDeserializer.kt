@@ -28,16 +28,12 @@ class BinanceDeserializer : JsonDeserializer<BinanceResponse> {
         var newResponse = response
         val jsonObject = json.asJsonObject
         val keySet = jsonObject.keySet()
-        if (keySet.contains("assetDetail")) {
+        if (keySet.contains("BTC")) {
             for (entry in jsonObject.entrySet()) {
-                if (entry.key == "assetDetail") {
-                    val assetObject = entry.value.asJsonObject
-                    for (asset in assetObject.entrySet()) {
-                        val assetDetail = gson.fromJson(asset.value, AssetDetail::class.java)
-                        assetDetail.currencyName = asset.key
-                        newResponse.assetDetails.add(assetDetail)
-                    }
-                }
+                val assetObject = entry.value.asJsonObject
+                val assetDetail = gson.fromJson(assetObject, AssetDetail::class.java)
+                assetDetail.currencyName = entry.key
+                newResponse.assetDetails.add(assetDetail)
             }
         } else if (keySet.contains("coin") && keySet.contains("free")) {
             val balance = gson.fromJson(jsonObject, BinanceBalance::class.java)
@@ -49,6 +45,13 @@ class BinanceDeserializer : JsonDeserializer<BinanceResponse> {
                 && keySet.contains("price") && keySet.contains("origQty") && keySet.contains("executedQty")) {
             val order = gson.fromJson(jsonObject, BinanceOrder::class.java)
             newResponse.orders.add(order)
+        } else if (keySet.contains("coin") && keySet.contains("amount") && keySet.contains("insertTime") &&
+                keySet.contains("txId")) {
+            val deposit = gson.fromJson(jsonObject, Deposit::class.java)
+            newResponse.depositList.add(deposit)
+        } else if (keySet.contains("coin") && keySet.contains("amount") && keySet.contains("withdrawOrderId")) {
+            val withdraw = gson.fromJson(jsonObject, Withdraw::class.java)
+            newResponse.withdrawList.add(withdraw)
         } else {
             newResponse = gson.fromJson(json, BinanceResponse::class.java)
         }

@@ -163,7 +163,7 @@ class BinanceMarketClient internal constructor(url: String, apiKey: String?, sec
     override fun getAddress(coinName: String): String? {
         if (keysIsEmpty()) return null
         val params: MutableMap<String, String> = LinkedHashMap()
-        params["asset"] = coinName
+        params["coin"] = coinName
         params["recvWindow"] = "10000"
         addTimestamp(params)
         val hash = makeHash(params)
@@ -186,7 +186,7 @@ class BinanceMarketClient internal constructor(url: String, apiKey: String?, sec
 
         val params: MutableMap<String, String> = LinkedHashMap()
         params["amount"] = String.format(Locale.US, "%.8f", amount)
-        params["asset"] = coinName
+        params["coin"] = coinName
         params["address"] = address
         params["recvWindow"] = "15000"
         addTimestamp(params)
