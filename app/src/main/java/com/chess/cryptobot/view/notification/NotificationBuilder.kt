@@ -116,7 +116,7 @@ class NotificationBuilder(private val context: Context) {
             intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
             if (extraFlag != null) intent.putExtra(extraFlag, true)
             val uniqueInt = (System.currentTimeMillis() and 0xfffffff).toInt()
-            return PendingIntent.getActivity(context, uniqueInt, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+            return PendingIntent.getActivity(context, uniqueInt, intent, PendingIntent.FLAG_IMMUTABLE)
         }
 
 }

@@ -19,7 +19,8 @@ import java.math.RoundingMode
 import java.util.*
 import kotlin.collections.HashMap
 
-class TradingService : IntentService("TradingService") {
+class
+TradingService : IntentService("TradingService") {
     private var resultInfo = ""
     private lateinit var pair: Pair
     private var marketsMap = HashMap<String, Market>()

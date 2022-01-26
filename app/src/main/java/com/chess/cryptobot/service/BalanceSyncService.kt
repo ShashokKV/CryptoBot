@@ -24,8 +24,6 @@ import com.chess.cryptobot.view.notification.NotificationBuilder
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
 class BalanceSyncService : IntentService("BalanceSyncService") {
     private var resultInfo = ""
@@ -268,7 +266,7 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
                 val history = ArrayList<History>()
                 marketsMap.values.forEach { history.addAll(it!!.getDepositHistory()) }
                 val filteredHistory = history.filter {
-                    it.action?.toLowerCase(Locale.ROOT) == "deposit"
+                    it.action?.lowercase(Locale.ROOT) == "deposit"
                             && it.currencyName.equals(coinName)
                             && it.amount == ticker.amount
                 }
@@ -282,7 +280,7 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
                     intent.putExtra("coinNames", coinNames)
                     intent.putExtra("forceUpdate", true)
                     intent.putExtra("makeNotifications", true)
-                    actionIntent = PendingIntent.getService(this@BalanceSyncService, 0, intent, 0)
+                    actionIntent = PendingIntent.getService(this@BalanceSyncService, 0, intent, PendingIntent.FLAG_IMMUTABLE)
                     throw SyncServiceException(DEPOSIT_IN_PROGRESS)
                 }
             }

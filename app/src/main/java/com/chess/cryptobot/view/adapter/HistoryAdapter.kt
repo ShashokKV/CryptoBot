@@ -28,7 +28,7 @@ class HistoryAdapter(holder: ContextHolder, private val state: HistoryHolder.Sta
                 history.dateTime!!.withNano(0).format(DateTimeFormatter.ISO_LOCAL_TIME))
         holder.marketView.text = history.market
         holder.nameView.text = history.currencyName
-        holder.actionView.text = history.action!!.toLowerCase(Locale.getDefault())
+        holder.actionView.text = history.action!!.lowercase(Locale.getDefault())
         holder.amountView.text = String.format(Locale.US, "%.8f", history.amount)
         holder.priceView.text = if (history.price == null) "" else String.format(Locale.US, "%.8f", history.price)
         if (state === HistoryHolder.State.HISTORY) {

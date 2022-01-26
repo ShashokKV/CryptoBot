@@ -60,7 +60,7 @@ class BinanceWebSocket(orchestrator: WebSocketOrchestrator) : MarketWebSocket(or
 
     private fun prepareSubscribeMessage(pairs: List<Pair>) {
         subscribeMessage = Gson().toJson(BinanceSubscribe(params = pairs.map { pair ->
-            pair.getPairNameForMarket(BINANCE_MARKET).toLowerCase(Locale.ROOT).plus("@bookTicker")
+            pair.getPairNameForMarket(BINANCE_MARKET).lowercase(Locale.ROOT).plus("@bookTicker")
         }, id = 100))
     }
 

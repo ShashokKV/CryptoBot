@@ -80,7 +80,7 @@ abstract class MarketClient(val url: String, apiKey: String?, secretKey: String?
         for (b in bytes) {
             formatter.format("%02x", b)
         }
-        return formatter.toString().toUpperCase(Locale.ROOT)
+        return formatter.toString().uppercase(Locale.ROOT)
     }
 
     private fun buildQueryString(args: Map<String, String>): String {

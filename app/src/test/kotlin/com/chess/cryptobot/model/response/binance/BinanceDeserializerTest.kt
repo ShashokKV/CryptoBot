@@ -32,7 +32,7 @@ class BinanceDeserializerTest {
         val gson = builder.create()
         val response: BinanceResponse = gson.fromJson(json, BinanceResponse::class.java)
 
-        val detail = response.assetDetails?.filter { assetDetail -> assetDetail.currencyName.equals("SKY") }
-        assert(detail?.get(0)?.fee == 0.01)
+        val detail = response.assetDetails.filter { assetDetail -> assetDetail.currencyName.equals("SKY") }
+        assert(detail[0].fee == 0.01)
     }
 }

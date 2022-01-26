@@ -231,7 +231,7 @@ class BittrexMarketClient internal constructor(url: String, apiKey: String?, sec
         headers["Api-Timestamp"] = timestamp
         val contentHash = contentHash(body)
         headers["Api-Content-Hash"] = contentHash
-        headers["Api-Signature"] = encode(timestamp + path + method + contentHash).toLowerCase(Locale.ROOT)
+        headers["Api-Signature"] = encode(timestamp + path + method + contentHash).lowercase(Locale.ROOT)
         return headers
     }
 
