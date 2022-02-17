@@ -33,18 +33,18 @@ class MarketFactory private constructor(context: Context) {
 
     companion object : SingletonHolder<MarketFactory, Context>(::MarketFactory)
 
-    fun getWithdrawalMarkets(): List<MarketClient?> {
+    fun getWithdrawalMarkets(): List<MarketClient> {
         val marketNames = arrayOf(Market.BITTREX_MARKET, Market.BINANCE_WITHDRAWAL_MARKET, Market.POLONIEX_MARKET)
         return getMarkets(marketNames)
     }
 
-    fun getMarkets(): List<MarketClient?> {
+    fun getMarkets(): List<MarketClient> {
         val marketNames = arrayOf(Market.BITTREX_MARKET, Market.BINANCE_MARKET, Market.POLONIEX_MARKET)
         return getMarkets(marketNames)
     }
 
-    private fun getMarkets(marketNames: Array<String>): List<MarketClient?> {
-        val markets: MutableList<MarketClient?> = ArrayList()
+    private fun getMarkets(marketNames: Array<String>): List<MarketClient> {
+        val markets: MutableList<MarketClient> = ArrayList()
         for (marketName in marketNames) {
             markets.add(getMarket(marketName))
         }

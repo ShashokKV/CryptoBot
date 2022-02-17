@@ -1,7 +1,6 @@
 package com.chess.cryptobot.task
 
 import android.graphics.Color
-import android.os.AsyncTask
 import com.chess.cryptobot.R
 import com.chess.cryptobot.model.room.CryptoBalance
 import com.chess.cryptobot.model.room.CryptoBotDatabase
@@ -13,6 +12,10 @@ import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.lang.ref.WeakReference
 import java.time.Instant
 import java.time.LocalDateTime
@@ -20,27 +23,32 @@ import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import kotlin.math.roundToLong
 
-class BalanceGraphTask(balanceGraphFragment: BalanceGraphFragment, private val coinName: String) : AsyncTask<Void?, Int?, Void?>() {
+class BalanceGraphTask(balanceGraphFragment: BalanceGraphFragment, private val coinName: String) {
 
-    private val graphFragmentWeakReference: WeakReference<BalanceGraphFragment> = WeakReference(balanceGraphFragment)
+    private val graphFragmentWeakReference: WeakReference<BalanceGraphFragment> =
+        WeakReference(balanceGraphFragment)
     private var dataSets: List<ILineDataSet?>? = null
     private var minTime = 0.0f
     private var maxTime = 0.0f
     private var maxBalance = 0.0f
     private var minBalance = 0.0f
 
-    override fun doInBackground(vararg params: Void?): Void? {
+    fun doInBackground() {
         val context = graphFragmentWeakReference.get()!!.context
         val database = CryptoBotDatabase.getInstance(context!!)
         val dao = database.cryptoBalanceDao
         val dateEnd = LocalDateTime.now()
         val dateStart = dateEnd.minusDays(30)
-        val balances = dao!!.getByDateAndCoinName(dateStart, dateEnd, coinName)
-        dataSets = createDataSets(balances)
-        return null
+        CoroutineScope(Dispatchers.IO).launch {
+            val balances = dao!!.getByDateAndCoinName(dateStart, dateEnd, coinName)
+            dataSets = createDataSets(balances)
+            withContext(Dispatchers.Main) {
+                onPostExecute()
+            }
+        }
     }
 
-    override fun onPostExecute(param: Void?) {
+    private fun onPostExecute() {
         val lineChart = createChart() ?: return
         lineChart.invalidate()
         lineChart.fitScreen()
@@ -63,7 +71,11 @@ class BalanceGraphTask(balanceGraphFragment: BalanceGraphFragment, private val c
         }
 
         dataSet.axisDependency = YAxis.AxisDependency.LEFT
-        dataSet.color = Color.rgb((Math.random() * 255).toInt(), (Math.random() * 255).toInt(), (Math.random() * 255).toInt())
+        dataSet.color = Color.rgb(
+            (Math.random() * 255).toInt(),
+            (Math.random() * 255).toInt(),
+            (Math.random() * 255).toInt()
+        )
         dataSet.setDrawCircles(false)
         val dataSets: MutableList<ILineDataSet> = ArrayList()
         dataSets.add(dataSet)
@@ -71,7 +83,8 @@ class BalanceGraphTask(balanceGraphFragment: BalanceGraphFragment, private val c
     }
 
     private fun floatDateTime(dateTime: LocalDateTime?): Float {
-        return dateTime!!.toEpochSecond(ZoneOffset.systemDefault().rules.getOffset(Instant.now())).toFloat()
+        return dateTime!!.toEpochSecond(ZoneOffset.systemDefault().rules.getOffset(Instant.now()))
+            .toFloat()
     }
 
     private fun createChart(): LineChart? {
@@ -107,9 +120,11 @@ class BalanceGraphTask(balanceGraphFragment: BalanceGraphFragment, private val c
         xAxis.setCenterAxisLabels(true)
         val formatter: ValueFormatter = object : ValueFormatter() {
             override fun getAxisLabel(value: Float, axis: AxisBase): String {
-                return LocalDateTime.ofEpochSecond(value.roundToLong(), 0,
-                        ZoneOffset.systemDefault().rules.getOffset(Instant.now()))
-                        .format(DateTimeFormatter.ofPattern("dd.MM HH:mm"))
+                return LocalDateTime.ofEpochSecond(
+                    value.roundToLong(), 0,
+                    ZoneOffset.systemDefault().rules.getOffset(Instant.now())
+                )
+                    .format(DateTimeFormatter.ofPattern("dd.MM HH:mm"))
             }
         }
         xAxis.valueFormatter = formatter

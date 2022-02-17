@@ -1,10 +1,7 @@
 package com.chess.cryptobot.content.history
 
 import android.content.Context
-import android.os.AsyncTask
-
 import androidx.fragment.app.Fragment
-
 import com.chess.cryptobot.content.ContextHolder
 import com.chess.cryptobot.content.Preferences
 import com.chess.cryptobot.model.ViewItem
@@ -29,7 +26,7 @@ class HistoryHolder(fragment: Fragment, private val state: State) : ContextHolde
     override fun updateAllItems() {
         viewItems = ArrayList()
         val task = HistoryTask(this, state)
-        task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, 0)
+        task.doInBackground(0)
     }
 
     override fun updateItem(item: ViewItem) {

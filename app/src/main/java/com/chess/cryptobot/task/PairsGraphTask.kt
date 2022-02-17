@@ -1,7 +1,6 @@
 package com.chess.cryptobot.task
 
 import android.graphics.Color
-import android.os.AsyncTask
 import com.chess.cryptobot.R
 import com.chess.cryptobot.model.room.CryptoBotDatabase.Companion.getInstance
 import com.chess.cryptobot.model.room.ProfitPair
@@ -16,12 +15,21 @@ import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.lang.ref.WeakReference
 import java.time.LocalDateTime
 
-class PairsGraphTask(pairsGraphFragment: PairsGraphFragment, private val daysToShow: Int, private val minPercent: Float) : AsyncTask<Void?, Int?, Void?>() {
+class PairsGraphTask(
+    pairsGraphFragment: PairsGraphFragment,
+    private val daysToShow: Int,
+    private val minPercent: Float
+) {
 
-    private val graphFragmentWeakReference: WeakReference<PairsGraphFragment> = WeakReference(pairsGraphFragment)
+    private val graphFragmentWeakReference: WeakReference<PairsGraphFragment> =
+        WeakReference(pairsGraphFragment)
     private var allPairNames: List<String>? = null
     private var maxPercent = 0f
     private var count = 0
@@ -30,19 +38,24 @@ class PairsGraphTask(pairsGraphFragment: PairsGraphFragment, private val daysToS
     private var dataSets: MutableList<IBarDataSet> = ArrayList()
     private var labels: MutableList<String> = ArrayList()
 
-    override fun doInBackground(vararg params: Void?): Void? {
+    fun doInBackground() {
+        onProgressUpdate()
         val context = graphFragmentWeakReference.get()!!.context
         val database = getInstance(context!!)
         dao = database.profitPairDao
-        val searchDate = date.minusDays(daysToShow.toLong())
-        allPairNames = dao!!.getPairNamesByDateAndMinPercent(searchDate, minPercent)
+        CoroutineScope(Dispatchers.IO).launch {
+            val searchDate = date.minusDays(daysToShow.toLong())
+            allPairNames = dao!!.getPairNamesByDateAndMinPercent(searchDate, minPercent)
 
-        count = dao!!.getCountByDate(date.minusDays(daysToShow.toLong()), minPercent)
+            count = dao!!.getCountByDate(date.minusDays(daysToShow.toLong()), minPercent)
 
-        if (allPairNames!!.isEmpty()) return null
-        initDataSets()
+            if (allPairNames!!.isEmpty())
+                initDataSets()
 
-        return null
+            withContext(Dispatchers.Main) {
+                onPostExecute()
+            }
+        }
     }
 
     private fun initDataSets() {
@@ -52,13 +65,17 @@ class PairsGraphTask(pairsGraphFragment: PairsGraphFragment, private val daysToS
             val entries: ArrayList<BarEntry> = ArrayList()
             pairs[j]?.percent?.let { BarEntry(j.toFloat(), it) }?.let { entries.add(it) }
             val dataSet = BarDataSet(entries, pairs[j]?.pairName)
-            dataSet.color = Color.rgb((Math.random() * 255).toInt(), (Math.random() * 255).toInt(), (Math.random() * 255).toInt())
+            dataSet.color = Color.rgb(
+                (Math.random() * 255).toInt(),
+                (Math.random() * 255).toInt(),
+                (Math.random() * 255).toInt()
+            )
             dataSets.add(dataSet)
-            labels.add(pairs[j]?.pairName?:"")
+            labels.add(pairs[j]?.pairName ?: "")
         }
     }
 
-    override fun onPostExecute(param: Void?) {
+    private fun onPostExecute() {
         val barChart = createChart() ?: return
         barChart.invalidate()
         val pairsGraphFragment = graphFragmentWeakReference.get()
@@ -68,12 +85,16 @@ class PairsGraphTask(pairsGraphFragment: PairsGraphFragment, private val daysToS
         }
     }
 
-    override fun onProgressUpdate(vararg values: Int?) {
+    fun onProgressUpdate() {
         val pairsGraphFragment = graphFragmentWeakReference.get()
         pairsGraphFragment?.showSpinner()
     }
 
-    private fun profitPairsByAllTime(dao: ProfitPairDao?, dateEnd: LocalDateTime, minPercent: Float): List<ProfitPair?> {
+    private fun profitPairsByAllTime(
+        dao: ProfitPairDao?,
+        dateEnd: LocalDateTime,
+        minPercent: Float
+    ): List<ProfitPair?> {
         val dateStart = dateEnd.minusDays(daysToShow.toLong())
         return dao!!.getAllPairsByDayAndMinPercent(dateStart, dateEnd, minPercent)
     }
@@ -85,7 +106,7 @@ class PairsGraphTask(pairsGraphFragment: PairsGraphFragment, private val daysToS
             pair.percent = averagePercent
         }
 
-        pairs.sortedByDescending {it?.percent}
+        pairs.sortedByDescending { it?.percent }
     }
 
     private fun createChart(): HorizontalBarChart? {
@@ -111,16 +132,16 @@ class PairsGraphTask(pairsGraphFragment: PairsGraphFragment, private val daysToS
         barChart.setFitBars(true)
         barChart.extraBottomOffset = 20f
         barChart.setVisibleYRange(maxPercent, 1f, YAxis.AxisDependency.LEFT)
-        barChart.setVisibleXRangeMaximum(allPairNames?.size?.toFloat()?:1f)
+        barChart.setVisibleXRangeMaximum(allPairNames?.size?.toFloat() ?: 1f)
         barChart.enableScroll()
         barChart.legend.isEnabled = false
     }
 
     private fun customizeXAxis(xAxis: XAxis, textColor: Int) {
-        val maxSize = allPairNames?.size?.toFloat()?:1f
-        xAxis.mAxisMinimum=0f
-        xAxis.mAxisMaximum=maxSize
-        xAxis.calculate(0f,maxSize)
+        val maxSize = allPairNames?.size?.toFloat() ?: 1f
+        xAxis.mAxisMinimum = 0f
+        xAxis.mAxisMaximum = maxSize
+        xAxis.calculate(0f, maxSize)
         xAxis.granularity = 1f
         xAxis.setDrawAxisLine(false)
         xAxis.valueFormatter = IndexAxisValueFormatter(labels)

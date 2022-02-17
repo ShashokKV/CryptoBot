@@ -87,7 +87,7 @@ class BalanceFragment : MainFragment<BalanceAdapter.BalanceViewHolder>() {
 
     private fun initBalanceStatus() {
         val coinStatusTask = CoinStatusTask(holder)
-        coinStatusTask.execute(0)
+        coinStatusTask.doInBackground(0)
     }
 
     public override fun initFragmentView(inflater: LayoutInflater, container: ViewGroup?): View {

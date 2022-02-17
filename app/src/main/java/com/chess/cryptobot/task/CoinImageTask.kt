@@ -3,39 +3,40 @@ package com.chess.cryptobot.task
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.os.AsyncTask
 import android.util.Log
 import com.chess.cryptobot.content.balance.BalanceHolder
 import com.chess.cryptobot.model.Balance
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.launch
 import java.io.IOException
-import java.lang.ref.WeakReference
 import java.net.URL
 import java.util.*
+import java.util.concurrent.Executors
 
-class CoinImageTask(balanceHolder: BalanceHolder) : AsyncTask<Balance, Int?, Balance?>() {
+class CoinImageTask(private val balanceHolder: BalanceHolder) {
+    private val executor = Executors.newSingleThreadExecutor()
+    private val scope = CoroutineScope(SupervisorJob() + executor.asCoroutineDispatcher())
 
-    private val balanceHolderWeakReference: WeakReference<BalanceHolder> = WeakReference(balanceHolder)
-
-    override fun doInBackground(vararg params: Balance): Balance? {
-        var updated = false
+    fun doInBackground(vararg params: Balance) {
         val balance = params[0]
+
         try {
-            val bitmap = getImage(balance)
-            balance.coinIcon = bitmap
-            updated = true
+            scope.launch(IO) {
+                val bitmap = getImage(balance)
+                balance.coinIcon = bitmap
+                onPostExecute(balance)
+            }
         } catch (ignored: IOException) {
         }
-        if (!updated) {
-            cancel(true)
-            return null
-        }
-        return balance
+
     }
 
-    override fun onPostExecute(balance: Balance?) {
+    private fun onPostExecute(balance: Balance?) {
         if (balance == null) return
-        val balanceHolder = balanceHolderWeakReference.get()
-        balanceHolder?.setItem(balance)
+        balanceHolder.setItem(balance)
     }
 
     @Throws(IOException::class)
@@ -45,7 +46,7 @@ class CoinImageTask(balanceHolder: BalanceHolder) : AsyncTask<Balance, Int?, Bal
         try {
             bitmap = loadImage(coinName)
         } catch (e: IOException) {
-            if (balance.coinUrl==null) return null
+            if (balance.coinUrl == null) return null
             bitmap = downloadImage(balance.coinUrl)
             saveImage(bitmap, fileName(coinName))
         }
@@ -54,22 +55,22 @@ class CoinImageTask(balanceHolder: BalanceHolder) : AsyncTask<Balance, Int?, Bal
 
     @Throws(IOException::class)
     private fun loadImage(coinName: String): Bitmap? {
-        val context = context ?: return null
-        context.openFileInput(fileName(coinName)).use { fileInputStream -> return BitmapFactory.decodeStream(fileInputStream) }
+        context.openFileInput(fileName(coinName))
+            .use { fileInputStream -> return BitmapFactory.decodeStream(fileInputStream) }
     }
 
     private fun fileName(coinName: String): String {
-        return String.format("%s.png", coinName.toLowerCase(Locale.getDefault()))
+        return String.format("%s.png", coinName.lowercase(Locale.getDefault()))
     }
 
     private fun saveImage(bitmap: Bitmap?, fileName: String) {
-        val context = context
-        if (context == null || bitmap == null) return
+        if (bitmap == null) return
         try {
-            context.openFileOutput(fileName, Context.MODE_PRIVATE).use { out -> bitmap.compress(Bitmap.CompressFormat.PNG, 100, out) }
+            context.openFileOutput(fileName, Context.MODE_PRIVATE)
+                .use { out -> bitmap.compress(Bitmap.CompressFormat.PNG, 100, out) }
         } catch (e: IOException) {
             var message = e.localizedMessage
-            if (message==null) message = e.toString()
+            if (message == null) message = e.toString()
             Log.d(TAG, message)
         }
     }
@@ -80,15 +81,9 @@ class CoinImageTask(balanceHolder: BalanceHolder) : AsyncTask<Balance, Int?, Bal
         imageUrl.openStream().use { inputStream -> return BitmapFactory.decodeStream(inputStream) }
     }
 
-    private val context: Context?
+    private val context: Context
         get() {
-            val balanceHolder = balanceHolderWeakReference.get()
-            return if (balanceHolder != null) {
-                balanceHolder.context
-            } else {
-                cancel(true)
-                null
-            }
+            return balanceHolder.context
         }
 
     companion object {

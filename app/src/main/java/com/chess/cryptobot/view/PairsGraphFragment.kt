@@ -12,7 +12,6 @@ import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
 import com.chess.cryptobot.R
 import com.chess.cryptobot.task.PairsGraphTask
-import com.chess.cryptobot.task.SerialExecutor
 import com.chess.cryptobot.task.SinglePairGraphTask
 import com.github.mikephil.charting.charts.HorizontalBarChart
 import java.util.*
@@ -25,7 +24,7 @@ class PairsGraphFragment : Fragment() {
     private var seekBar: SeekBar? = null
     private var pairName: String? = null
     private var daysToShow = 30
-    private var serialExecutor: SerialExecutor? = null
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.pairs_graph_fragment, container, false)
         chart = view.findViewById(R.id.chart)
@@ -33,22 +32,20 @@ class PairsGraphFragment : Fragment() {
         seekBar = view.findViewById(R.id.seekBar)
         initSeekBar()
         initSpinner()
-        serialExecutor = SerialExecutor()
         return view
     }
 
     private fun updateGraph(daysToShow: Int, pairName: String?) {
-        val task = if (pairName==null) {
-            PairsGraphTask(this, daysToShow, minPercent)
+    if (pairName==null) {
+            PairsGraphTask(this, daysToShow, minPercent).doInBackground()
         } else {
-            SinglePairGraphTask(this, daysToShow, pairName, minPercent)
+            SinglePairGraphTask(this, daysToShow, pairName, minPercent).doInBackground()
         }
-        task.executeOnExecutor(serialExecutor)
     }
 
     private val minPercent: Float
         get() {
-            val preferences = PreferenceManager.getDefaultSharedPreferences(context)
+            val preferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
             return preferences.getString(context?.getString(R.string.min_profit_percent), "3")?.toFloat() ?: 3.0F
         }
 

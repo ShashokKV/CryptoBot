@@ -1,28 +1,40 @@
 package com.chess.cryptobot.task
 
 import android.graphics.Color
-import android.os.AsyncTask
 import com.chess.cryptobot.R
 import com.chess.cryptobot.model.room.CryptoBotDatabase.Companion.getInstance
 import com.chess.cryptobot.model.room.ProfitPair
 import com.chess.cryptobot.model.room.ProfitPairDao
 import com.chess.cryptobot.view.PairsGraphFragment
 import com.github.mikephil.charting.charts.HorizontalBarChart
-import com.github.mikephil.charting.components.*
+import com.github.mikephil.charting.components.AxisBase
+import com.github.mikephil.charting.components.Description
+import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.data.DataSet
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.lang.ref.WeakReference
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
-class SinglePairGraphTask(pairsGraphFragment: PairsGraphFragment, private val daysToShow: Int, private val pairName: String, private val minPercent: Float) : AsyncTask<Void?, Int?, Void?>() {
+class SinglePairGraphTask(
+    pairsGraphFragment: PairsGraphFragment,
+    private val daysToShow: Int,
+    private val pairName: String,
+    private val minPercent: Float
+) {
 
-    private val graphFragmentWeakReference: WeakReference<PairsGraphFragment> = WeakReference(pairsGraphFragment)
+    private val graphFragmentWeakReference: WeakReference<PairsGraphFragment> =
+        WeakReference(pairsGraphFragment)
     private var allPairNames: List<String>? = listOf(pairName)
     private var dataSets: List<IBarDataSet>? = null
     private var xAxisNames: MutableList<String>? = null
@@ -30,26 +42,31 @@ class SinglePairGraphTask(pairsGraphFragment: PairsGraphFragment, private val da
     private var dao: ProfitPairDao? = null
     private var date = LocalDateTime.now()
 
-    override fun doInBackground(vararg params: Void?): Void? {
+    fun doInBackground() {
+        onProgressUpdate()
         val context = graphFragmentWeakReference.get()!!.context
         val database = getInstance(context!!)
         dao = database.profitPairDao
 
-        val entriesGroups = initEntriesGroup()
-        xAxisNames = ArrayList()
-        for (i in 0..daysToShow) {
-            val pair = profitPairsByDay(dao, date, minPercent)
-            countAveragePercent(pair)
-            addToEntriesGroup(entriesGroups, pair, i)
-            addToXAxisNames(date)
-            date = date.minusDays(1)
-        }
+        CoroutineScope(Dispatchers.IO).launch {
+            val entriesGroups = initEntriesGroup()
+            xAxisNames = ArrayList()
+            for (i in 0..daysToShow) {
+                val pair = profitPairsByDay(dao, date, minPercent)
+                countAveragePercent(pair)
+                addToEntriesGroup(entriesGroups, pair, i)
+                addToXAxisNames(date)
+                date = date.minusDays(1)
+            }
 
-        dataSets = createDataSets(entriesGroups)
-        return null
+            dataSets = createDataSets(entriesGroups)
+            withContext(Dispatchers.Main) {
+                onPostExecute()
+            }
+        }
     }
 
-    override fun onPostExecute(param: Void?) {
+    private fun onPostExecute() {
         val barChart = createChart() ?: return
         barChart.invalidate()
         val pairsGraphFragment = graphFragmentWeakReference.get()
@@ -59,12 +76,16 @@ class SinglePairGraphTask(pairsGraphFragment: PairsGraphFragment, private val da
         }
     }
 
-    override fun onProgressUpdate(vararg values: Int?) {
+    private fun onProgressUpdate() {
         val pairsGraphFragment = graphFragmentWeakReference.get()
         pairsGraphFragment?.showSpinner()
     }
 
-    private fun profitPairsByDay(dao: ProfitPairDao?, date: LocalDateTime, minPercent: Float): ProfitPair {
+    private fun profitPairsByDay(
+        dao: ProfitPairDao?,
+        date: LocalDateTime,
+        minPercent: Float
+    ): ProfitPair {
         val dateStart = date.toLocalDate().atStartOfDay()
         val dateEnd = date.toLocalDate().atTime(LocalTime.MAX)
         return dao!!.getPairByDayAndMinPercent(pairName, dateStart, dateEnd, minPercent)
@@ -86,12 +107,21 @@ class SinglePairGraphTask(pairsGraphFragment: PairsGraphFragment, private val da
         return entriesGroups
     }
 
-    private fun addToEntriesGroup(entriesGroups: List<MutableList<BarEntry>>, pair: ProfitPair?, barEntryIndex: Int) {
-        pair?.percent?.let { BarEntry(barEntryIndex.toFloat(), it) }?.let { entriesGroups[0].add(it) }
+    private fun addToEntriesGroup(
+        entriesGroups: List<MutableList<BarEntry>>,
+        pair: ProfitPair?,
+        barEntryIndex: Int
+    ) {
+        pair?.percent?.let { BarEntry(barEntryIndex.toFloat(), it) }
+            ?.let { entriesGroups[0].add(it) }
     }
 
     private fun createDataSets(entriesGroups: List<MutableList<BarEntry>>): List<IBarDataSet> {
-        val color = Color.rgb((Math.random() * 255).toInt(), (Math.random() * 255).toInt(), (Math.random() * 255).toInt())
+        val color = Color.rgb(
+            (Math.random() * 255).toInt(),
+            (Math.random() * 255).toInt(),
+            (Math.random() * 255).toInt()
+        )
         val dataSets: MutableList<IBarDataSet> = ArrayList()
         for (entryGroup in entriesGroups) {
             val dataSet: DataSet<*> = BarDataSet(entryGroup, pairName)

@@ -6,7 +6,8 @@ import com.chess.cryptobot.exceptions.MarketException
 import com.chess.cryptobot.market.Market
 import com.chess.cryptobot.model.History
 
-class HistoryTask(private val holder: ContextHolder, private val state: HistoryHolder.State) : MarketTask<Int, String?>(holder) {
+class HistoryTask(private val holder: ContextHolder, private val state: HistoryHolder.State) :
+    MarketTask<Int, String?>(holder) {
     private var historyList: MutableList<History> = ArrayList()
 
     override fun preMarketProcess(param: Int) {
@@ -20,7 +21,7 @@ class HistoryTask(private val holder: ContextHolder, private val state: HistoryH
         } else {
             market.getOpenOrders()
         }
-        synchronized(historyList) {historyList.addAll(marketHistory)}
+        synchronized(historyList) { historyList.addAll(marketHistory) }
         return ""
     }
 

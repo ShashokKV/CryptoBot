@@ -9,9 +9,6 @@ import com.chess.cryptobot.model.Pair
 import com.chess.cryptobot.model.ViewItem
 import com.chess.cryptobot.task.AvailablePairsTask
 import com.chess.cryptobot.task.PairsUpdateTask
-import com.chess.cryptobot.task.SerialExecutor
-import java.util.*
-import kotlin.collections.HashSet
 
 class PairsHolder(fr: Fragment) : ContextHolder(fr) {
     private var invalidPairs: MutableList<String> = ArrayList()
@@ -19,7 +16,6 @@ class PairsHolder(fr: Fragment) : ContextHolder(fr) {
     var hasAvailablePairs: Boolean = false
     private var negativePercentPairs: MutableList<String> = ArrayList()
     private var allPairsPrefs: AllPairsPreferences? = null
-    private val serialExecutor: SerialExecutor = SerialExecutor()
 
     init {
         init()
@@ -28,7 +24,7 @@ class PairsHolder(fr: Fragment) : ContextHolder(fr) {
     fun initAvailablePairs() {
         if (availablePairs.isNotEmpty()) return
         val availablePairsTask = AvailablePairsTask(this)
-        availablePairsTask.executeOnExecutor(serialExecutor, 0)
+        availablePairsTask.doInBackground(0)
     }
 
     public override fun initPrefs(context: Context): Preferences {
@@ -92,7 +88,7 @@ class PairsHolder(fr: Fragment) : ContextHolder(fr) {
     public override fun updateItem(item: ViewItem) {
         val pair = item as Pair
         val task = PairsUpdateTask(this)
-        task.executeOnExecutor(serialExecutor, pair)
+        task.doInBackground(pair)
     }
 
     fun addToInvalidPairs(pair: Pair) {

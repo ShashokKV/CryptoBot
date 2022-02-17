@@ -12,12 +12,9 @@ import androidx.fragment.app.Fragment
 import com.chess.cryptobot.R
 import com.chess.cryptobot.content.balance.BalancePreferences
 import com.chess.cryptobot.task.BalanceGraphTask
-import com.chess.cryptobot.task.SerialExecutor
 import com.github.mikephil.charting.charts.LineChart
-import java.util.*
 
 class BalanceGraphFragment : Fragment() {
-    private var serialExecutor: SerialExecutor? = null
     private var spinner: Spinner? = null
     private var adapter: ArrayAdapter<String?>? = null
     var chart: LineChart? = null
@@ -28,7 +25,6 @@ class BalanceGraphFragment : Fragment() {
         chart = view.findViewById(R.id.balance_graph)
         spinner = view.findViewById(R.id.balance_spinner)
         initSpinner()
-        serialExecutor = SerialExecutor()
         return view
     }
 
@@ -71,7 +67,7 @@ class BalanceGraphFragment : Fragment() {
 
     private fun updateGraph(coinName: String) {
         val task = BalanceGraphTask(this, coinName)
-        task.executeOnExecutor(serialExecutor)
+        task.doInBackground()
     }
 
 }

@@ -6,8 +6,9 @@ import com.chess.cryptobot.exceptions.MarketException
 import com.chess.cryptobot.market.Market
 import com.chess.cryptobot.model.response.TickerResponse
 
-class AvailablePairsTask(pairsHolder: PairsHolder) : MarketTask<Int, MutableList<String>?>(pairsHolder) {
-    private  var availablePairNames: MutableList<String>? = null
+class AvailablePairsTask(pairsHolder: PairsHolder) :
+    MarketTask<Int, MutableList<String>?>(pairsHolder) {
+    private var availablePairNames: MutableList<String>? = null
 
     override fun preMarketProcess(param: Int) {}
 

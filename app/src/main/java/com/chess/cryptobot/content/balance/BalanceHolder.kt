@@ -10,7 +10,6 @@ import com.chess.cryptobot.model.Balance
 import com.chess.cryptobot.model.ViewItem
 import com.chess.cryptobot.task.BalanceUpdateTask
 import com.chess.cryptobot.task.CoinImageTask
-import com.chess.cryptobot.task.SerialExecutor
 
 class BalanceHolder(fragment: Fragment) : ContextHolder(fragment) {
     private var hasKeys: Boolean = false
@@ -19,7 +18,6 @@ class BalanceHolder(fragment: Fragment) : ContextHolder(fragment) {
     private var poloniexStatuses: Map<String, Boolean> = HashMap()
     private var iconUrls: Map<String, String?> = HashMap()
     var availableCoins = ArrayList<String>()
-    private val serialExecutor: SerialExecutor = SerialExecutor()
 
     init {
         super.init()
@@ -28,7 +26,7 @@ class BalanceHolder(fragment: Fragment) : ContextHolder(fragment) {
 
     private fun checkIfHasKeys(): Boolean {
         for (market in MarketFactory.getInstance(context).getMarkets()) {
-            if (market?.keysIsEmpty() != false) {
+            if (market.keysIsEmpty()) {
                 return false
             }
         }
@@ -68,12 +66,12 @@ class BalanceHolder(fragment: Fragment) : ContextHolder(fragment) {
 
     private fun updateImage(balance: Balance) {
         val task = CoinImageTask(this)
-        task.executeOnExecutor(serialExecutor, balance)
+        task.doInBackground(balance)
     }
 
     private fun updateAmount(balance: Balance) {
         val task = BalanceUpdateTask(this)
-        task.executeOnExecutor(serialExecutor, balance)
+        task.doInBackground(balance)
     }
 
     @Throws(ItemNotFoundException::class)
