@@ -40,7 +40,7 @@ class BalanceGraphTask(balanceGraphFragment: BalanceGraphFragment, private val c
         val dateEnd = LocalDateTime.now()
         val dateStart = dateEnd.minusDays(30)
         CoroutineScope(Dispatchers.IO).launch {
-            val balances = dao!!.getByDateAndCoinName(dateStart, dateEnd, coinName)
+            val balances = dao.getByDateAndCoinName(dateStart, dateEnd, coinName)
             dataSets = createDataSets(balances)
             withContext(Dispatchers.Main) {
                 onPostExecute()

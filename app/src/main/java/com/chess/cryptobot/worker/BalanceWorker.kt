@@ -25,12 +25,13 @@ class BalanceWorker(context: Context, workerParams: WorkerParameters) : Worker(c
         var btcSum = 0.0
         val usdSum: Double
         val markets = MarketFactory.getInstance(applicationContext).getMarkets()
+        markets.forEach(Market::resetBalance)
         if (isApiKeysEmpty(markets)) return Result.success()
 
         val tickerMap = try {
             getTickers(markets)
         } catch (e: MarketException) {
-            Log.e(TAG, e.localizedMessage, e)
+            Log.e(TAG, Log.getStackTraceString(e))
             return Result.failure()
         }
 
@@ -38,9 +39,9 @@ class BalanceWorker(context: Context, workerParams: WorkerParameters) : Worker(c
             var amount = 0.0
             for (market in markets) {
                 val marketAmount = try {
-                    market!!.getAmount(coinName)
+                    market.getAmount(coinName)
                 } catch (e: MarketException) {
-                    Log.e(TAG, e.localizedMessage, e)
+                    Log.e(TAG, Log.getStackTraceString(e))
                     return Result.failure()
                 }
                 if (marketAmount > 0) {
@@ -70,7 +71,7 @@ class BalanceWorker(context: Context, workerParams: WorkerParameters) : Worker(c
             var btcPrice = 0.0
             markets.forEach { market ->
                 val pairName = "USDT/BTC"
-                val ticker = tickerMap[market?.getMarketName()]
+                val ticker = tickerMap[market.getMarketName()]
                         ?.first { tickerResponse -> tickerResponse.tickerName == pairName }
                 btcPrice += ticker?.tickerBid?:0.0
             }
@@ -102,7 +103,7 @@ class BalanceWorker(context: Context, workerParams: WorkerParameters) : Worker(c
         val database = CryptoBotDatabase.getInstance(applicationContext)
         val dao = database.cryptoBalanceDao
         val filterDate = LocalDateTime.now().minusDays(31)
-        val balances = dao!!.getLowerThanDate(filterDate)
+        val balances = dao.getLowerThanDate(filterDate)
         dao.deleteAll(balances)
     }
 
@@ -110,7 +111,7 @@ class BalanceWorker(context: Context, workerParams: WorkerParameters) : Worker(c
         val database = CryptoBotDatabase.getInstance(applicationContext)
         val dao = database.cryptoBalanceDao
         val balance = CryptoBalance(name = coinName, balance = amount.toFloat(), dateCreated = LocalDateTime.now())
-        dao?.insert(balance)
+        dao.insert(balance)
     }
 
     companion object {

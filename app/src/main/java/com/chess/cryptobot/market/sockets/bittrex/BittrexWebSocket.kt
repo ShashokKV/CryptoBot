@@ -36,7 +36,7 @@ class BittrexWebSocket(orchestrator: WebSocketOrchestrator) : MarketWebSocket(or
             hubConnection.start().get()
             subscribe(pairs)
         } catch (e: Throwable) {
-            Log.e(tag, e.message?:e.stackTraceToString(), e)
+            Log.e(tag, Log.getStackTraceString(e))
         }
 
     }

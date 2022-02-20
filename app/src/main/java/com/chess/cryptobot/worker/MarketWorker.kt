@@ -31,6 +31,7 @@ class MarketWorker(private val context: Context, workerParams: WorkerParameters)
     private lateinit var markets: List<MarketClient?>
     private lateinit var database: CryptoBotDatabase
     private lateinit var marketInfoReader: MarketInfoReader
+    private val tag = MarketWorker::class.qualifiedName
 
     override fun doWork(): Result {
         allPairNames = AllPairsPreferences(context).items
@@ -44,7 +45,7 @@ class MarketWorker(private val context: Context, workerParams: WorkerParameters)
             infoOnProfitPairs()
             infoOnMinTradeSize()
         } catch (e: Exception) {
-            Log.e(TAG, e.localizedMessage, e)
+            Log.e(TAG, Log.getStackTraceString(e))
             return Result.failure()
         }
         return Result.success()
@@ -113,6 +114,7 @@ class MarketWorker(private val context: Context, workerParams: WorkerParameters)
             try {
                 minQuantity = it.getMinQuantity()
             } catch (e: MarketException) {
+                Log.e(tag, Log.getStackTraceString(e))
                 exception = e
             }
             if (minQuantity != null) tradeLimits[it.getMarketName()] = minQuantity
@@ -127,7 +129,7 @@ class MarketWorker(private val context: Context, workerParams: WorkerParameters)
         pairNames.forEach { pairName ->
             var resultQuantity = 0.0
             var insert = false
-            var pairMinTradeSize = minTradeSizeDao?.getByPairName(pairName)
+            var pairMinTradeSize = minTradeSizeDao.getByPairName(pairName)
             if (pairMinTradeSize == null) {
                 pairMinTradeSize = PairMinTradeSize(pairName = pairName)
                 insert = true
@@ -152,9 +154,9 @@ class MarketWorker(private val context: Context, workerParams: WorkerParameters)
             }
             pairMinTradeSize.minTradeSize = resultQuantity
             if (insert) {
-                minTradeSizeDao?.insert(pairMinTradeSize)
+                minTradeSizeDao.insert(pairMinTradeSize)
             } else {
-                minTradeSizeDao?.update(pairMinTradeSize)
+                minTradeSizeDao.update(pairMinTradeSize)
             }
         }
     }
@@ -166,7 +168,7 @@ class MarketWorker(private val context: Context, workerParams: WorkerParameters)
             val currencies = it.getCurrencies()
             synchronized(this) {
                 for (currency in currencies) {
-                    var coinInfo = coinInfoDao?.getByNameAndMarketName(currency.currencyName, it.getMarketName())
+                    var coinInfo = coinInfoDao.getByNameAndMarketName(currency.currencyName, it.getMarketName())
                     if (coinInfo == null) {
                         coinInfo = CoinInfo(
                                 name = currency.currencyName,
@@ -175,10 +177,10 @@ class MarketWorker(private val context: Context, workerParams: WorkerParameters)
                         coinInfo.name = currency.currencyName!!
                         coinInfo.marketName = it.getMarketName()
                         updateCoinInfo(coinInfo, currency)
-                        coinInfoDao?.insert(coinInfo)
+                        coinInfoDao.insert(coinInfo)
                     } else {
                         updateCoinInfo(coinInfo, currency)
-                        coinInfoDao?.update(coinInfo)
+                        coinInfoDao.update(coinInfo)
                     }
                 }
             }
@@ -199,7 +201,7 @@ class MarketWorker(private val context: Context, workerParams: WorkerParameters)
     private fun cleanDatabase() {
         val dao = database.profitPairDao
         val filterDate = LocalDateTime.now().minusDays(31)
-        val profitPairs = dao!!.getLowerThanDate(filterDate)
+        val profitPairs = dao.getLowerThanDate(filterDate)
         dao.deleteAll(profitPairs)
     }
 
@@ -215,7 +217,7 @@ class MarketWorker(private val context: Context, workerParams: WorkerParameters)
             )
             profitPairs.add(profitPair)
         }
-        pairDao!!.insertAll(profitPairs)
+        pairDao.insertAll(profitPairs)
     }
 
     companion object {

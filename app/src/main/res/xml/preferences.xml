@@ -74,31 +74,37 @@
         <androidx.preference.EditTextPreference
             android:defaultValue="3"
             android:dialogLayout="@layout/number_dialog"
+            android:inputType="number"
             android:key="@string/min_profit_percent"
             android:title="Minimum profit percent" />
         <androidx.preference.EditTextPreference
             android:defaultValue="0.0005"
             android:dialogLayout="@layout/number_dialog"
+            android:inputType="number"
             android:key="@string/min_btc_amount"
             android:title="Minimum BTC trade value" />
         <androidx.preference.EditTextPreference
             android:defaultValue="0.025"
             android:dialogLayout="@layout/number_dialog"
+            android:inputType="number"
             android:key="@string/min_eth_amount"
             android:title="Minimum ETH trade value" />
         <androidx.preference.EditTextPreference
             android:defaultValue="10.0"
             android:dialogLayout="@layout/number_dialog"
+            android:inputType="number"
             android:key="@string/min_usdt_amount"
             android:title="Minimum USDT trade value" />
         <androidx.preference.EditTextPreference
             android:defaultValue="5"
             android:dialogLayout="@layout/number_dialog"
+            android:inputType="number"
             android:key="@string/service_run_period"
             android:title="Run period in minutes" />
         <androidx.preference.EditTextPreference
             android:defaultValue="30"
             android:dialogLayout="@layout/number_dialog"
+            android:inputType="number"
             android:key="@string/statistic_run_period"
             android:title="Statistic collection period" />
     </androidx.preference.PreferenceCategory>

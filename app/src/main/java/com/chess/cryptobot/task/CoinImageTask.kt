@@ -6,11 +6,8 @@ import android.graphics.BitmapFactory
 import android.util.Log
 import com.chess.cryptobot.content.balance.BalanceHolder
 import com.chess.cryptobot.model.Balance
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.launch
 import java.io.IOException
 import java.net.URL
 import java.util.*
@@ -19,6 +16,7 @@ import java.util.concurrent.Executors
 class CoinImageTask(private val balanceHolder: BalanceHolder) {
     private val executor = Executors.newSingleThreadExecutor()
     private val scope = CoroutineScope(SupervisorJob() + executor.asCoroutineDispatcher())
+    private val tag = CoinImageTask::class.qualifiedName
 
     fun doInBackground(vararg params: Balance) {
         val balance = params[0]
@@ -27,9 +25,12 @@ class CoinImageTask(private val balanceHolder: BalanceHolder) {
             scope.launch(IO) {
                 val bitmap = getImage(balance)
                 balance.coinIcon = bitmap
-                onPostExecute(balance)
+                withContext(Dispatchers.Main) {
+                    onPostExecute(balance)
+                }
             }
-        } catch (ignored: IOException) {
+        } catch (e: IOException) {
+            Log.e(tag, Log.getStackTraceString(e))
         }
 
     }
@@ -69,9 +70,7 @@ class CoinImageTask(private val balanceHolder: BalanceHolder) {
             context.openFileOutput(fileName, Context.MODE_PRIVATE)
                 .use { out -> bitmap.compress(Bitmap.CompressFormat.PNG, 100, out) }
         } catch (e: IOException) {
-            var message = e.localizedMessage
-            if (message == null) message = e.toString()
-            Log.d(TAG, message)
+            Log.e(tag, Log.getStackTraceString(e))
         }
     }
 
@@ -85,9 +84,4 @@ class CoinImageTask(private val balanceHolder: BalanceHolder) {
         get() {
             return balanceHolder.context
         }
-
-    companion object {
-        private const val TAG = "CoinImageTask"
-    }
-
 }

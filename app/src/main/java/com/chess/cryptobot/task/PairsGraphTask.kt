@@ -85,7 +85,7 @@ class PairsGraphTask(
         }
     }
 
-    fun onProgressUpdate() {
+    private fun onProgressUpdate() {
         val pairsGraphFragment = graphFragmentWeakReference.get()
         pairsGraphFragment?.showSpinner()
     }

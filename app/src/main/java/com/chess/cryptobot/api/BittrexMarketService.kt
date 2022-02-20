@@ -5,8 +5,8 @@ import retrofit2.Call
 import retrofit2.http.*
 
 interface BittrexMarketService {
-    @GET("balances/{coinName}")
-    fun getBalance(@Path("coinName") coinName: String, @HeaderMap headers: Map<String, String>): Call<BittrexBalance>
+    @GET("balances")
+    fun getBalances(@HeaderMap headers: Map<String, String>): Call<List<BittrexBalance>>
 
     @GET("markets/{marketSymbol}/orderbook")
     fun getOrderBook(@Path("marketSymbol") pairName: String): Call<BittrexOrderBook>

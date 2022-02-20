@@ -9,7 +9,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+
 abstract class MarketTask<S, T>(private val holder: ContextHolder) {
+    private val tag = MarketTask::class.qualifiedName
 
     @SafeVarargs
     fun doInBackground(vararg params: S) {
@@ -30,13 +32,16 @@ abstract class MarketTask<S, T>(private val holder: ContextHolder) {
                     onPostExecute(postMarketProcessResult)
                 }
             } catch (e: Exception) {
-                onCancelled(exceptionProcess(param, e.message))
+                withContext(Dispatchers.Main) {
+                    onCancelled(exceptionProcess(param, e.message))
+                }
             }
         }
     }
 
     @Throws(MarketException::class)
     private fun marketsLoop(market: Market, param: S): T? {
+        market.resetBalance()
         return marketProcess(market, param)
     }
 

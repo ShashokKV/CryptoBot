@@ -7,7 +7,7 @@ class ErrorResponse {
     @SerializedName("errorMessage")
     @Expose
     val errorMessage: String = "no error Message"
-        get() = message?:msg?:code?:field
+        get() = message?:msg?:code?:error?:field
     @SerializedName("message")
     @Expose
     private val message: String? = null
@@ -17,5 +17,8 @@ class ErrorResponse {
     @SerializedName("code")
     @Expose
     private val code: String? = null
+    @SerializedName("error")
+    @Expose
+    private val error: String? = null
 
 }

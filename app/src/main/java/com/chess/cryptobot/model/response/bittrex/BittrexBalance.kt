@@ -8,4 +8,8 @@ class BittrexBalance : BalanceResponse, BittrexMarketResponse() {
     @SerializedName("available")
     @Expose
     override val amount: Double = 0.0
+
+    @SerializedName("currencySymbol")
+    @Expose
+    val currencySymbol: String = ""
 }

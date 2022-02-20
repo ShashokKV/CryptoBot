@@ -1,10 +1,11 @@
-package com.chess.cryptobot.service
+package com.chess.cryptobot.worker
 
-import android.app.IntentService
 import android.app.NotificationManager
-import android.content.Intent
+import android.content.Context
 import android.util.Log
+import androidx.work.*
 import com.chess.cryptobot.content.balance.BalancePreferences
+import com.chess.cryptobot.exceptions.InitializationException
 import com.chess.cryptobot.exceptions.MarketException
 import com.chess.cryptobot.market.Market
 import com.chess.cryptobot.market.MarketFactory
@@ -17,10 +18,9 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import java.math.RoundingMode
 import java.util.*
-import kotlin.collections.HashMap
 
-class
-TradingService : IntentService("TradingService") {
+class TradingWorker(private val context: Context, private val workerParams: WorkerParameters) :
+    Worker(context, workerParams) {
     private var resultInfo = ""
     private lateinit var pair: Pair
     private var marketsMap = HashMap<String, Market>()
@@ -33,26 +33,29 @@ TradingService : IntentService("TradingService") {
     private var minEthAmount = 0.025
     private var minUsdtAmount = 10.0
     private val scope = CoroutineScope(SupervisorJob())
-    private val tag = TradingService::class.qualifiedName
+    private val tag = TradingWorker::class.qualifiedName
 
-    override fun onHandleIntent(intent: Intent?) {
-        if (intent == null) return
-        initFromIntent(intent)
+    override fun doWork(): Result {
+        initFromParams(workerParams)
         initMarkets()
         if (isApiKeysEmpty) {
-            makeNotification("Api keys are empty", "Please fill api keys in settings or turn AutoTrade off")
-            return
+            makeNotification(
+                "Api keys are empty",
+                "Please fill api keys in settings or turn AutoTrade off"
+            )
+            return Result.failure()
         }
         try {
             initAmounts()
         } catch (e: MarketException) {
+            Log.e(tag, Log.getStackTraceString(e))
             makeNotification("Init amounts exception", e.message)
-            return
+            return Result.failure()
         }
         val trader = Trader(pair)
         if (trader.quantity <= minMarketQuantity) {
             Log.d(tag, pair.name + " quantity to low, aborting..")
-            return
+            return Result.failure()
         }
         val buyResult = scope.async { trader.buy() }
         val sellResult = scope.async { trader.sell() }
@@ -62,30 +65,38 @@ TradingService : IntentService("TradingService") {
         }
         if (!trader.success) {
             makeNotification("Trade exception", resultInfo)
-            return
+            return Result.failure()
         } else {
             makeNotification("Trading results", resultInfo)
             trader.syncBalance()
         }
+
+        return Result.success()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onStopped() {
+        super.onStopped()
         workingOnPair = null
     }
 
-    private fun initFromIntent(intent: Intent) {
-        pair = intent.getSerializableExtra(Pair::class.java.name) as Pair
+    private fun initFromParams(workerParams: WorkerParameters) {
+        val inputData = workerParams.inputData
+        val pairJson = inputData.getString(Pair::class.java.name)
+            ?: throw InitializationException("pair")
+        pair = Pair.fromJson(pairJson)
         Log.d(tag, "Start trading on pair: " + pair.name)
         workingOnPair = pair.name
-        minMarketQuantity = intent.getDoubleExtra("minQuantity", 0.0)
-        stepSize = intent.getDoubleExtra("stepSize", 0.00000001)
-        priceFilter = intent.getDoubleExtra("priceFilter", 0.00000001)
+        minMarketQuantity = inputData.getDouble("minQuantity", 0.0)
+        stepSize = inputData.getDouble("stepSize", 0.00000001)
+        priceFilter = inputData.getDouble("priceFilter", 0.00000001)
     }
 
     private fun initMarkets() {
-        MarketFactory.getInstance(this).getMarkets()
-                .forEach { market -> if (market != null) marketsMap[market.getMarketName()] = market }
+        MarketFactory.getInstance(context).getMarkets()
+            .forEach { market ->
+                marketsMap[market.getMarketName()] = market
+                market.resetBalance
+            }
     }
 
     private val isApiKeysEmpty: Boolean
@@ -106,12 +117,15 @@ TradingService : IntentService("TradingService") {
             try {
                 askBaseAmount = askBaseDeferred.await()
                 bidMarketAmount = bidMarketDeferred.await()
-            }catch (e: MarketException) {
+            } catch (e: MarketException) {
+                Log.e(tag, Log.getStackTraceString(e))
                 exception = e
             }
         }
-        if (exception!=null) {throw exception as MarketException }
-        val balancePreferences = BalancePreferences(this)
+        if (exception != null) {
+            throw exception as MarketException
+        }
+        val balancePreferences = BalancePreferences(context)
         minBtcAmount = balancePreferences.getMinBtcAmount()
         minEthAmount = balancePreferences.getMinEthAmount()
         minUsdtAmount = balancePreferences.getMinUsdtAmount()
@@ -120,16 +134,16 @@ TradingService : IntentService("TradingService") {
 
     private fun makeNotification(title: String, message: String?) {
         if (message!!.isEmpty()) return
-        
-        NotificationBuilder(this)
-                .setNotificationId(NotificationID.id)
-                .setChannelId(CHANNEL_ID)
-                .setNotificationText(resultInfo)
-                .setChannelName("Trading service")
-                .setImportance(NotificationManager.IMPORTANCE_DEFAULT)
-                .setTitle(title)
-                .setNotificationText(message)
-                .buildAndNotify()
+
+        NotificationBuilder(context)
+            .setNotificationId(NotificationID.id)
+            .setChannelId(CHANNEL_ID)
+            .setNotificationText(resultInfo)
+            .setChannelName("Trading service")
+            .setImportance(NotificationManager.IMPORTANCE_DEFAULT)
+            .setTitle(title)
+            .setNotificationText(message)
+            .buildAndNotify()
         resultInfo = ""
     }
 
@@ -163,13 +177,13 @@ TradingService : IntentService("TradingService") {
             if (quantity > minAvailableAmount) quantity = minAvailableAmount
             //-1% for trading fee
             quantity -= quantity / 100
-            val minBaseAmount = when(pair.baseName) {
+            val minBaseAmount = when (pair.baseName) {
                 "BTC" -> minBtcAmount
                 "ETH" -> minEthAmount
                 "USDT" -> minUsdtAmount
                 else -> 0.0
             }
-            val minMarketAmount = when(pair.marketName) {
+            val minMarketAmount = when (pair.marketName) {
                 "BTC" -> minBtcAmount
                 "ETH" -> minEthAmount
                 "USDT" -> minUsdtAmount
@@ -179,13 +193,14 @@ TradingService : IntentService("TradingService") {
             if (quantity * askPrice < minBaseAmount) return 0.0
             if (quantity * bidPrice < minMarketAmount) return 0.0
 
-            return quantity.toBigDecimal().setScale(computeScale(stepSize), RoundingMode.DOWN).toDouble()
+            return quantity.toBigDecimal().setScale(computeScale(stepSize), RoundingMode.DOWN)
+                .toDouble()
         }
 
         private fun computeScale(testValue: Double): Int {
             var scale = 0
             var testStep = 1.00000000
-            while (scale<=8 && testStep!=testValue) {
+            while (scale <= 8 && testStep != testValue) {
                 testStep /= 10
                 scale++
             }
@@ -197,17 +212,22 @@ TradingService : IntentService("TradingService") {
             try {
                 buyMarket!!.buy(buyPairName, price, quantity)
             } catch (e: MarketException) {
+                Log.e(tag, Log.getStackTraceString(e))
                 success = false
-                return String.format(Locale.US, "%.8f%s bid %.8f; ask %.8f; error: %s",
-                        quantity,
-                        buyPairName,
-                        bidPrice,
-                        askPrice,
-                        e.message)
+                return String.format(
+                    Locale.US, "%.8f%s bid %.8f; ask %.8f; error: %s",
+                    quantity,
+                    buyPairName,
+                    bidPrice,
+                    askPrice,
+                    e.message
+                )
             }
             success = true
-            return String.format(Locale.getDefault(), "buy %.8f%s for %.8f on %s", quantity, buyPairName,
-                    price, buyMarket!!.getMarketName())
+            return String.format(
+                Locale.getDefault(), "buy %.8f%s for %.8f on %s", quantity, buyPairName,
+                price, buyMarket!!.getMarketName()
+            )
         }
 
         fun sell(): String {
@@ -215,21 +235,27 @@ TradingService : IntentService("TradingService") {
             try {
                 sellMarket!!.sell(sellPairName, price, quantity)
             } catch (e: MarketException) {
+                Log.e(tag, Log.getStackTraceString(e))
                 success = false
-                return String.format(Locale.US, "%.8f%s bid %.8f; ask %.8f; error: %s",
-                        quantity,
-                        buyPairName,
-                        bidPrice,
-                        askPrice,
-                        e.message)
+                return String.format(
+                    Locale.US, "%.8f%s bid %.8f; ask %.8f; error: %s",
+                    quantity,
+                    buyPairName,
+                    bidPrice,
+                    askPrice,
+                    e.message
+                )
             }
             success = true
-            return String.format(Locale.getDefault(), "sell %.8f%s for %.8f on %s", quantity, sellPairName,
-                    price, sellMarket!!.getMarketName())
+            return String.format(
+                Locale.getDefault(), "sell %.8f%s for %.8f on %s", quantity, sellPairName,
+                price, sellMarket!!.getMarketName()
+            )
         }
 
         private fun formatAmount(amount: Double): Double {
-            return amount.toBigDecimal().setScale(computeScale(priceFilter), RoundingMode.DOWN).toDouble()
+            return amount.toBigDecimal().setScale(computeScale(priceFilter), RoundingMode.DOWN)
+                .toDouble()
         }
 
         fun updateInfo(text: String) {
@@ -240,9 +266,14 @@ TradingService : IntentService("TradingService") {
             val coinNames = ArrayList<String>()
             coinNames.add(pair.baseName)
             coinNames.add(pair.marketName)
-            val intent = Intent(this@TradingService, BalanceSyncService::class.java)
-            intent.putExtra("coinNames", coinNames)
-            startService(intent)
+            val dataBuilder = Data.Builder()
+            dataBuilder.putStringArray("coinNames", coinNames.toTypedArray())
+
+            val balanceSyncWorker = OneTimeWorkRequest.Builder(BalanceSyncWorker::class.java)
+                .setInputData(dataBuilder.build())
+                .build()
+
+            WorkManager.getInstance(context).enqueue(balanceSyncWorker)
         }
     }
 

@@ -1,6 +1,7 @@
 package com.chess.cryptobot.market
 
 //import okhttp3.logging.HttpLoggingInterceptor
+import android.util.Log
 import com.chess.cryptobot.exceptions.MarketException
 import com.chess.cryptobot.model.response.ErrorResponse
 import com.chess.cryptobot.model.response.MarketResponse
@@ -15,12 +16,9 @@ import java.io.UnsupportedEncodingException
 import java.net.URLEncoder
 import java.security.InvalidKeyException
 import java.security.NoSuchAlgorithmException
-import java.time.Instant
-import java.time.ZoneId
 import java.util.*
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
-import kotlin.collections.ArrayList
 
 
 private const val DEFAULT_ENCODING = "UTF-8"
@@ -30,6 +28,12 @@ abstract class MarketClient(val url: String, apiKey: String?, secretKey: String?
     var algorithm: String? = null
     val apiKey: String = apiKey ?: ""
     private val secretKey: String = secretKey ?: ""
+    private val tag = MarketClient::class.qualifiedName
+    var resetBalance: Boolean = false
+
+    override fun resetBalance() {
+        resetBalance = true
+    }
 
     abstract fun initGson(): Gson
 
@@ -67,10 +71,13 @@ abstract class MarketClient(val url: String, apiKey: String?, secretKey: String?
             mac.init(keySpec)
             mac.doFinal(value.toByteArray(charset(DEFAULT_ENCODING)))
         } catch (e: NoSuchAlgorithmException) {
+            Log.e(tag, Log.getStackTraceString(e))
             throw RuntimeException(e)
         } catch (e: InvalidKeyException) {
+            Log.e(tag, Log.getStackTraceString(e))
             throw RuntimeException(e)
         } catch (e: UnsupportedEncodingException) {
+            Log.e(tag, Log.getStackTraceString(e))
             throw RuntimeException(e)
         }
     }
@@ -91,7 +98,7 @@ abstract class MarketClient(val url: String, apiKey: String?, secretKey: String?
                 result.append(URLEncoder.encode(param, DEFAULT_ENCODING))
                         .append("=").append(URLEncoder.encode(args[param], DEFAULT_ENCODING))
             } catch (ex: Exception) {
-                ex.printStackTrace()
+                Log.e(this.toString(), Log.getStackTraceString(ex))
                 result.append(param).append("=").append(param)
             }
         }
@@ -103,7 +110,7 @@ abstract class MarketClient(val url: String, apiKey: String?, secretKey: String?
     }
 
     open fun timestamp(): String {
-        return Instant.now().atZone(ZoneId.of("Z")).toInstant().toEpochMilli().toString()
+        return Date().time.toString()
     }
 
     @Throws(MarketException::class)

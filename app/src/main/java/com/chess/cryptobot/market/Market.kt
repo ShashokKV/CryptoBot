@@ -11,6 +11,8 @@ import com.chess.cryptobot.model.response.TradeLimitResponse
 interface Market {
     fun getMarketName(): String
 
+    fun resetBalance()
+
     @Throws(MarketException::class)
     fun getAmount(coinName: String): Double
 

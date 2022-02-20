@@ -14,5 +14,5 @@ open class PoloniexResponse : MarketResponse {
         return error ?: "no message"
     }
 
-    var data: JsonObject? = null
+    var data: JsonObject = JsonObject()
 }

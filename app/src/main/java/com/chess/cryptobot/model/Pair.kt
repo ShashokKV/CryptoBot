@@ -4,6 +4,7 @@ import com.chess.cryptobot.market.Market.Companion.BINANCE_MARKET
 import com.chess.cryptobot.market.Market.Companion.BITTREX_MARKET
 import com.chess.cryptobot.market.Market.Companion.POLONIEX_MARKET
 import com.chess.cryptobot.model.response.binance.BinanceDeserializer
+import com.google.gson.Gson
 import java.io.Serializable
 
 class Pair(val baseName: String, val marketName: String) : ViewItem, Serializable {
@@ -64,7 +65,18 @@ class Pair(val baseName: String, val marketName: String) : ViewItem, Serializabl
     private val poloniexPairName: String
         get() = baseName +"_$marketName"
 
+
+    fun toJson(): String {
+        val gson = Gson()
+        return gson.toJson(this)
+    }
+
     companion object {
+        fun fromJson(json: String): Pair {
+            val gson = Gson()
+            return gson.fromJson(json, Pair::class.java)
+        }
+
         fun fromPairName(pairName: String): Pair {
             val coinNames = pairName.split("/").toTypedArray()
             return Pair(coinNames[0], coinNames[1])

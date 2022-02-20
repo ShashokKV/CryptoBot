@@ -9,12 +9,15 @@ import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
 import androidx.preference.PreferenceManager
+import androidx.work.OneTimeWorkRequest
+import androidx.work.WorkManager
 import com.chess.cryptobot.R
 import com.chess.cryptobot.content.balance.BalancePreferences
 import com.chess.cryptobot.content.pairs.AllPairsPreferences
 import com.chess.cryptobot.market.sockets.WebSocketOrchestrator
 import com.chess.cryptobot.model.Pair
 import com.chess.cryptobot.view.notification.NotificationBuilder
+import com.chess.cryptobot.worker.ProfitPairWorker
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -107,7 +110,8 @@ class BotService : Service() {
                     webSocketOrchestrator = WebSocketOrchestrator(this@BotService, pairs)
                 webSocketOrchestrator?.subscribeAll()
             } else {
-                startService(Intent(this@BotService, ProfitPairService::class.java))
+                val profitPairWorker = OneTimeWorkRequest.Builder(ProfitPairWorker::class.java).build()
+                WorkManager.getInstance(this@BotService).enqueue(profitPairWorker)
             }
         }
 

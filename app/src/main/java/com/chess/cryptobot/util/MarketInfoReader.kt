@@ -6,33 +6,33 @@ import com.chess.cryptobot.market.Market
 import com.chess.cryptobot.model.Pair
 import com.chess.cryptobot.model.room.CryptoBotDatabase
 
-class MarketInfoReader(database: CryptoBotDatabase?) {
-    private var coinInfoDao = database?.coinInfoDao
-    private var minTradeSizeDao = database?.minTradeSizeDao
+class MarketInfoReader(database: CryptoBotDatabase) {
+    private var coinInfoDao = database.coinInfoDao
+    private var minTradeSizeDao = database.minTradeSizeDao
 
     constructor(context: Context): this(CryptoBotDatabase.getInstance(context))
 
     fun checkCoinStatus(coinName: String): Boolean {
-        val bittrexStatus = coinInfoDao?.getByNameAndMarketName(coinName, Market.BITTREX_MARKET)?.status ?: true
-        val binanceStatus = coinInfoDao?.getByNameAndMarketName(coinName, Market.BINANCE_MARKET)?.status ?: true
-        val poloniexStatus = coinInfoDao?.getByNameAndMarketName(coinName, Market.POLONIEX_MARKET)?.status ?: true
+        val bittrexStatus = coinInfoDao.getByNameAndMarketName(coinName, Market.BITTREX_MARKET)?.status ?: true
+        val binanceStatus = coinInfoDao.getByNameAndMarketName(coinName, Market.BINANCE_MARKET)?.status ?: true
+        val poloniexStatus = coinInfoDao.getByNameAndMarketName(coinName, Market.POLONIEX_MARKET)?.status ?: true
         return bittrexStatus && binanceStatus && poloniexStatus
     }
 
     @Throws(SyncServiceException::class)
     fun getFee(marketName: String, coinName: String): Double {
-        return coinInfoDao?.getByNameAndMarketName(coinName, marketName)?.fee?:0.0
+        return coinInfoDao.getByNameAndMarketName(coinName, marketName)?.fee?:0.0
     }
 
-    fun getMinQuantity(pair: Pair): Double? {
-        return minTradeSizeDao?.getByPairName(pair.name)?.minTradeSize
+    fun getMinQuantity(pair: Pair): Double {
+        return minTradeSizeDao.getByPairName(pair.name)?.minTradeSize?:0.0
     }
 
-    fun getStepSize(pair: Pair): Double? {
-        return minTradeSizeDao?.getByPairName(pair.name)?.stepSize
+    fun getStepSize(pair: Pair): Double {
+        return minTradeSizeDao.getByPairName(pair.name)?.stepSize?:1.0
     }
 
-    fun getPriceFilter(pair: Pair): Double? {
-        return minTradeSizeDao?.getByPairName(pair.name)?.priceFilter
+    fun getPriceFilter(pair: Pair): Double {
+        return minTradeSizeDao.getByPairName(pair.name)?.priceFilter?:0.00000001
     }
 }

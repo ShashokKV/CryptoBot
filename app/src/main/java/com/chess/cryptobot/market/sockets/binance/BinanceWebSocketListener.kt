@@ -20,7 +20,7 @@ class BinanceWebSocketListener(private val binanceWebSocket: BinanceWebSocket) :
             checkError(jsonMessage)
             parseMessage(jsonMessage)
         } catch (e: Exception) {
-            Log.e(tag, e.message ?: e.stackTraceToString(), e)
+            Log.e(tag, Log.getStackTraceString(e))
         }
     }
 

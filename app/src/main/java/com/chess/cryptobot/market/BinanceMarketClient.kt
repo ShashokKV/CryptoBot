@@ -1,6 +1,7 @@
 package com.chess.cryptobot.market
 
 import android.content.Context
+import android.util.Log
 import com.chess.cryptobot.api.BinanceMarketService
 import com.chess.cryptobot.content.balance.BalancePreferences
 import com.chess.cryptobot.content.pairs.AllPairsPreferences
@@ -19,15 +20,17 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
-import kotlin.collections.LinkedHashMap
 
 
-class BinanceMarketClient internal constructor(url: String, apiKey: String?, secretKey: String?,
-                                               private val proxySelector: BinanceProxySelector?) : MarketClient(url, apiKey, secretKey) {
+class BinanceMarketClient internal constructor(
+    url: String, apiKey: String?, secretKey: String?,
+    private val proxySelector: BinanceProxySelector?
+) : MarketClient(url, apiKey, secretKey) {
 
+    private val tag = BinanceMarketClient::class.qualifiedName
     private val service: BinanceMarketService
+
+    private var balances = HashMap<String, Double>()
 
     init {
         algorithm = "HmacSHA256"
@@ -41,8 +44,8 @@ class BinanceMarketClient internal constructor(url: String, apiKey: String?, sec
 
         if (proxySelector != null) {
             clientBuilder = clientBuilder
-                    .proxySelector(proxySelector)
-                    .proxyAuthenticator(proxySelector.proxyAuthenticator)
+                .proxySelector(proxySelector)
+                .proxyAuthenticator(proxySelector.proxyAuthenticator)
         }
 
         return clientBuilder.build()
@@ -54,9 +57,9 @@ class BinanceMarketClient internal constructor(url: String, apiKey: String?, sec
 
     override fun initGson(): Gson {
         return GsonBuilder()
-                .registerTypeAdapter(BinanceResponse::class.java, BinanceDeserializer())
-                .excludeFieldsWithoutExposeAnnotation()
-                .create()
+            .registerTypeAdapter(BinanceResponse::class.java, BinanceDeserializer())
+            .excludeFieldsWithoutExposeAnnotation()
+            .create()
     }
 
     override fun initService(retrofit: Retrofit): Any {
@@ -68,8 +71,14 @@ class BinanceMarketClient internal constructor(url: String, apiKey: String?, sec
         return getBalancesMap()[coinName] ?: 0.0
     }
 
-    private fun getBalancesMap():  MutableMap<String, Double> {
+    private fun getBalancesMap(): MutableMap<String, Double> {
         if (keysIsEmpty()) return HashMap()
+
+        if (resetBalance) {
+            balances.clear()
+        } else {
+            return balances
+        }
 
         val params: MutableMap<String, String> = LinkedHashMap()
         params["recvWindow"] = "15000"
@@ -84,14 +93,15 @@ class BinanceMarketClient internal constructor(url: String, apiKey: String?, sec
         response = try {
             execute(call) as BinanceResponse
         } catch (e: MarketException) {
+            Log.e(tag, Log.getStackTraceString(e))
             throw BinanceException(e.message!!)
         }
 
-        val balances = HashMap<String, Double>()
         response.balances.forEach { balanceResponse ->
             balances[balanceResponse.coinName!!] = balanceResponse.amount
         }
 
+        resetBalance = false
         return balances
     }
 
@@ -105,6 +115,7 @@ class BinanceMarketClient internal constructor(url: String, apiKey: String?, sec
         response = try {
             execute(call) as BinanceResponse
         } catch (e: MarketException) {
+            Log.e(tag, Log.getStackTraceString(e))
             throw BinanceException(e.message!!)
         }
         return response
@@ -121,6 +132,7 @@ class BinanceMarketClient internal constructor(url: String, apiKey: String?, sec
                 throw BinanceException("No response")
             }
         } catch (e: IOException) {
+            Log.e(tag, Log.getStackTraceString(e))
             throw BinanceException(e.message!!)
         }
         val tickerResponse = response.tickers
@@ -142,6 +154,7 @@ class BinanceMarketClient internal constructor(url: String, apiKey: String?, sec
         response = try {
             execute(call) as BinanceResponse
         } catch (e: MarketException) {
+            Log.e(tag, Log.getStackTraceString(e))
             throw BinanceException(e.message!!)
         }
         return response.getCurrencies()
@@ -154,6 +167,7 @@ class BinanceMarketClient internal constructor(url: String, apiKey: String?, sec
         response = try {
             execute(call) as BinanceResponse
         } catch (e: MarketException) {
+            Log.e(tag, Log.getStackTraceString(e))
             throw BinanceException(e.message!!)
         }
         return response
@@ -164,7 +178,7 @@ class BinanceMarketClient internal constructor(url: String, apiKey: String?, sec
         if (keysIsEmpty()) return null
         val params: MutableMap<String, String> = LinkedHashMap()
         params["coin"] = coinName
-        params["recvWindow"] = "10000"
+        params["recvWindow"] = "15000"
         addTimestamp(params)
         val hash = makeHash(params)
         val headers: MutableMap<String, String> = HashMap()
@@ -175,6 +189,7 @@ class BinanceMarketClient internal constructor(url: String, apiKey: String?, sec
         response = try {
             execute(call) as BinanceResponse
         } catch (e: MarketException) {
+            Log.e(tag, Log.getStackTraceString(e))
             throw BinanceException(e.message!!)
         }
         return response.address
@@ -198,6 +213,7 @@ class BinanceMarketClient internal constructor(url: String, apiKey: String?, sec
         try {
             execute(call)
         } catch (e: MarketException) {
+            Log.e(tag, Log.getStackTraceString(e))
             throw BinanceException(e.message!!)
         }
     }
@@ -232,6 +248,7 @@ class BinanceMarketClient internal constructor(url: String, apiKey: String?, sec
         try {
             execute(call)
         } catch (e: MarketException) {
+            Log.e(tag, Log.getStackTraceString(e))
             throw BinanceException(e.message!!)
         }
     }
@@ -251,6 +268,7 @@ class BinanceMarketClient internal constructor(url: String, apiKey: String?, sec
         response = try {
             execute(call) as BinanceResponse
         } catch (e: MarketException) {
+            Log.e(tag, Log.getStackTraceString(e))
             throw BinanceException(e.message!!)
         }
         return HistoryResponseFactory(response.orders).history
@@ -261,7 +279,14 @@ class BinanceMarketClient internal constructor(url: String, apiKey: String?, sec
         if (keysIsEmpty()) return listOf(History())
         val startTime = getStartTime()
         val historyList: MutableList<History> = ArrayList()
-        getAllPairs(context).forEach { pair -> historyList.addAll(getOrdersHistory(pair, startTime)) }
+        getAllPairs(context).forEach { pair ->
+            historyList.addAll(
+                getOrdersHistory(
+                    pair,
+                    startTime
+                )
+            )
+        }
 
         historyList.addAll(getWithdrawHistory())
         historyList.addAll(getDepositHistory())
@@ -275,7 +300,7 @@ class BinanceMarketClient internal constructor(url: String, apiKey: String?, sec
         val pairsList = ArrayList<String>()
         balancePrefs.items?.forEach { baseName ->
             balancePrefs.items?.forEach { marketName ->
-                if (baseName!=marketName) {
+                if (baseName != marketName) {
                     var pairName = "${baseName}/${marketName}"
                     if (allPairs.contains(pairName)) {
                         pairName = "$marketName$baseName"
@@ -302,6 +327,7 @@ class BinanceMarketClient internal constructor(url: String, apiKey: String?, sec
         try {
             response = execute(call) as BinanceResponse
         } catch (e: MarketException) {
+            Log.e(tag, Log.getStackTraceString(e))
             throw BinanceException(e.message!!)
         }
         return HistoryResponseFactory(response.orders.filter { order -> order.status.equals("FILLED") }).history
@@ -311,8 +337,8 @@ class BinanceMarketClient internal constructor(url: String, apiKey: String?, sec
     override fun getDepositHistory(): List<History> {
         val params: MutableMap<String, String> = LinkedHashMap()
         params["recvWindow"] = "15000"
-        addTimestamp(params)
         params["startTime"] = getStartTime()
+        addTimestamp(params)
         val hash = makeHash(params)
         val headers: MutableMap<String, String> = HashMap()
         headers["X-MBX-APIKEY"] = apiKey
@@ -322,6 +348,7 @@ class BinanceMarketClient internal constructor(url: String, apiKey: String?, sec
         response = try {
             execute(call)
         } catch (e: MarketException) {
+            Log.e(tag, Log.getStackTraceString(e))
             throw BinanceException(e.message!!)
         } as BinanceResponse
         return HistoryResponseFactory(response.depositList).history
@@ -331,8 +358,8 @@ class BinanceMarketClient internal constructor(url: String, apiKey: String?, sec
     override fun getWithdrawHistory(): List<History> {
         val params: MutableMap<String, String> = LinkedHashMap()
         params["recvWindow"] = "15000"
-        addTimestamp(params)
         params["startTime"] = getStartTime()
+        addTimestamp(params)
         val hash = makeHash(params)
         val headers: MutableMap<String, String> = HashMap()
         headers["X-MBX-APIKEY"] = apiKey
@@ -342,6 +369,7 @@ class BinanceMarketClient internal constructor(url: String, apiKey: String?, sec
         response = try {
             execute(call)
         } catch (e: MarketException) {
+            Log.e(tag, Log.getStackTraceString(e))
             throw BinanceException(e.message!!)
         } as BinanceResponse
         return HistoryResponseFactory(response.withdrawList).history
@@ -349,7 +377,7 @@ class BinanceMarketClient internal constructor(url: String, apiKey: String?, sec
 
     private fun getStartTime(): String {
         return (LocalDateTime.now().minusDays(29)
-                .toEpochSecond(ZoneOffset.systemDefault().rules.getOffset(Instant.now())) * 1000).toString()
+            .toEpochSecond(ZoneOffset.systemDefault().rules.getOffset(Instant.now())) * 1000).toString()
     }
 
     private fun addTimestamp(params: MutableMap<String, String>) {

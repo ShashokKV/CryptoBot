@@ -1,6 +1,7 @@
 package com.chess.cryptobot.market
 
 import android.content.Context
+import android.util.Log
 import com.chess.cryptobot.api.BittrexMarketService
 import com.chess.cryptobot.exceptions.BittrexException
 import com.chess.cryptobot.exceptions.MarketException
@@ -19,9 +20,12 @@ import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 
-class BittrexMarketClient internal constructor(url: String, apiKey: String?, secretKey: String?) : MarketClient(url, apiKey, secretKey) {
+class BittrexMarketClient internal constructor(url: String, apiKey: String?, secretKey: String?) :
+    MarketClient(url, apiKey, secretKey) {
     private val service: BittrexMarketService
     private lateinit var gson: Gson
+    private val tag = BittrexMarketClient::class.qualifiedName
+    private var balances = HashMap<String, Double>()
 
     init {
         algorithm = "HmacSHA512"
@@ -34,14 +38,20 @@ class BittrexMarketClient internal constructor(url: String, apiKey: String?, sec
 
     override fun initGson(): Gson {
         gson = GsonBuilder()
-                .excludeFieldsWithoutExposeAnnotation()
-                .registerTypeAdapter(object : TypeToken<Double>() {}.type, object : JsonSerializer<Double> {
-                    override fun serialize(src: Double, typeOfSrc: Type, context: JsonSerializationContext): JsonElement {
+            .excludeFieldsWithoutExposeAnnotation()
+            .registerTypeAdapter(
+                object : TypeToken<Double>() {}.type,
+                object : JsonSerializer<Double> {
+                    override fun serialize(
+                        src: Double,
+                        typeOfSrc: Type,
+                        context: JsonSerializationContext
+                    ): JsonElement {
                         val value = BigDecimal.valueOf(src)
                         return JsonPrimitive(value)
                     }
                 })
-                .create()
+            .create()
         return gson
     }
 
@@ -51,15 +61,29 @@ class BittrexMarketClient internal constructor(url: String, apiKey: String?, sec
 
     @Throws(BittrexException::class)
     override fun getAmount(coinName: String): Double {
+
+        if (resetBalance) {
+            balances.clear()
+        } else {
+            return balances[coinName] ?:0.0
+        }
+
         if (keysIsEmpty()) return 0.0
-        path = url + "balances/" + coinName
-        val response: BittrexBalance = try {
-            val call = service.getBalance(coinName, signHeaders("", "GET"))
-            execute(call) as BittrexBalance
+        path = url + "balances"
+        val response: List<*> = try {
+            val call = service.getBalances(signHeaders("", "GET"))
+            executeList(call)
         } catch (e: MarketException) {
+            Log.e(tag, Log.getStackTraceString(e))
             throw BittrexException(e.message!!)
         }
-        return response.amount
+
+        response.forEach { balanceResponse ->
+            if (balanceResponse is BittrexBalance)
+            balances[balanceResponse.currencySymbol] = balanceResponse.amount
+        }
+        resetBalance = false
+        return balances[coinName]?:0.0
     }
 
     @Throws(MarketException::class)
@@ -70,6 +94,7 @@ class BittrexMarketClient internal constructor(url: String, apiKey: String?, sec
             val call = service.getAddress(coinName, signHeaders("", "GET"))
             execute(call) as BittrexAddress
         } catch (e: MarketException) {
+            Log.e(tag, Log.getStackTraceString(e))
             throw BittrexException(e.message!!)
         }
         return response.address
@@ -81,6 +106,7 @@ class BittrexMarketClient internal constructor(url: String, apiKey: String?, sec
             val call = service.getOrderBook(pairName)
             execute(call) as BittrexOrderBook
         } catch (e: MarketException) {
+            Log.e(tag, Log.getStackTraceString(e))
             throw BittrexException(e.message!!)
         }
     }
@@ -92,9 +118,11 @@ class BittrexMarketClient internal constructor(url: String, apiKey: String?, sec
         response = try {
             executeList(call)
         } catch (e: MarketException) {
+            Log.e(tag, Log.getStackTraceString(e))
             throw BittrexException(e.message!!)
         }
-        return response.filterIsInstance<TickerResponse>().filter { it.tickerAsk > 0.0 && it.tickerBid > 0.0 }
+        return response.filterIsInstance<TickerResponse>()
+            .filter { it.tickerAsk > 0.0 && it.tickerBid > 0.0 }
     }
 
     @Throws(MarketException::class)
@@ -104,6 +132,7 @@ class BittrexMarketClient internal constructor(url: String, apiKey: String?, sec
         response = try {
             executeList(call)
         } catch (e: MarketException) {
+            Log.e(tag, Log.getStackTraceString(e))
             throw BittrexException(e.message!!)
         }
         return response.filterIsInstance<CurrenciesResponse>()
@@ -116,6 +145,7 @@ class BittrexMarketClient internal constructor(url: String, apiKey: String?, sec
         response = try {
             executeList(call)
         } catch (e: MarketException) {
+            Log.e(tag, Log.getStackTraceString(e))
             throw BittrexException(e.message!!)
         }
         val limit = BittrexTradeLimit()
@@ -135,6 +165,7 @@ class BittrexMarketClient internal constructor(url: String, apiKey: String?, sec
         val response: BittrexWithdrawResponse = try {
             execute(call) as BittrexWithdrawResponse
         } catch (e: MarketException) {
+            Log.e(tag, Log.getStackTraceString(e))
             throw BittrexException(e.message!!)
         }
         if (response.status == "ERROR_INVALID_ADDRESS") throw BittrexException("invalid address")
@@ -162,6 +193,7 @@ class BittrexMarketClient internal constructor(url: String, apiKey: String?, sec
         try {
             execute(call)
         } catch (e: MarketException) {
+            Log.e(tag, Log.getStackTraceString(e))
             throw BittrexException(e.message!!)
         }
     }
@@ -175,6 +207,7 @@ class BittrexMarketClient internal constructor(url: String, apiKey: String?, sec
         response = try {
             executeList(call)
         } catch (e: MarketException) {
+            Log.e(tag, Log.getStackTraceString(e))
             throw BittrexException(e.message!!)
         }
         return HistoryResponseFactory(response.filterIsInstance<BittrexHistory>()).history
@@ -193,6 +226,7 @@ class BittrexMarketClient internal constructor(url: String, apiKey: String?, sec
             historyList.addAll(getWithdrawHistory())
             historyList.addAll(getDepositHistory())
         } catch (e: MarketException) {
+            Log.e(tag, Log.getStackTraceString(e))
             throw BittrexException(e.message!!)
         }
         return historyList
@@ -206,6 +240,7 @@ class BittrexMarketClient internal constructor(url: String, apiKey: String?, sec
         response = try {
             executeList(call)
         } catch (e: MarketException) {
+            Log.e(tag, Log.getStackTraceString(e))
             throw BittrexException(e.message!!)
         }
         return HistoryResponseFactory(response.filterIsInstance<BittrexHistory>()).history
@@ -219,6 +254,7 @@ class BittrexMarketClient internal constructor(url: String, apiKey: String?, sec
         response = try {
             executeList(call)
         } catch (e: MarketException) {
+            Log.e(tag, Log.getStackTraceString(e))
             throw BittrexException(e.message!!)
         }
         return HistoryResponseFactory(response.filterIsInstance<BittrexHistory>()).history
@@ -231,13 +267,9 @@ class BittrexMarketClient internal constructor(url: String, apiKey: String?, sec
         headers["Api-Timestamp"] = timestamp
         val contentHash = contentHash(body)
         headers["Api-Content-Hash"] = contentHash
-        headers["Api-Signature"] = encode(timestamp + path + method + contentHash).lowercase(Locale.ROOT)
+        headers["Api-Signature"] =
+            encode(timestamp + path + method + contentHash).lowercase(Locale.ROOT)
         return headers
-    }
-
-    override fun timestamp(): String {
-        val date = Date()
-        return date.time.toString()
     }
 
     private fun contentHash(value: String): String {

@@ -1,5 +1,6 @@
 package com.chess.cryptobot.view
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -44,6 +45,7 @@ abstract class MainFragment<T : RecyclerView.ViewHolder> : Fragment(), OnRefresh
         return view
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     override fun onRefresh() {
         beforeRefresh()
         adapter?.notifyDataSetChanged()
@@ -73,6 +75,7 @@ abstract class MainFragment<T : RecyclerView.ViewHolder> : Fragment(), OnRefresh
         return adapter!!.itemNameByPosition(position)
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     fun updateAllItems() {
         adapter?.notifyDataSetChanged()
     }

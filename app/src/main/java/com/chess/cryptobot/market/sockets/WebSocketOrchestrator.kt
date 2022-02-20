@@ -1,8 +1,9 @@
 package com.chess.cryptobot.market.sockets
 
 import android.content.Context
-import android.content.Intent
 import androidx.preference.PreferenceManager
+import androidx.work.OneTimeWorkRequest
+import androidx.work.WorkManager
 import com.chess.cryptobot.R
 import com.chess.cryptobot.market.Market.Companion.BINANCE_MARKET
 import com.chess.cryptobot.market.Market.Companion.BITTREX_MARKET
@@ -11,7 +12,7 @@ import com.chess.cryptobot.market.sockets.binance.BinanceWebSocket
 import com.chess.cryptobot.market.sockets.bittrex.BittrexWebSocket
 import com.chess.cryptobot.market.sockets.poloniex.PoloniexWebSocket
 import com.chess.cryptobot.model.Pair
-import com.chess.cryptobot.service.ProfitPairService
+import com.chess.cryptobot.worker.ProfitPairWorker
 import java.util.concurrent.ConcurrentHashMap
 
 class WebSocketOrchestrator(val context: Context, val pairs: MutableList<Pair>) {
@@ -81,8 +82,9 @@ class WebSocketOrchestrator(val context: Context, val pairs: MutableList<Pair>) 
         if (stopFlag) return
         stopFlag = true
         disconnectAll()
-        val intent = Intent(context, ProfitPairService::class.java)
-        context.startService(intent)
+
+        val profitPairWorker = OneTimeWorkRequest.Builder(ProfitPairWorker::class.java).build()
+        WorkManager.getInstance(context).enqueue(profitPairWorker)
     }
 
 }

@@ -16,7 +16,7 @@ interface PairMinTradeSizeDao {
     @Query("SELECT * FROM" +
             " PairMinTradeSize " +
             "WHERE pairName = :pairName")
-    fun getByPairName(pairName: String): PairMinTradeSize
+    fun getByPairName(pairName: String): PairMinTradeSize?
 
 
 }

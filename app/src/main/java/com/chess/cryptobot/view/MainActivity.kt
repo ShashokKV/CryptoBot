@@ -27,6 +27,7 @@ import com.chess.cryptobot.view.dialog.DialogListener
 import com.chess.cryptobot.worker.BalanceWorker
 import com.chess.cryptobot.worker.MarketWorker
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.navigation.NavigationBarView
 import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity(), DialogListener {
@@ -45,7 +46,7 @@ class MainActivity : AppCompatActivity(), DialogListener {
         setContentView(R.layout.main_layout)
         this.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LOCKED
         val navigation = findViewById<BottomNavigationView>(R.id.bottom_navigation)
-        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
+        navigation.setOnItemSelectedListener(mOnNavigationItemSelectedListener)
         val intent = intent
         var openPairs = false
         if (intent != null) {
@@ -82,7 +83,7 @@ class MainActivity : AppCompatActivity(), DialogListener {
         runWork()
     }
 
-    private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item: MenuItem ->
+    private val mOnNavigationItemSelectedListener = NavigationBarView.OnItemSelectedListener { item: MenuItem ->
         when (item.itemId) {
             R.id.activity_balance -> {
                 fragmentManager.commit {
@@ -90,7 +91,7 @@ class MainActivity : AppCompatActivity(), DialogListener {
                     show(balanceFragment)
                 }
                 active = balanceFragment
-                return@OnNavigationItemSelectedListener true
+                return@OnItemSelectedListener true
             }
             R.id.activity_pairs -> {
                 fragmentManager.commit {
@@ -98,7 +99,7 @@ class MainActivity : AppCompatActivity(), DialogListener {
                     show(pairFragment)
                 }
                 active = pairFragment
-                return@OnNavigationItemSelectedListener true
+                return@OnItemSelectedListener true
             }
             R.id.activity_graph -> {
                 fragmentManager.commit {
@@ -106,7 +107,7 @@ class MainActivity : AppCompatActivity(), DialogListener {
                     show(graphFragment)
                 }
                 active = graphFragment
-                return@OnNavigationItemSelectedListener true
+                return@OnItemSelectedListener true
             }
             R.id.activity_history -> {
                 fragmentManager.commit {
@@ -114,10 +115,10 @@ class MainActivity : AppCompatActivity(), DialogListener {
                     show(historyPagerFragment)
                 }
                 active = historyPagerFragment
-                return@OnNavigationItemSelectedListener true
+                return@OnItemSelectedListener true
             }
         }
-        return@OnNavigationItemSelectedListener false
+        return@OnItemSelectedListener false
     }
 
     override fun onStop() {

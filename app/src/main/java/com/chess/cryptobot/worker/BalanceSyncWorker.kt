@@ -1,11 +1,13 @@
-package com.chess.cryptobot.service
+package com.chess.cryptobot.worker
 
-import android.app.IntentService
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Icon
 import android.util.Log
+import androidx.work.Worker
+import androidx.work.WorkerParameters
 import com.chess.cryptobot.R
 import com.chess.cryptobot.content.balance.BalancePreferences
 import com.chess.cryptobot.enricher.PairResponseEnricher
@@ -19,13 +21,14 @@ import com.chess.cryptobot.model.response.TickerResponse
 import com.chess.cryptobot.model.response.TradeLimitResponse
 import com.chess.cryptobot.model.room.BalanceSyncTicker
 import com.chess.cryptobot.model.room.CryptoBotDatabase
+import com.chess.cryptobot.service.BalanceForceSyncService
 import com.chess.cryptobot.util.MarketInfoReader
 import com.chess.cryptobot.view.notification.NotificationBuilder
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.util.*
 
-class BalanceSyncService : IntentService("BalanceSyncService") {
+class BalanceSyncWorker(private val ctx: Context, private val params: WorkerParameters) : Worker(ctx, params) {
     private var resultInfo = ""
     private lateinit var marketInfoReader: MarketInfoReader
     private val marketsMap: MutableMap<String, Market?> = HashMap()
@@ -36,22 +39,22 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
     private var makeNotifications = false
     private var actionIntent: PendingIntent? = null
     private var forceUpdate = false
-    private val tag = BalanceSyncService::class.qualifiedName
+    private val tag = BalanceSyncWorker::class.qualifiedName
 
-    override fun onHandleIntent(intent: Intent?) {
-        if (intent == null) return
-        val coinNames = intent.getStringArrayListExtra("coinNames")
+    override fun doWork(): Result {
+        val inputData = params.inputData
+        val coinNames = inputData.getStringArray("coinNames")
         Log.d(tag, "Start balance sync on coins: " + coinNames?.joinToString(", "))
-        marketInfoReader = MarketInfoReader(this)
-        makeNotifications = intent.getBooleanExtra("makeNotifications", false)
+        marketInfoReader = MarketInfoReader(ctx)
+        makeNotifications = inputData.getBoolean("makeNotifications", false)
         if (makeNotifications) makeNotification("Balance sync in progress...")
-        val balancePreferences = BalancePreferences(this)
+        val balancePreferences = BalancePreferences(ctx)
         minBtcAmount = balancePreferences.getMinBtcAmount()
         minBtcAmount += minBtcAmount / 100
-        forceUpdate = intent.getBooleanExtra("forceUpdate", false)
+        forceUpdate = inputData.getBoolean("forceUpdate", false)
 
-        val markets = MarketFactory.getInstance(this).getWithdrawalMarkets()
-        markets.forEach { marketsMap[it!!.getMarketName()] = it }
+        val markets = MarketFactory.getInstance(ctx).getWithdrawalMarkets()
+        markets.forEach { marketsMap[it.getMarketName()] = it }
         var syncExecuted = false
         coinNames?.forEach { coinName: String ->
             try {
@@ -66,6 +69,8 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
             resultInfo = "No sync needed"
         }
         makeNotification(resultInfo)
+
+        return Result.success()
     }
 
     @Throws(SyncServiceException::class)
@@ -112,10 +117,14 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
                     tickersMap[marketName] = market.getTicker()
                 }
                 val pairName = pair.name
-                minBalances.add(minQuantityMap[marketName]?.getTradeLimitByName(pair.getPairNameForMarket(marketName))
-                        ?: 0.0)
-                pair = PairResponseEnricher(pair).enrichFromTicker(tickersMap[marketName]!!
-                        .filter { it.tickerName == pairName }[0], marketName).pair
+                minBalances.add(
+                    minQuantityMap[marketName]?.getTradeLimitByName(
+                        pair.getPairNameForMarket(marketName))?: 0.0
+                )
+                val filtered = tickersMap[marketName]!!.filter { it.tickerName == pairName }
+                if (filtered.isNotEmpty()) {
+                    pair = PairResponseEnricher(pair).enrichFromTicker(filtered[0], marketName).pair
+                }
             }
         }
 
@@ -126,13 +135,14 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
         } else {
             minBalanceByMarket
         }
-        minBalance+=minBalance/100
+        minBalance += minBalance / 100
     }
 
     @Throws(MarketException::class)
     private fun getMarketsAmounts(markets: List<Market?>, coinName: String): Map<String, Double> {
         val marketAmounts: MutableMap<String, Double> = HashMap()
         for (market in markets) {
+            market?.resetBalance()
             marketAmounts[market!!.getMarketName()] = market.getAmount(coinName)
         }
         return marketAmounts
@@ -144,16 +154,20 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
 
     private fun makeNotification(notificationText: String) {
         if (notificationText.isEmpty()) return
-        val builder = NotificationBuilder(this)
-                .setNotificationId(NOTIFICATION_ID)
-                .setChannelId(CHANNEL_ID)
-                .setNotificationText(notificationText)
-                .setChannelName("Balance sync service")
-                .setImportance(NotificationManager.IMPORTANCE_DEFAULT)
-                .setTitle("Balance synchronization")
+        val builder = NotificationBuilder(ctx)
+            .setNotificationId(NOTIFICATION_ID)
+            .setChannelId(CHANNEL_ID)
+            .setNotificationText(notificationText)
+            .setChannelName("Balance sync service")
+            .setImportance(NotificationManager.IMPORTANCE_DEFAULT)
+            .setTitle("Balance synchronization")
 
-        if (notificationText.contains(DEPOSIT_IN_PROGRESS) && actionIntent!=null) {
-            builder.addAction(Icon.createWithResource("", R.drawable.baseline_sync_24),"Force sync", actionIntent!!)
+        if (notificationText.contains(DEPOSIT_IN_PROGRESS) && actionIntent != null) {
+            builder.addAction(
+                Icon.createWithResource("", R.drawable.baseline_sync_24),
+                "Force sync",
+                actionIntent!!
+            )
         }
         builder.buildAndNotify()
         resultInfo = ""
@@ -206,16 +220,16 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
             val database = CryptoBotDatabase.getInstance(applicationContext)
             val dao = database.balanceSyncDao
             val ticker = BalanceSyncTicker(
-                    coinName = historyItem.currencyName,
-                    marketName = moveTo,
-                    dateCreated = historyItem.dateTime,
-                    amount = historyItem.amount
+                coinName = historyItem.currencyName,
+                marketName = moveTo,
+                dateCreated = historyItem.dateTime,
+                amount = historyItem.amount
             )
             ticker.coinName = historyItem.currencyName
             ticker.marketName = moveTo
             ticker.dateCreated = historyItem.dateTime
             ticker.amount = historyItem.amount
-            dao?.insert(ticker)
+            dao.insert(ticker)
         }
 
         private fun needSync(delta: Double): Boolean {
@@ -229,7 +243,7 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
         @Throws(SyncServiceException::class)
         private fun getAmount(amounts: Map<String, Double>?, marketName: String?): Double {
             val amount = amounts!![marketName] ?: throw SyncServiceException("Can't get amount")
-            return (amount - (amount/100))
+            return (amount - (amount / 100))
         }
 
         private fun recalculateDelta(fromAmount: Double, toAmount: Double, fee: Double): Double {
@@ -255,14 +269,14 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
             val database = CryptoBotDatabase.getInstance(applicationContext)
             val dao = database.balanceSyncDao
             val balanceSyncTickers: List<BalanceSyncTicker> =
-                    dao?.getByCoinNameAndMarket(coinName, moveToMarket.getMarketName())
-                            ?.sortedByDescending { it.dateCreated } ?: return
+                dao.getByCoinNameAndMarket(coinName, moveToMarket.getMarketName())
+                    .sortedByDescending { it.dateCreated }
             if (balanceSyncTickers.isEmpty()) return
             val ticker = balanceSyncTickers[0]
 
             if (forceUpdate) {
                 dao.deleteAll(balanceSyncTickers)
-            } else{
+            } else {
                 val history = ArrayList<History>()
                 marketsMap.values.forEach { history.addAll(it!!.getDepositHistory()) }
                 val filteredHistory = history.filter {
@@ -276,22 +290,35 @@ class BalanceSyncService : IntentService("BalanceSyncService") {
                 } else {
                     val coinNames = ArrayList<String>()
                     coinNames.add(coinName)
-                    val intent = Intent(this@BalanceSyncService, BalanceSyncService::class.java)
+                    val intent = Intent(ctx, BalanceForceSyncService::class.java)
                     intent.putExtra("coinNames", coinNames)
                     intent.putExtra("forceUpdate", true)
                     intent.putExtra("makeNotifications", true)
-                    actionIntent = PendingIntent.getService(this@BalanceSyncService, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+                    actionIntent = PendingIntent.getService(
+                        ctx,
+                        0,
+                        intent,
+                        PendingIntent.FLAG_IMMUTABLE
+                    )
                     throw SyncServiceException(DEPOSIT_IN_PROGRESS)
                 }
             }
         }
 
         @Throws(MarketException::class)
-        private fun moveBalances(moveFrom: Market, moveTo: Market, coinName: String, amount: Double) {
+        private fun moveBalances(
+            moveFrom: Market,
+            moveTo: Market,
+            coinName: String,
+            amount: Double
+        ) {
             val address = moveTo.getAddress(coinName)
-                    ?: throw SyncServiceException("Could not get address for " + moveTo.getMarketName())
+                ?: throw SyncServiceException("Could not get address for " + moveTo.getMarketName())
             moveFrom.sendCoins(coinName, amount, address)
-            updateInfo(coinName, "$amount sent from ${moveFrom.getMarketName()} to ${moveTo.getMarketName()}")
+            updateInfo(
+                coinName,
+                "$amount sent from ${moveFrom.getMarketName()} to ${moveTo.getMarketName()}"
+            )
         }
 
     }

@@ -47,7 +47,7 @@ class BinanceWebSocket(orchestrator: WebSocketOrchestrator) : MarketWebSocket(or
             Log.d(tag, "CONNECTED")
             subscribe(pairs)
         } catch (e: ExecutionException) {
-            Log.e(tag, e.message ?: e.stackTraceToString(), e)
+            Log.e(tag, Log.getStackTraceString(e))
         }
     }
 

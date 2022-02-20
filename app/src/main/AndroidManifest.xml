@@ -38,9 +38,7 @@
                 android:value=".view.MainActivity"/>
         </activity>
         <service android:name=".service.BotService" />
-        <service android:name=".service.ProfitPairService" />
-        <service android:name=".service.BalanceSyncService" />
-        <service android:name=".service.TradingService" />
+        <service android:name=".service.BalanceForceSyncService" />
 
     </application>
 

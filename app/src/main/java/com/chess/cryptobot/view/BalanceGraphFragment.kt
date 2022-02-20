@@ -56,7 +56,7 @@ class BalanceGraphFragment : Fragment() {
 
     private fun initAdapterWithCoinNames() {
         val context = this.context ?: return
-        val coinNames: MutableList<String> = ArrayList<String>()
+        val coinNames: MutableList<String> = ArrayList()
         coinNames.add("USD total")
         coinNames.add("BTC total")
         BalancePreferences(context).items?.let { coinNames.addAll(it) }

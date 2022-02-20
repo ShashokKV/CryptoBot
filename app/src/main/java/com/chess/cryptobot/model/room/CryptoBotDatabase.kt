@@ -17,11 +17,11 @@ import com.chess.cryptobot.util.SingletonHolder
 ], exportSchema = false)
 @TypeConverters(TimestampConverter::class)
 abstract class CryptoBotDatabase : RoomDatabase() {
-    abstract val profitPairDao: ProfitPairDao?
-    abstract val cryptoBalanceDao: CryptoBalanceDao?
-    abstract val balanceSyncDao: BalanceSyncDao?
-    abstract val minTradeSizeDao: PairMinTradeSizeDao?
-    abstract val coinInfoDao: CoinInfoDao?
+    abstract val profitPairDao: ProfitPairDao
+    abstract val cryptoBalanceDao: CryptoBalanceDao
+    abstract val balanceSyncDao: BalanceSyncDao
+    abstract val minTradeSizeDao: PairMinTradeSizeDao
+    abstract val coinInfoDao: CoinInfoDao
 
     companion object : SingletonHolder<CryptoBotDatabase, Context>({
         Room.databaseBuilder(it.applicationContext, CryptoBotDatabase::class.java, "cryptobotDB")

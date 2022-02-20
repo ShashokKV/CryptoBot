@@ -1,11 +1,11 @@
-package com.chess.cryptobot.service
+package com.chess.cryptobot.worker
 
-import android.app.IntentService
 import android.app.NotificationManager
-import android.content.Intent
+import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
 import androidx.preference.PreferenceManager
+import androidx.work.*
 import com.chess.cryptobot.R
 import com.chess.cryptobot.content.balance.BalancePreferences
 import com.chess.cryptobot.content.pairs.AllPairsPreferences
@@ -20,10 +20,9 @@ import com.chess.cryptobot.util.MarketInfoReader
 import com.chess.cryptobot.view.notification.NotificationBuilder
 import java.util.*
 import java.util.stream.Collectors
-import kotlin.collections.ArrayList
 
 
-class ProfitPairService : IntentService("ProfitPairService") {
+class ProfitPairWorker(private val ctx: Context, params: WorkerParameters) : Worker(ctx, params) {
 
     private lateinit var markets: List<MarketClient?>
     private lateinit var marketInfoReader: MarketInfoReader
@@ -31,24 +30,24 @@ class ProfitPairService : IntentService("ProfitPairService") {
     private var autoTrade = false
     private lateinit var pairs: MutableList<Pair>
     private var minPercent = 0.0f
-    private val tag = ProfitPairService::class.qualifiedName
+    private val tag = ProfitPairWorker::class.qualifiedName
 
-    override fun onHandleIntent(intent: Intent?) {
-        if (intent == null) return
-
-        preferences = PreferenceManager.getDefaultSharedPreferences(this)
-        marketInfoReader = MarketInfoReader(this)
-        markets = MarketFactory.getInstance(this).getMarkets()
-        autoTrade = preferences.getBoolean(getString(R.string.auto_trade), false)
+    override fun doWork() : Result {
+        preferences = PreferenceManager.getDefaultSharedPreferences(ctx)
+        marketInfoReader = MarketInfoReader(ctx)
+        markets = MarketFactory.getInstance(ctx).getMarkets()
+        autoTrade = preferences.getBoolean(ctx.getString(R.string.auto_trade), false)
         pairs = initPairsFromPrefs()
         Log.d(tag, "Starting on pairs: " + pairs.map { pair -> pair.name })
-        minPercent = preferences.getString(getString(R.string.min_profit_percent), "3")?.toFloat()
-                ?: 3.0f
+        minPercent = preferences.getString(ctx.getString(R.string.min_profit_percent), "3")
+        ?.toFloat()?: 3.0f
 
         val profitPairs = getProfitPairs(pairs, markets)
         if (profitPairs.isNotEmpty() && !autoTrade) {
             makeNotification("Profitable pairs found", getNotificationText(profitPairs))
         }
+
+        return Result.success()
     }
 
     @Synchronized
@@ -68,8 +67,8 @@ class ProfitPairService : IntentService("ProfitPairService") {
     }
 
     private fun initPairsFromPrefs(): MutableList<Pair> {
-        val coinNames = BalancePreferences(this).items
-        val allPairNames = AllPairsPreferences(this).items
+        val coinNames = BalancePreferences(ctx).items
+        val allPairNames = AllPairsPreferences(ctx).items
         val pairs = ArrayList<Pair>()
         if (coinNames != null) {
             for (baseName in coinNames) {
@@ -114,7 +113,7 @@ class ProfitPairService : IntentService("ProfitPairService") {
 
     private fun isTradingNow(pairName: String): Boolean {
         for (i in 0..9) {
-            if (TradingService.workingOnPair == pairName) {
+            if (TradingWorker.workingOnPair == pairName) {
                 try {
                     Thread.sleep(1000)
                 } catch (ignored: InterruptedException) {
@@ -128,19 +127,24 @@ class ProfitPairService : IntentService("ProfitPairService") {
     }
 
     private fun beginTrade(pair: Pair) {
-        val intent = Intent(this, TradingService::class.java)
-        intent.putExtra(Pair::class.java.name, pair)
-        intent.putExtra("minQuantity", marketInfoReader.getMinQuantity(pair))
+        val dataBuilder = Data.Builder()
+        dataBuilder.putString(Pair::class.java.name, pair.toJson())
+        dataBuilder.putDouble("minQuantity", marketInfoReader.getMinQuantity(pair))
         if (pair.askMarketName == Market.BINANCE_MARKET || pair.bidMarketName == Market.BINANCE_MARKET) {
-            intent.putExtra("stepSize", marketInfoReader.getStepSize(pair))
-            intent.putExtra("priceFilter", marketInfoReader.getPriceFilter(pair))
+            dataBuilder.putDouble("stepSize", marketInfoReader.getStepSize(pair))
+            dataBuilder.putDouble("priceFilter", marketInfoReader.getPriceFilter(pair))
         }
-        startService(intent)
+
+        val tradingWorker = OneTimeWorkRequest.Builder(TradingWorker::class.java)
+            .setInputData(dataBuilder.build())
+            .build()
+
+        WorkManager.getInstance(ctx).enqueue(tradingWorker)
     }
 
     private val isNotificationShown: Boolean
         get() {
-            val notifications = getSystemService(NotificationManager::class.java).activeNotifications
+            val notifications = ctx.getSystemService(NotificationManager::class.java).activeNotifications
             for (notification in notifications) {
                 if (notification.id == NOTIFICATION_ID) {
                     return true
@@ -150,7 +154,7 @@ class ProfitPairService : IntentService("ProfitPairService") {
         }
 
     private fun makeNotification(title: String, text: String?) {
-        NotificationBuilder(this)
+        NotificationBuilder(ctx)
                 .setTitle(title)
                 .setImportance(NotificationManager.IMPORTANCE_DEFAULT)
                 .setChannelName(applicationContext.getString(R.string.channel_name))
