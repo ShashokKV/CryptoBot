@@ -16,12 +16,8 @@ import retrofit2.Retrofit
 import java.io.IOException
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
-import java.time.ZoneId
 import java.time.ZoneOffset
 import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
-import kotlin.collections.LinkedHashMap
 
 class PoloniexMarketClient internal constructor(url: String?, apiKey: String?, secretKey: String?) : MarketClient(url!!, apiKey, secretKey) {
     private val service: PoloniexMarketService
